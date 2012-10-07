@@ -1,6 +1,10 @@
+seq-align
+=========
 Smith-Waterman & Needleman Wunsch Alignment in C  
-Isaac Turner <turner.isaac@gmail.com>  
-GPLv3
+project: string_buffer  
+url: https://github.com/noporpoise/StringBuffer  
+author: Isaac Turner <turner.isaac@gmail.com>  
+license: GPLv3
 
 About
 =====
@@ -26,6 +30,7 @@ Scoring Penalties
 
 License
 =======
+
 
 DEVELOPMENT
 ===========

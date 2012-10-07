@@ -1,3 +1,6 @@
-
+TODO:
 1) Check memory leak / issue that zam emailed about
 2) Triple check --nomismatches / --nogaps!
+3) update sw_example and nw_example
+4) Write README
+5) Add perl/NeedlemanWunsch.pm
