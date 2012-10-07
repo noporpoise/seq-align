@@ -1,6 +1,6 @@
 TODO:
-1) Check memory leak / issue that zam emailed about
-2) Triple check --nomismatches / --nogaps!
+1) Triple check --nomismatches / --nogaps!
+2) Ensure memory reuse when doing nw/sw aligning (rather than free/malloc loops)
 3) update sw_example and nw_example
 4) Write README
 5) Add perl/NeedlemanWunsch.pm

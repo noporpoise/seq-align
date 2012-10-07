@@ -31,6 +31,7 @@
 
 #include "alignment_cmdline.h"
 
+#include "string_buffer.h"
 #include "seq_file.h"
 
 // File loading
@@ -141,13 +142,15 @@ void align_from_file(const char *path1, const char *path2,
       title1 = entry1_title->buff;
     }
 
-    if(!seq_read_all_bases(sf2, entry2_seq))
+    if(!seq_next_read(sf2))
     {
       fprintf(stderr, "Alignment Error: Odd number of sequences - "
                       "I read in pairs!\n");
       fflush(stderr);
       break;
     }
+
+    seq_read_all_bases(sf2, entry2_seq);
 
     if(seq_file_get_type(sf2) != SEQ_PLAIN)
     {

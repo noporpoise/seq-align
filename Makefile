@@ -29,8 +29,8 @@ LIB_LIST = -lseqfile -lstrbuf -lbitarr -lbam -lutil -lz
 NW_ARGS = -DSCORE_TYPE='int'
 SW_ARGS = -DSCORE_TYPE='unsigned int'
 
-NW_FILES = nw_cmdline.c needleman_wunsch.c common/*.c
-SW_FILES = sw_cmdline.c smith_waterman.c common/*.c
+NW_FILES = nw_cmdline.c needleman_wunsch.c mem_size.c common/*.c
+SW_FILES = sw_cmdline.c smith_waterman.c mem_size.c common/*.c
 
 all: clean
 	$(CC) -o needleman_wunsch $(CFLAGS) $(LIB_INCS) $(NW_ARGS) $(NW_FILES) $(LIB_LIST)

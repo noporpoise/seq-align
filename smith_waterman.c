@@ -31,6 +31,7 @@
 
 #include "smith_waterman.h"
 #include "utility_lib.h"
+#include "mem_size.h"
 
 long max(long a, long b, long c, long d)
 {
@@ -133,6 +134,22 @@ SW_COMPUTATION* smith_waterman_align(const char* seq_a, const char* seq_b,
   
   unsigned long arr_size = (unsigned long)score_width * score_height;
   
+  //
+  // Check system memory size
+  size_t matrix_num_of_bytes = arr_size * sizeof(score_t);
+  // 3 matrices required -- overall mem usage:
+  size_t overal_num_of_bytes = 3 * matrix_num_of_bytes;
+
+  // Get amount of RAM on this machine
+  size_t system_mem_size = getMemorySize();
+
+  if(system_mem_size != 0 && overal_num_of_bytes > system_mem_size)
+  {
+    fprintf(stderr, "Warning: memory usage exceeds available RAM "
+                    "(%lu bytes requested, %lu available)\n",
+            overal_num_of_bytes, system_mem_size);
+  }
+
   // 2d array (length_a x length_b)
   // addressing [a][b]
 

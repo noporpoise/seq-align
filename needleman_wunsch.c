@@ -27,6 +27,7 @@
 #include <limits.h>
 
 #include "needleman_wunsch.h"
+#include "mem_size.h"
 
 inline long max(long a, long b, long c)
 {
@@ -123,7 +124,7 @@ char find_end_max(score_t *score_arr,
 // scoring system
 int needleman_wunsch(const char* seq_a, const char* seq_b,
                      char* alignment_a, char* alignment_b,
-                     SCORING_SYSTEM* scoring)
+                     const SCORING_SYSTEM* scoring)
 {
   #ifdef DEBUG
   scoring_print(scoring);
@@ -149,24 +150,40 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
   
   unsigned long arr_size = (unsigned long)score_width * score_height;
   
+  //
+  // Check system memory size
+  size_t matrix_num_of_bytes = arr_size * sizeof(score_t);
+  // 3 matrices required -- overall mem usage:
+  size_t overal_num_of_bytes = 3 * matrix_num_of_bytes;
+
+  // Get amount of RAM on this machine
+  size_t system_mem_size = getMemorySize();
+
+  if(system_mem_size != 0 && overal_num_of_bytes > system_mem_size)
+  {
+    fprintf(stderr, "Warning: memory usage exceeds available RAM "
+                    "(%lu bytes requested, %lu available)\n",
+            overal_num_of_bytes, system_mem_size);
+  }
+
   // 2d array (length_a x length_b)
   // addressing [a][b]
 
   // Score having just matched
-  score_t* match_score = (score_t*) malloc(arr_size * sizeof(int));
+  score_t* match_score = (score_t*) malloc(matrix_num_of_bytes);
   // score having just deleted from seq_a
-  score_t* gap_a_score = (score_t*) malloc(arr_size * sizeof(int));
+  score_t* gap_a_score = (score_t*) malloc(matrix_num_of_bytes);
   // score having just inserted into seq_a
-  score_t* gap_b_score = (score_t*) malloc(arr_size * sizeof(int));
+  score_t* gap_b_score = (score_t*) malloc(matrix_num_of_bytes);
   
   if(match_score == NULL || gap_a_score == NULL || gap_b_score == NULL)
   {
-    unsigned long num_of_bytes = arr_size * sizeof(int);
     fprintf(stderr, "Couldn't allocate enough memory (%lu bytes required)\n",
-            num_of_bytes);
+            matrix_num_of_bytes);
     
     #ifdef DEBUG
-    fprintf(stderr, "SeqA length: %i; SeqB length: %i\n", (int)length_a, (int)length_b);
+    fprintf(stderr, "SeqA length: %i; SeqB length: %i\n",
+            (int)length_a, (int)length_b);
     fprintf(stderr, "arr_size: %lu; int size: %li\n", arr_size, sizeof(int));
     #endif
 
