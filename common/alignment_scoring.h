@@ -81,7 +81,7 @@ SCORING_SYSTEM* scoring_create(int match, int mismatch,
 
 void scoring_add_wildcard(SCORING_SYSTEM* scoring, char c, int s);
 
-char scoring_check_wildcards(SCORING_SYSTEM* scoring, char a, char b);
+char scoring_check_wildcards(const SCORING_SYSTEM* scoring, char a, char b);
 
 void scoring_add_mutations(SCORING_SYSTEM* scoring,
                            unsigned int num_chars, char* chars, int* scores,
@@ -90,9 +90,9 @@ void scoring_add_mutations(SCORING_SYSTEM* scoring,
 void scoring_add_mutation(SCORING_SYSTEM* scoring, char a, char b, int score);
 void scoring_free(SCORING_SYSTEM* scoring);
 
-void scoring_print(SCORING_SYSTEM* scoring);
+void scoring_print(const SCORING_SYSTEM* scoring);
 
-int scoring_lookup(SCORING_SYSTEM* scoring, char a, char b);
+int scoring_lookup(const SCORING_SYSTEM* scoring, char a, char b);
 
 // Some scoring systems
 SCORING_SYSTEM* scoring_system_PAM30();

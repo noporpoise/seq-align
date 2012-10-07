@@ -14,15 +14,14 @@ UTILITY_LIB_PATH = $(LIBS_PATH)/utility_lib
 STRING_BUF_PATH = $(LIBS_PATH)/string_buffer
 BIT_ARRAY_PATH = $(LIBS_PATH)/bit_array
 SEQ_FILE_PATH = $(LIBS_PATH)/seq_file
-SCORING_PATH = $(LIBS_PATH)/alignment_scoring
 SAMTOOLS_PATH = $(HOME)/bioinf/samtools-0.1.18
 
 # Add data type for alignment scoring
 CFLAGS := $(CFLAGS) -Wall -Wextra \
-         -I$(SCORING_PATH) -I$(SEQ_FILE_PATH) -I$(UTILITY_LIB_PATH) \
-         -I$(BIT_ARRAY_PATH) -I$(STRING_BUF_PATH) -I$(SAMTOOLS_PATH) -I.
+          -I. -Icommon/ -I$(SEQ_FILE_PATH) -I$(UTILITY_LIB_PATH) \
+          -I$(BIT_ARRAY_PATH) -I$(STRING_BUF_PATH) -I$(SAMTOOLS_PATH)
 
-LIB_INCS = -L$(SCORING_PATH) -L$(SEQ_FILE_PATH) -L$(UTILITY_LIB_PATH) \
+LIB_INCS = -L$(SEQ_FILE_PATH) -L$(UTILITY_LIB_PATH) \
            -L$(BIT_ARRAY_PATH) -L$(STRING_BUF_PATH) -L$(SAMTOOLS_PATH) -L.
 
 LIB_LIST = -lseqfile -lstrbuf -lbitarr -lbam -lutil -lz

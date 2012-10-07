@@ -99,7 +99,7 @@ void scoring_add_wildcard(SCORING_SYSTEM* scoring, char c, int s)
   scoring->num_of_wildcards++;
 }
 
-char scoring_check_wildcards(SCORING_SYSTEM* scoring, char a, char b)
+char scoring_check_wildcards(const SCORING_SYSTEM* scoring, char a, char b)
 {
   if(!scoring->case_sensitive)
   {
@@ -173,7 +173,7 @@ void scoring_free(SCORING_SYSTEM* scoring)
   free(scoring);
 }
 
-void scoring_print(SCORING_SYSTEM* scoring)
+void scoring_print(const SCORING_SYSTEM* scoring)
 {
   printf("scoring:\n");
   printf("  match: %i; mismatch: %i; (use_match_mismatch: %i)\n",
@@ -191,7 +191,7 @@ void scoring_print(SCORING_SYSTEM* scoring)
   printf("  swap_table: %s\n", (scoring->swap_table == NULL ? "no" : "yes"));
 }
 
-int scoring_lookup(SCORING_SYSTEM* scoring, char a, char b)
+int scoring_lookup(const SCORING_SYSTEM* scoring, char a, char b)
 {
   if(!scoring->case_sensitive)
   {

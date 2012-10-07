@@ -128,7 +128,7 @@ void alignment_colour_print_against(const char *alignment_a,
 
 // Order of alignment_a / alignment_b is not important
 void alignment_print_spacer(const char* alignment_a, const char* alignment_b,
-                            SCORING_SYSTEM* scoring)
+                            const SCORING_SYSTEM* scoring)
 {
   int i;
 
@@ -156,10 +156,11 @@ void alignment_reverse_move(enum Matrix *curr_matrix, score_t* curr_score,
                             unsigned int *score_x, unsigned int *score_y,
                             unsigned long *arr_index,
                             unsigned int score_width,
-                            score_t *match_score, score_t *gap_a_score,
-                            score_t *gap_b_score,
+                            const score_t *match_score,
+                            const score_t *gap_a_score,
+                            const score_t *gap_b_score,
                             const char* seq_a, const char* seq_b,
-                            SCORING_SYSTEM* scoring)
+                            const SCORING_SYSTEM* scoring)
 {
   int prev_match_penalty, prev_gap_a_penalty, prev_gap_b_penalty;
 
