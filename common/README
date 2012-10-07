@@ -1,0 +1,10 @@
+sequence alignment scoring code
+used by smith waterman and needleman wunsch alignment code
+
+GPL v3 or later
+
+Isaac Turner <turner.isaac@gmail.com>
+
+see:
+* http://sourceforge.net/projects/needlemanwunsch
+* http://sourceforge.net/projects/smithwaterman
