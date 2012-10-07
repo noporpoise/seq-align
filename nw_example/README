@@ -1,0 +1,10 @@
+Example of using needleman_wunsch in your own code
+GPLv3
+
+Isaac Turner <turner.isaac@gmail.com>
+Copyright 2012
+
+== build: ==
+
+Pass the path to needleman_wunsch to Make
+$ make NWPATH=~/needleman_wunsch/
