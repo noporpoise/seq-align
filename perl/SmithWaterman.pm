@@ -42,11 +42,12 @@ sub new
 
   while(my ($key,$value) = each(%options))
   {
-    if($key =~ /^case_sensitive$/i)
+    if(grep(/^$key$/i, qw(case_sensitive nogaps nomismatches)))
     {
+      # 'Flag' options -- they have no args
       if($value)
       {
-        $cmdline .= " --case_sensitive";
+        $cmdline .= " --$key";
       }
     }
     elsif($key =~ /^scoring$/i)
@@ -62,7 +63,7 @@ sub new
     }
     elsif(grep(/^$key$/i, qw(substitution_matrix substitution_pairs
                              match mismatch gapopen gapextend
-                             minscore maxhits nogaps nomismatches wildcard)))
+                             minscore maxhits wildcard)))
     {
       $cmdline .= " --$key $value";
     }
