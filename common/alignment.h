@@ -27,12 +27,17 @@
 #define ALIGNMENT_HEADER_SEEN
 
 #include "alignment_scoring.h"
-
 #include "string_buffer.h"
 
-#define MATRIX_NAME(x) ((x) == MATCH ? "MATCH" : ((x) == GAP_A ? "GAP_A" : "GAP_B"))
+/*
+typedef struct Alignment Alignment // previously SW_LOCAL_ALIGNMENT
+*/
 
+// C Preprocessor sets SCORE_TYPE
+// unsigned int for SW; int for NW
 typedef SCORE_TYPE score_t;
+
+#define MATRIX_NAME(x) ((x) == MATCH ? "MATCH" : ((x) == GAP_A ? "GAP_A" : "GAP_B"))
 
 // Matrix names
 enum Matrix { MATCH,GAP_A,GAP_B };
@@ -40,9 +45,21 @@ enum Matrix { MATCH,GAP_A,GAP_B };
 // Printing colour codes
 char *align_col_mismatch, *align_col_indel, *align_col_context, *align_col_stop;
 
+/*
+// Constructors/Destructors
+Alignment* alignment_create(size_t capacity);
+void alignment_ensure_capacity(Alignment* alignment);
+void alignment_destroy(Alignment* alignment);
+*/
+
+long max2(long a, long b);
+long max3(long a, long b, long c);
+long max4(long a, long b, long c, long d);
+
 // Methods
-void alignment_print_matrices(score_t* match_score, score_t* gap_a_score,
-                              score_t* gap_b_score,
+void alignment_print_matrices(const score_t* match_score,
+                              const score_t* gap_a_score,
+                              const score_t* gap_b_score,
                               int length_a, int length_b);
 
 void alignment_colour_print_against(const char *alignment_a,
@@ -55,7 +72,7 @@ void alignment_print_spacer(const char* alignment_a, const char* alignment_b,
 void alignment_reverse_move(enum Matrix *curr_matrix, score_t* curr_score,
                             unsigned int *score_x, unsigned int *score_y,
                             unsigned long *arr_index,
-                            unsigned int score_width,
+                            unsigned int score_width, unsigned int score_height,
                             const score_t *match_score,
                             const score_t *gap_a_score,
                             const score_t *gap_b_score,

@@ -21,9 +21,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define MAX_2(a,b)   ((a) >= (b) ? (a) : (b))
-#define MIN_2(a,b)   ((a) <= (b) ? (a) : (b))
-#define MIN_3(a,b,c) ((a) <= (b) && (a) <= (c) ? (a) : ((b) <= (c) ? (b) : (c)))
+#define MAX(a,b)   ((a) >= (b) ? (a) : (b))
+#define MIN(a,b)   ((a) <= (b) ? (a) : (b))
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -121,7 +120,8 @@ void print_usage(char* err_fmt, ...)
 "    --gapextend <score>  [default: %i]\n"
 "\n"
 "    --nogaps             No gaps allowed in the alignment\n"
-"    --nomismatches       No mismatches allowed - not to be used with --nogaps\n"
+"    --nomismatches       No mismatches allowed. \n"
+"      When used together, prints longest common substrings in order of length\n"
 "\n"
 "    --scoring <PAM30|PAM70|BLOSUM80|BLOSUM62>\n"
 "    --substitution_matrix <file>  see details for formatting\n"
@@ -235,8 +235,8 @@ void align(const char *seq_a, const char *seq_b,
 
   SW_COMPUTATION* smithwaterman = smith_waterman_align(seq_a, seq_b, scoring);
 
-  unsigned int len_a = smithwaterman->score_width-1;
-  unsigned int len_b = smithwaterman->score_height-1;
+  unsigned int len_a = smith_waterman_seq_a_strlen(smithwaterman);
+  unsigned int len_b = smith_waterman_seq_b_strlen(smithwaterman);
 
   printf("== Alignment %lu lengths (%i, %i):\n", alignment_index, len_a, len_b);
 
@@ -267,7 +267,7 @@ void align(const char *seq_a, const char *seq_b,
   if(!min_score_set)
   {
     // If min_score hasn't been set, set a limit based on the lengths of seqs
-    min_score = scoring->match * MAX_2(0.2 * MIN_2(len_a, len_b), 2);
+    min_score = scoring->match * MAX(0.2 * MIN(len_a, len_b), 2);
 
     #ifdef DEBUG
     printf("min_score: %i\n", min_score);
@@ -296,15 +296,14 @@ void align(const char *seq_a, const char *seq_b,
     if(print_context)
     {
       // Calculate number of characters of context to print either side
-      //context_left = MIN_3(alignment->pos_a, alignment->pos_b, print_context);
-      context_left = MAX_2(alignment->pos_a, alignment->pos_b);
-      context_left = MIN_2(context_left, print_context);
+      context_left = MAX(alignment->pos_a, alignment->pos_b);
+      context_left = MIN(context_left, print_context);
 
       unsigned int rem_a = len_a - (alignment->pos_a + alignment->len_a);
       unsigned int rem_b = len_b - (alignment->pos_b + alignment->len_b);
-      //context_right = MIN_3(rem_a, rem_b, print_context);
-      context_right = MAX_2(rem_a, rem_b);
-      context_right = MIN_2(context_right, print_context);
+
+      context_right = MAX(rem_a, rem_b);
+      context_right = MIN(context_right, print_context);
     
       left_spaces_a = (context_left > alignment->pos_a)
                       ? context_left - alignment->pos_a : 0;
@@ -335,8 +334,8 @@ void align(const char *seq_a, const char *seq_b,
     {
       printf("  ");
 
-      unsigned int max_left_spaces = MAX_2(left_spaces_a, left_spaces_b);
-      unsigned int max_right_spaces = MAX_2(right_spaces_a, right_spaces_b);
+      unsigned int max_left_spaces = MAX(left_spaces_a, left_spaces_b);
+      unsigned int max_right_spaces = MAX(right_spaces_a, right_spaces_b);
 
       unsigned int spacer;
 
@@ -703,10 +702,10 @@ int main(int argc, char* argv[])
     scoring->use_match_mismatch = 0;
   }
 
-  if(scoring->no_gaps && scoring->no_mismatches)
+  /*if(scoring->no_gaps && scoring->no_mismatches)
   {
     print_usage("--nogaps --nomismatches cannot be used at together");
-  }
+  }*/
 
   // Check for extra unused arguments
   // and set seq1 and seq2 if they have been passed

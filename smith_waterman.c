@@ -33,21 +33,39 @@
 #include "utility_lib.h"
 #include "mem_size.h"
 
-long max(long a, long b, long c, long d)
+// Store alignment here
+struct SW_COMPUTATION
 {
-  long result = a;
+  // keep pointer to scoring system
+  SCORING_SYSTEM* scoring;
 
-  if(b > result) {
-    result = b;
-  }
-  if(c > result) {
-    result = c;
-  }
-  if(d > result) {
-    result = d;
-  }
-  
-  return result;
+  // Pointers to aligned sequence
+  const char *seq_a, *seq_b;
+
+  // We allocate everything below here
+  score_t* match_score;
+  score_t* gap_a_score;
+  score_t* gap_b_score;
+
+  // For iterating through local alignments
+  BIT_ARRAY* match_scores_mask;
+  unsigned long *sorted_match_indices;
+  unsigned long num_of_hits;
+
+  unsigned long next_hit;
+
+  unsigned int score_width, score_height;
+};
+
+
+unsigned int smith_waterman_seq_a_strlen(SW_COMPUTATION *sw)
+{
+  return sw->score_width-1;
+}
+
+unsigned int smith_waterman_seq_b_strlen(SW_COMPUTATION *sw)
+{
+  return sw->score_width-1;
 }
 
 #ifdef DEBUG
@@ -60,7 +78,7 @@ void print_computation(SW_COMPUTATION* comp)
   printf(" bit mask: %s\n", str);
   free(str);
 
-  int i;
+  unsigned int i;
   printf(" hits: %lu", comp->sorted_match_indices[0]);
   for(i = 1; i < comp->num_of_hits; i++)
   {
@@ -205,6 +223,12 @@ SW_COMPUTATION* smith_waterman_align(const char* seq_a, const char* seq_b,
     gap_b_score[index] = 0;
   }
 
+  if(scoring->no_gaps)
+  {
+    memset(gap_a_score, 0, matrix_num_of_bytes);
+    memset(gap_b_score, 0, matrix_num_of_bytes);
+  }
+
   int gap_open_penalty = scoring->gap_extend + scoring->gap_open;
 
   for (i = 1; i < score_width; i++)
@@ -221,8 +245,8 @@ SW_COMPUTATION* smith_waterman_align(const char* seq_a, const char* seq_b,
 
       // 1) Update match_score[i][j] from position [i-1][j-1]
 
-      if(scoring->no_mismatches && seq_a[seq_i] != seq_b[seq_j] &&
-         !scoring_check_wildcards(scoring, seq_a[seq_i], seq_b[seq_j]))
+      if(scoring->no_mismatches &&
+         !scoring_is_match(scoring, seq_a[seq_i], seq_b[seq_j]))
       {
         match_score[new_index] = 0;
       }
@@ -237,40 +261,35 @@ SW_COMPUTATION* smith_waterman_align(const char* seq_a, const char* seq_b,
 
         // Long arithmetic needed to prevent overflow
         match_score[new_index]
-          = max((long)match_score[old_index] + substitution_penalty,
-                (long)gap_a_score[old_index] + substitution_penalty,
-                (long)gap_b_score[old_index] + substitution_penalty,
-                0);
+          = max4((long)match_score[old_index] + substitution_penalty,
+                 (long)gap_a_score[old_index] + substitution_penalty,
+                 (long)gap_b_score[old_index] + substitution_penalty,
+                 (long)0);
       }
 
-      if(scoring->no_gaps)
-      {
-        gap_a_score[new_index] = 0;
-        gap_b_score[new_index] = 0;
-      }
-      else
+      if(!scoring->no_gaps)
       {
         // 2) Update gap_a_score[i][j] from position [i][j-1]
         old_index = (unsigned long)(j-1)*score_width + i;
 
         gap_a_score[new_index]
-          = max((long)match_score[old_index] + gap_open_penalty,
-                (long)gap_a_score[old_index] + scoring->gap_extend,
-                (long)gap_b_score[old_index] + gap_open_penalty,
-                0);
+          = max4((long)match_score[old_index] + gap_open_penalty,
+                 (long)gap_a_score[old_index] + scoring->gap_extend,
+                 (long)gap_b_score[old_index] + gap_open_penalty,
+                 (long)0);
 
         // 3) Update gap_b_score[i][j] from position [i-1][j]
         old_index = (unsigned long)j*score_width + (i-1);
 
         gap_b_score[new_index]
-          = max((long)match_score[old_index] + gap_open_penalty,
-                (long)gap_a_score[old_index] + gap_open_penalty,
-                (long)gap_b_score[old_index] + scoring->gap_extend,
-                0);
+          = max4((long)match_score[old_index] + gap_open_penalty,
+                 (long)gap_a_score[old_index] + gap_open_penalty,
+                 (long)gap_b_score[old_index] + scoring->gap_extend,
+                 (long)0);
       }
     }
   }
-  
+
   #ifdef DEBUG
   alignment_print_matrices(match_score, gap_a_score, gap_b_score,
                            length_a, length_b);
@@ -390,6 +409,7 @@ char _follow_hit(SW_COMPUTATION* sw_computation, unsigned long arr_index,
     alignment_reverse_move(&curr_matrix, &curr_score,
                            &score_x, &score_y, &arr_index,
                            sw_computation->score_width,
+                           sw_computation->score_height,
                            sw_computation->match_score, // match matrix
                            sw_computation->gap_a_score, // gap a matrix
                            sw_computation->gap_b_score, // gap b matrix
@@ -462,6 +482,7 @@ char _follow_hit(SW_COMPUTATION* sw_computation, unsigned long arr_index,
     alignment_reverse_move(&curr_matrix, &curr_score,
                            &score_x, &score_y, &arr_index,
                            sw_computation->score_width,
+                           sw_computation->score_height,
                            sw_computation->match_score, // match matrix
                            sw_computation->gap_a_score, // gap a matrix
                            sw_computation->gap_b_score, // gap b matrix

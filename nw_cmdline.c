@@ -575,8 +575,8 @@ int main(int argc, char* argv[])
 
   if(scoring->no_gaps)
   {
-    scoring->no_start_gap_penalty = 1;
-    scoring->no_end_gap_penalty = 1;
+    //scoring->no_start_gap_penalty = 1;
+    //scoring->no_end_gap_penalty = 1;
   }
 
   // Check for extra unused arguments

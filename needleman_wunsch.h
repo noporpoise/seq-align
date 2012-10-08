@@ -25,6 +25,10 @@
 
 #include "alignment.h"
 
+/*
+typedef struct NWAligner NWAligner
+*/
+
 // alloc memory for result (returns length of seq_a + seq_b)
 int nw_alloc_mem(const char* seq_a, const char* seq_b,
                  char** alignment_a, char** alignment_b);

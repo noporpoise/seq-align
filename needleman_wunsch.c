@@ -29,19 +29,12 @@
 #include "needleman_wunsch.h"
 #include "mem_size.h"
 
-inline long max(long a, long b, long c)
+/*
+struct
 {
-  long result = a;
-
-  if(b > result) {
-    result = b;
-  }
-  if(c > result) {
-    result = c;
-  }
-
-  return result;
-}
+  
+} NWAligner;
+*/
 
 /* Allocate memory for alignment results */
 
@@ -196,6 +189,16 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
 
   // Fill in traceback matrix
 
+  if(scoring->no_gaps)
+  {
+    unsigned int i;
+    for(i = 0; i < arr_size; i++)
+    {
+      gap_a_score[i] = INT_MIN;
+      gap_b_score[i] = INT_MIN;
+    }
+  }
+
   unsigned int i, j;
   
   // [0][0]
@@ -211,9 +214,9 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
     // Think carefully about which way round these are
     gap_a_score[i] = INT_MIN;
     gap_b_score[i] = scoring->no_start_gap_penalty ? 0
-                     : scoring->gap_open + (long)i * scoring->gap_extend;
+                     :scoring->gap_open + (long)i * scoring->gap_extend;
   }
-  
+
   // work down first column -> [0][j]
   for(j = 1; j < score_height; j++)
   {
@@ -222,7 +225,7 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
     
     // Think carefully about which way round these are
     gap_a_score[index] = scoring->no_start_gap_penalty ? 0
-                         : scoring->gap_open + (long)j * scoring->gap_extend;
+                         : scoring->gap_open + (long)i * scoring->gap_extend;
     gap_b_score[index] = INT_MIN;
   }
   
@@ -231,6 +234,7 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
   //
 
   int gap_open_penalty = scoring->gap_extend + scoring->gap_open;
+  int gap_extend_penalty = scoring->gap_extend;
 
   for (i = 1; i < score_width; i++)
   {
@@ -245,14 +249,14 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
       unsigned long new_index = (unsigned long)j*score_width + i;
       unsigned long old_index;
       
-      if(scoring->no_mismatches && seq_a[seq_i] != seq_b[seq_j] &&
-         !scoring_check_wildcards(scoring, seq_a[seq_i], seq_b[seq_j]))
+      if(scoring->no_mismatches &&
+         !scoring_is_match(scoring, seq_a[seq_i], seq_b[seq_j]))
       {
-        match_score[new_index] = 0;
+        match_score[new_index] = INT_MIN;
       }
       else
       {
-        old_index = (unsigned long)(j-1)*score_width + (i-1);
+        old_index = ARR_2D_INDEX(score_width, i-1, j-1);
 
         // substitution penalty
         int substitution_penalty = scoring_lookup(scoring,
@@ -261,40 +265,87 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
 
         // substitution
         match_score[new_index]
-          = max((long)match_score[old_index], // continue alignment
-                (long)gap_a_score[old_index], // close gap in seq_a
-                (long)gap_b_score[old_index]) // close gap in seq_b
+          = max3((long)match_score[old_index], // continue alignment
+                 (long)gap_a_score[old_index], // close gap in seq_a
+                 (long)gap_b_score[old_index]) // close gap in seq_b
             + substitution_penalty;
       }                                     
       
-      if(scoring->no_gaps)
-      {
-        gap_a_score[new_index] = 0;
-        gap_b_score[new_index] = 0;
-      }
-      else
+      if(!scoring->no_gaps)
       {
         // Update gap_a_score[i][j] from position [i][j-1]
-        old_index = (unsigned long)(j-1)*score_width + i;
+        old_index = ARR_2D_INDEX(score_width, i, j-1);
         
         // Long arithmetic since some INTs are set to INT_MIN and penalty is -ve
         // (adding as ints would cause an integer overflow)
-        gap_a_score[new_index]
-          = max((long)match_score[old_index] + gap_open_penalty,
-                (long)gap_a_score[old_index] + scoring->gap_extend,
-                (long)gap_b_score[old_index] + gap_open_penalty);
       
+        if(i == score_width-1 && scoring->no_end_gap_penalty)
+        {
+          gap_a_score[new_index]
+            = max3((long)match_score[old_index],
+                   (long)gap_a_score[old_index],
+                   (long)gap_b_score[old_index] + (j == 1 ? 0 : gap_open_penalty));
+        }
+        else
+        {
+          gap_a_score[new_index]
+            = max3((long)match_score[old_index] + gap_open_penalty,
+                   (long)gap_a_score[old_index] + gap_extend_penalty,
+                   (long)gap_b_score[old_index] + gap_open_penalty);
+        }
+
         // Update gap_b_score[i][j] from position [i-1][j]
-        old_index = (unsigned long)j*score_width + (i-1);
+        old_index = ARR_2D_INDEX(score_width, i-1, j);
         
-        gap_b_score[new_index]
-          = max((long)match_score[old_index] + gap_open_penalty,
-                (long)gap_a_score[old_index] + gap_open_penalty,
-                (long)gap_b_score[old_index] + scoring->gap_extend);
+        if(j == score_height-1 && scoring->no_end_gap_penalty)
+        {
+          gap_b_score[new_index]
+            = max3((long)match_score[old_index],
+                   (long)gap_a_score[old_index] + (i == 1 ? 0 : gap_open_penalty),
+                   (long)gap_b_score[old_index]);
+        }
+        else
+        {
+          gap_b_score[new_index]
+            = max3((long)match_score[old_index] + gap_open_penalty,
+                   (long)gap_a_score[old_index] + gap_open_penalty,
+                   (long)gap_b_score[old_index] + gap_extend_penalty);
+        }
       }
     }
   }
-  
+
+  if(scoring->no_gaps)
+  {
+    unsigned long old_index = ARR_2D_INDEX(score_width, score_width-1, 0);
+
+    for(j = 1; j < score_height; j++)
+    {
+      unsigned long new_index = ARR_2D_INDEX(score_width, score_width-1, j);
+
+      gap_a_score[new_index]
+        = max3((long)match_score[old_index] + gap_open_penalty,
+               (long)gap_a_score[old_index] + gap_extend_penalty,
+               INT_MIN);
+    
+      old_index = new_index;
+    }
+
+    old_index = ARR_2D_INDEX(score_width, 0, score_height-1);
+
+    for(i = 1; i < score_width; i++)
+    {
+      unsigned long new_index = ARR_2D_INDEX(score_width, i, score_height-1);
+
+      gap_b_score[new_index]
+        = max3((long)match_score[old_index] + gap_open_penalty,
+               (long)gap_b_score[old_index] + gap_extend_penalty,
+               INT_MIN);
+    
+      old_index = new_index;
+    }
+  }
+
   #ifdef DEBUG
   printf("Filled score matrices - traceback next\n");
   #endif
@@ -304,80 +355,29 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
   //
   
   // work backwards re-tracing optimal alignment, then shift sequences into place
-
-  // seq_i is the index of the next char of seq_a to be added (working bckwrds)
-  // seq_j is the index of the next char of seq_b to be added (working bckwrds)
-  unsigned int seq_i, seq_j;
-  enum Matrix curr_matrix;
-  score_t curr_score;
   
   // Position of next alignment character in buffer (working backwards)
   unsigned int next_char = longest_alignment-1;
+
+  // Get max score (and therefore current matrix)
+  enum Matrix curr_matrix = MATCH;
+  score_t curr_score = match_score[arr_size-1];
   
-  if(scoring->no_end_gap_penalty)
+  if(gap_b_score[arr_size-1] >= curr_score)
   {
-    curr_matrix = MATCH;
-    curr_score = ARR_LOOKUP(match_score, score_width, score_width-1, 0);
-    seq_i = (unsigned int)length_a - 1;
-    seq_j = (unsigned int)length_b - 1;
-    
-    find_end_max(match_score, length_a, length_b,
-                 &curr_score, &seq_i, &seq_j);
-    
-    if(find_end_max(gap_a_score, length_a, length_b,
-                    &curr_score, &seq_i, &seq_j))
-    {
-      curr_matrix = GAP_A;
-    }
-    
-    if(find_end_max(gap_b_score, length_a, length_b,
-                    &curr_score, &seq_i, &seq_j))
-    {
-      curr_matrix = GAP_B;
-    }
-    
-    #ifdef DEBUG
-    printf("no_end_gap_penalty: "
-           "(matrix: %s, curr_score: %i, seq_i: %i, seq_j: %i)\n",
-           MATRIX_NAME(curr_matrix), curr_score, seq_i, seq_j);
-    #endif
-    
-    // Fill in last gap
-    unsigned int i;
-    for(i = length_a - 1; i > seq_i; i--, next_char--)
-    {
-      alignment_a[next_char] = seq_a[i];
-      alignment_b[next_char] = '-';
-    }
-
-    unsigned int j;
-    for(j = length_b - 1; j > seq_j; j--, next_char--)
-    {
-      alignment_a[next_char] = '-';
-      alignment_b[next_char] = seq_b[j];
-    }
+    curr_matrix = GAP_B;
+    curr_score = gap_b_score[arr_size-1];
   }
-  else
+
+  if(gap_a_score[arr_size-1] >= curr_score)
   {
-    // Get max score (and therefore current matrix)
-    curr_matrix = MATCH;
-    curr_score = match_score[arr_size-1];
-    
-    if(gap_a_score[arr_size-1] > curr_score)
-    {
-      curr_matrix = GAP_A;
-      curr_score = gap_a_score[arr_size-1];
-    }
-    
-    if(gap_b_score[arr_size-1] > curr_score)
-    {
-      curr_matrix = GAP_B;
-      curr_score = gap_b_score[arr_size-1];
-    }
-
-    seq_i = length_a - 1;
-    seq_j = length_b - 1;
+    curr_matrix = GAP_A;
+    curr_score = gap_a_score[arr_size-1];
   }
+
+  // coords in score matrices
+  unsigned int score_x = length_a;
+  unsigned int score_y = length_b;
 
 #ifdef DEBUG
   alignment_print_matrices(match_score, gap_a_score, gap_b_score,
@@ -387,8 +387,8 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
   // Hold this value to return later
   int max_alignment_score = curr_score;
   
-  unsigned int score_x = (unsigned int)seq_i+1;
-  unsigned int score_y = (unsigned int)seq_j+1;
+  //unsigned int score_x = (unsigned int)seq_i+1;
+  //unsigned int score_y = (unsigned int)seq_j+1;
   unsigned long arr_index;
 
   // note: longest_alignment = strlen(seq_a) + strlen(seq_b)
@@ -421,13 +421,16 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
         fprintf(stderr, "Please submit a bug report to: turner.isaac@gmail.com\n");
         exit(EXIT_FAILURE);
     }
-    
-    alignment_reverse_move(&curr_matrix, &curr_score,
+
+    if(score_x > 0 && score_y > 0)
+    {
+      alignment_reverse_move(&curr_matrix, &curr_score,
                            &score_x, &score_y, &arr_index,
-                           score_width,
+                           score_width, score_height,
                            // score matrices:
                            match_score, gap_a_score, gap_b_score,
                            seq_a, seq_b, scoring);
+    }
   }
   
   // Free memory

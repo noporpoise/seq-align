@@ -38,9 +38,59 @@ char* align_col_indel = "\033[91m"; // Insertion / deletion (RED)
 char* align_col_context = "\033[95m";
 char* align_col_stop = "\033[0m";
 
+/*
+struct Alignment
+{
+  // Store local alignment result here
+  char *result_a, *result_b;
+  unsigned int capacity, length;
+  unsigned int pos_a, pos_b; // position of first base (0-based)
+  unsigned int len_a, len_b; // number of bases in alignment
+  score_t score;
+};
+*/
 
-void alignment_print_matrices(score_t* match_score, score_t* gap_a_score,
-                              score_t* gap_b_score, int length_a, int length_b)
+long max2(long a, long b)
+{
+  return (a >= b ? a : b);
+}
+
+long max3(long a, long b, long c)
+{
+  long result = a;
+
+  if(b > result) {
+    result = b;
+  }
+  if(c > result) {
+    result = c;
+  }
+
+  return result;
+}
+
+long max4(long a, long b, long c, long d)
+{
+  long result = a;
+
+  if(b > result) {
+    result = b;
+  }
+  if(c > result) {
+    result = c;
+  }
+  if(d > result) {
+    result = d;
+  }
+  
+  return result;
+}
+
+
+void alignment_print_matrices(const score_t* match_score,
+                              const score_t* gap_a_score,
+                              const score_t* gap_b_score,
+                              int length_a, int length_b)
 {
   int score_width = length_a+1;
   int i, j;
@@ -155,7 +205,7 @@ void alignment_print_spacer(const char* alignment_a, const char* alignment_b,
 void alignment_reverse_move(enum Matrix *curr_matrix, score_t* curr_score,
                             unsigned int *score_x, unsigned int *score_y,
                             unsigned long *arr_index,
-                            unsigned int score_width,
+                            unsigned int score_width, unsigned int score_height,
                             const score_t *match_score,
                             const score_t *gap_a_score,
                             const score_t *gap_b_score,
@@ -169,6 +219,16 @@ void alignment_reverse_move(enum Matrix *curr_matrix, score_t* curr_score,
 
   int match_penalty = scoring_lookup(scoring, seq_a[seq_x], seq_b[seq_y]);
 
+  int gap_open_penalty = scoring->gap_extend + scoring->gap_open;
+  int gap_extend_penalty = scoring->gap_extend;
+
+  if(scoring->no_end_gap_penalty &&
+     (*score_x == score_width-1 || *score_y == score_height-1))
+  {
+    gap_open_penalty = 0;
+    gap_extend_penalty = 0;
+  }
+
   switch(*curr_matrix)
   {
     case MATCH:
@@ -180,16 +240,16 @@ void alignment_reverse_move(enum Matrix *curr_matrix, score_t* curr_score,
       break;
 
     case GAP_A:
-      prev_match_penalty = scoring->gap_extend + scoring->gap_open;
-      prev_gap_a_penalty = scoring->gap_extend;
-      prev_gap_b_penalty = scoring->gap_extend + scoring->gap_open;
+      prev_match_penalty = gap_open_penalty;
+      prev_gap_a_penalty = gap_extend_penalty;
+      prev_gap_b_penalty = gap_open_penalty;
       (*score_y)--;
       break;
 
     case GAP_B:
-      prev_match_penalty = scoring->gap_extend + scoring->gap_open;
-      prev_gap_a_penalty = scoring->gap_extend + scoring->gap_open;
-      prev_gap_b_penalty = scoring->gap_extend;
+      prev_match_penalty = gap_open_penalty;
+      prev_gap_a_penalty = gap_open_penalty;
+      prev_gap_b_penalty = gap_extend_penalty;
       (*score_x)--;
       break;
 
@@ -201,25 +261,28 @@ void alignment_reverse_move(enum Matrix *curr_matrix, score_t* curr_score,
 
   *arr_index = ARR_2D_INDEX(score_width, *score_x, *score_y);
 
-  //printf("%i,%i\n", *score_x, *score_y);
-  //(!scoring->no_mismatches || (seq_a[*score_x] == seq_b[*score_y])) &&
+  if(!scoring->no_gaps ||
+     (score_width < score_height && (*score_x == 0 || *score_x == score_width-1)) ||
+     (score_width > score_height && (*score_y == 0 || *score_y == score_height-1)))
+  {
+    if((long)gap_a_score[*arr_index] + prev_gap_a_penalty == *curr_score)
+    {
+      *curr_matrix = GAP_A;
+      *curr_score = gap_a_score[*arr_index];
+      return;
+    }
+    else if((long)gap_b_score[*arr_index] + prev_gap_b_penalty == *curr_score)
+    {
+      *curr_matrix = GAP_B;
+      *curr_score = gap_b_score[*arr_index];
+      return;
+    }
+  }
 
   if((long)match_score[*arr_index] + prev_match_penalty == *curr_score)
   {
     *curr_matrix = MATCH;
     *curr_score = match_score[*arr_index];
-  }
-  else if(!scoring->no_gaps &&
-          (long)gap_a_score[*arr_index] + prev_gap_a_penalty == *curr_score)
-  {
-    *curr_matrix = GAP_A;
-    *curr_score = gap_a_score[*arr_index];
-  }
-  else if(!scoring->no_gaps &&
-          (long)gap_b_score[*arr_index] + prev_gap_b_penalty == *curr_score)
-  {
-    *curr_matrix = GAP_B;
-    *curr_score = gap_b_score[*arr_index];
   }
   else
   {

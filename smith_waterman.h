@@ -27,32 +27,13 @@
 #include "bit_array.h"
 #include "alignment.h"
 
+/*
+typedef struct SWAligner      SWAligner
+typedef struct SWAlignment    SWAlignment    // previously SW_COMPUTATION
+*/
+
 typedef struct SW_COMPUTATION SW_COMPUTATION;
 typedef struct SW_LOCAL_ALIGNMENT SW_LOCAL_ALIGNMENT;
-
-// Store alignment here
-struct SW_COMPUTATION
-{
-  // keep pointer to scoring system
-  SCORING_SYSTEM* scoring;
-
-  // Pointers to aligned sequence
-  const char *seq_a, *seq_b;
-
-  // We allocate everything below here
-  score_t* match_score;
-  score_t* gap_a_score;
-  score_t* gap_b_score;
-
-  // For iterating through local alignments
-  BIT_ARRAY* match_scores_mask;
-  unsigned long *sorted_match_indices;
-  unsigned long num_of_hits;
-
-  unsigned long next_hit;
-
-  unsigned int score_width, score_height;
-};
 
 struct SW_LOCAL_ALIGNMENT
 {
@@ -66,16 +47,20 @@ struct SW_LOCAL_ALIGNMENT
 
 /*
  Do not alter seq_a, seq_b or scoring whilst calling this method
- or between cals to smith_waterman_get_hit
+ or between calls to smith_waterman_get_hit
 */
 SW_COMPUTATION* smith_waterman_align(const char* seq_a, const char* seq_b,
                                      SCORING_SYSTEM* scoring);
+
+unsigned int smith_waterman_seq_a_strlen(SW_COMPUTATION *sw);
+unsigned int smith_waterman_seq_b_strlen(SW_COMPUTATION *sw);
 
 SW_LOCAL_ALIGNMENT* smith_waterman_create_hit();
 
 // An alignment to read from, and a pointer to memory to store the result
 // returns 1 if an alignment was read, 0 otherwise
-char smith_waterman_get_hit(SW_COMPUTATION* sw_computation, SW_LOCAL_ALIGNMENT* result);
+char smith_waterman_get_hit(SW_COMPUTATION* sw_computation,
+                            SW_LOCAL_ALIGNMENT* result);
 
 void smith_waterman_free_hit(SW_LOCAL_ALIGNMENT* alignment);
 void smith_waterman_free(SW_COMPUTATION* sw_computation);

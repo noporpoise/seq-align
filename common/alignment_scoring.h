@@ -36,6 +36,7 @@
 typedef struct MUTATION_SCORE MUTATION_SCORE;
 typedef struct SCORING_SYSTEM SCORING_SYSTEM;
 
+// MutationScore
 struct MUTATION_SCORE
 {
   int id; // hash key
@@ -43,6 +44,7 @@ struct MUTATION_SCORE
   UT_hash_handle hh; // makes this structure hashable
 };
 
+// struct ScoringSystem
 struct SCORING_SYSTEM
 {
   int gap_open, gap_extend;
@@ -82,6 +84,7 @@ SCORING_SYSTEM* scoring_create(int match, int mismatch,
 void scoring_add_wildcard(SCORING_SYSTEM* scoring, char c, int s);
 
 char scoring_check_wildcards(const SCORING_SYSTEM* scoring, char a, char b);
+char scoring_is_match(const SCORING_SYSTEM* scoring, char a, char b);
 
 void scoring_add_mutations(SCORING_SYSTEM* scoring,
                            unsigned int num_chars, char* chars, int* scores,

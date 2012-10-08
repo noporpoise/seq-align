@@ -1,6 +1,11 @@
-TODO:
-1) Triple check --nomismatches / --nogaps!
-2) Ensure memory reuse when doing nw/sw aligning (rather than free/malloc loops)
-3) update sw_example and nw_example
-4) Write README
-5) Add perl/NeedlemanWunsch.pm
+1) Ensure memory reuse when doing nw/sw aligning (rather than free/malloc loops)
+Add structs:
+NWAligner, SWAligner
+SWAlignment
+Alignment
+
+NWAligner gives a single Alignment
+SWAligner gives a SWAlignment, from which we get multiple Alignment results
+
+2) update sw_example and nw_example
+3) Add perl/NeedlemanWunsch.pm

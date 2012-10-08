@@ -120,6 +120,17 @@ char scoring_check_wildcards(const SCORING_SYSTEM* scoring, char a, char b)
   return 0;
 }
 
+char scoring_is_match(const SCORING_SYSTEM* scoring, char a, char b)
+{
+  if(!scoring->case_sensitive)
+  {
+    a = tolower(a);
+    b = tolower(b);
+  }
+
+  return (a == b || scoring_check_wildcards(scoring, a, b));
+}
+
 void scoring_add_mutations(SCORING_SYSTEM* scoring,
                            unsigned int num_chars, char* chars, int* scores,
                            char use_match_mismatch)
@@ -192,6 +203,7 @@ void scoring_print(const SCORING_SYSTEM* scoring)
 }
 
 int scoring_lookup(const SCORING_SYSTEM* scoring, char a, char b)
+//, char* is_match)
 {
   if(!scoring->case_sensitive)
   {
@@ -202,6 +214,8 @@ int scoring_lookup(const SCORING_SYSTEM* scoring, char a, char b)
   //#ifdef DEBUG
   //printf(" scoring_lookup(%c,%c)\n", a, b);
   //#endif
+
+  //*is_match = (a == b);
 
   // Look up in table
   if(scoring->swap_table != NULL)
@@ -225,6 +239,7 @@ int scoring_lookup(const SCORING_SYSTEM* scoring, char a, char b)
   {
     if(scoring->wildcards[i] == a || scoring->wildcards[i] == b)
     {
+      //*is_match = 1;
       return scoring->wildscores[i];
     }
   }

@@ -29,10 +29,10 @@
 
 #include "alignment_scoring.h"
 
-void align_scoring_load_matrix(gzFile* file, char* file_path,
+void align_scoring_load_matrix(gzFile* file, const char* file_path,
                                SCORING_SYSTEM* scoring, char case_sensitive);
 
-void align_scoring_load_pairwise(gzFile* file, char* file_path,
+void align_scoring_load_pairwise(gzFile* file, const char* file_path,
                                  SCORING_SYSTEM* scoring, char case_sensitive);
 
 #endif
