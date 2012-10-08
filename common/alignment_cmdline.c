@@ -36,8 +36,8 @@
 
 // File loading
 int file_list_length = 0;
-int file_list_capacity = 10;
-char **file_paths1, **file_paths2;
+int file_list_capacity = 0;
+char **file_paths1 = NULL, **file_paths2 = NULL;
 
 void cmdline_init()
 {
@@ -53,7 +53,20 @@ void cmdline_finish()
 
 void _check_file_array_lengths()
 {
-  if(file_list_length == file_list_capacity)
+  if(file_list_capacity == 0)
+  {
+    file_list_capacity = 10;
+    file_paths1 = malloc(sizeof(char*) * file_list_capacity);
+    file_paths2 = malloc(sizeof(char*) * file_list_capacity);
+
+    if(file_paths1 == NULL || file_paths2 == NULL)
+    {
+      fprintf(stderr, "%s:%i: Ran out of memory taking file arguments!\n",
+              __FILE__, __LINE__);
+      exit(EXIT_FAILURE);
+    }
+  }
+  else if(file_list_length == file_list_capacity)
   {
     // Expand arrays used for holding file paths
     file_list_capacity *= 2;
@@ -64,6 +77,7 @@ void _check_file_array_lengths()
     {
       fprintf(stderr, "%s:%i: Ran out of memory taking file arguments!\n",
               __FILE__, __LINE__);
+      exit(EXIT_FAILURE);
     }
   }
 }

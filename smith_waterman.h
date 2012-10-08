@@ -40,8 +40,8 @@ struct SW_LOCAL_ALIGNMENT
   // Store local alignment result here
   char *result_a, *result_b;
   unsigned int capacity, length;
-  unsigned int pos_a, pos_b; // position of first base (0-based)
-  unsigned int len_a, len_b; // number of bases in alignment
+  size_t pos_a, pos_b; // position of first base (0-based)
+  size_t len_a, len_b; // number of bases in alignment
   score_t score;
 };
 
@@ -52,8 +52,8 @@ struct SW_LOCAL_ALIGNMENT
 SW_COMPUTATION* smith_waterman_align(const char* seq_a, const char* seq_b,
                                      SCORING_SYSTEM* scoring);
 
-unsigned int smith_waterman_seq_a_strlen(SW_COMPUTATION *sw);
-unsigned int smith_waterman_seq_b_strlen(SW_COMPUTATION *sw);
+size_t smith_waterman_seq_a_strlen(SW_COMPUTATION *sw);
+size_t smith_waterman_seq_b_strlen(SW_COMPUTATION *sw);
 
 SW_LOCAL_ALIGNMENT* smith_waterman_create_hit();
 

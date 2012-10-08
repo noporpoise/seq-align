@@ -38,14 +38,14 @@ struct
 
 /* Allocate memory for alignment results */
 
-int nw_alloc_mem(const char* seq_a, const char* seq_b,
+size_t nw_alloc_mem(const char* seq_a, const char* seq_b,
                  char** alignment_a, char** alignment_b)
 {
-  int length_a = strlen(seq_a);
-  int length_b = strlen(seq_b);
+  size_t length_a = strlen(seq_a);
+  size_t length_b = strlen(seq_b);
   
   // Calculate largest amount of mem needed
-  int longest_alignment = length_a + length_b;
+  size_t longest_alignment = length_a + length_b;
   
   // longest_alignment + 1 to allow for \0
   *alignment_a = (char*) malloc((longest_alignment+1) * sizeof(char));
@@ -130,14 +130,14 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
   unsigned int longest_alignment = (unsigned int)length_a +
                                    (unsigned int)length_b;
   
-  unsigned int score_width = length_a+1;
-  unsigned int score_height = length_b+1;
+  size_t score_width = length_a+1;
+  size_t score_height = length_b+1;
   
   // Check sequences aren't too long to align
   if(score_height > ULONG_MAX / score_width)
   {
     fprintf(stderr, "Error: sequences too long to align (%i * %i > %lu)\n",
-            score_width, score_height, ULONG_MAX);
+            (int)score_width, (int)score_height, ULONG_MAX);
     exit(EXIT_FAILURE);
   }
   
@@ -213,8 +213,9 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
     
     // Think carefully about which way round these are
     gap_a_score[i] = INT_MIN;
-    gap_b_score[i] = scoring->no_start_gap_penalty ? 0
-                     :scoring->gap_open + (long)i * scoring->gap_extend;
+    gap_b_score[i]
+      = (score_t)(scoring->no_start_gap_penalty ? 0
+                  : scoring->gap_open + (long)i * scoring->gap_extend);
   }
 
   // work down first column -> [0][j]
@@ -224,8 +225,9 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
     match_score[index] = INT_MIN;
     
     // Think carefully about which way round these are
-    gap_a_score[index] = scoring->no_start_gap_penalty ? 0
-                         : scoring->gap_open + (long)i * scoring->gap_extend;
+    gap_a_score[index]
+      = (score_t)(scoring->no_start_gap_penalty ? 0
+                  : scoring->gap_open + (long)i * scoring->gap_extend);
     gap_b_score[index] = INT_MIN;
   }
   
@@ -265,9 +267,9 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
 
         // substitution
         match_score[new_index]
-          = max3((long)match_score[old_index], // continue alignment
-                 (long)gap_a_score[old_index], // close gap in seq_a
-                 (long)gap_b_score[old_index]) // close gap in seq_b
+          = (score_t)max3((long)match_score[old_index], // continue alignment
+                          (long)gap_a_score[old_index], // close gap in seq_a
+                          (long)gap_b_score[old_index]) // close gap in seq_b
             + substitution_penalty;
       }                                     
       
@@ -282,16 +284,16 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
         if(i == score_width-1 && scoring->no_end_gap_penalty)
         {
           gap_a_score[new_index]
-            = max3((long)match_score[old_index],
-                   (long)gap_a_score[old_index],
-                   (long)gap_b_score[old_index] + (j == 1 ? 0 : gap_open_penalty));
+            = (score_t)max3((long)match_score[old_index],
+                            (long)gap_a_score[old_index],
+                            (long)gap_b_score[old_index] + (j == 1 ? 0 : gap_open_penalty));
         }
         else
         {
           gap_a_score[new_index]
-            = max3((long)match_score[old_index] + gap_open_penalty,
-                   (long)gap_a_score[old_index] + gap_extend_penalty,
-                   (long)gap_b_score[old_index] + gap_open_penalty);
+            = (score_t)max3((long)match_score[old_index] + gap_open_penalty,
+                            (long)gap_a_score[old_index] + gap_extend_penalty,
+                            (long)gap_b_score[old_index] + gap_open_penalty);
         }
 
         // Update gap_b_score[i][j] from position [i-1][j]
@@ -300,16 +302,16 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
         if(j == score_height-1 && scoring->no_end_gap_penalty)
         {
           gap_b_score[new_index]
-            = max3((long)match_score[old_index],
-                   (long)gap_a_score[old_index] + (i == 1 ? 0 : gap_open_penalty),
-                   (long)gap_b_score[old_index]);
+            = (score_t)max3((long)match_score[old_index],
+                            (long)gap_a_score[old_index] + (i == 1 ? 0 : gap_open_penalty),
+                            (long)gap_b_score[old_index]);
         }
         else
         {
           gap_b_score[new_index]
-            = max3((long)match_score[old_index] + gap_open_penalty,
-                   (long)gap_a_score[old_index] + gap_open_penalty,
-                   (long)gap_b_score[old_index] + gap_extend_penalty);
+            = (score_t)max3((long)match_score[old_index] + gap_open_penalty,
+                            (long)gap_a_score[old_index] + gap_open_penalty,
+                            (long)gap_b_score[old_index] + gap_extend_penalty);
         }
       }
     }
@@ -324,9 +326,9 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
       unsigned long new_index = ARR_2D_INDEX(score_width, score_width-1, j);
 
       gap_a_score[new_index]
-        = max3((long)match_score[old_index] + gap_open_penalty,
-               (long)gap_a_score[old_index] + gap_extend_penalty,
-               INT_MIN);
+        = (score_t)max3((long)match_score[old_index] + gap_open_penalty,
+                        (long)gap_a_score[old_index] + gap_extend_penalty,
+                        INT_MIN);
     
       old_index = new_index;
     }
@@ -338,9 +340,9 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
       unsigned long new_index = ARR_2D_INDEX(score_width, i, score_height-1);
 
       gap_b_score[new_index]
-        = max3((long)match_score[old_index] + gap_open_penalty,
-               (long)gap_b_score[old_index] + gap_extend_penalty,
-               INT_MIN);
+        = (score_t)max3((long)match_score[old_index] + gap_open_penalty,
+                        (long)gap_b_score[old_index] + gap_extend_penalty,
+                        INT_MIN);
     
       old_index = new_index;
     }
@@ -376,8 +378,8 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
   }
 
   // coords in score matrices
-  unsigned int score_x = length_a;
-  unsigned int score_y = length_b;
+  size_t score_x = length_a;
+  size_t score_y = length_b;
 
 #ifdef DEBUG
   alignment_print_matrices(match_score, gap_a_score, gap_b_score,
@@ -395,7 +397,7 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
   for(; score_x > 0 && score_y > 0; next_char--)
   {
     #ifdef DEBUG
-    printf("matrix: %s (%i,%i) score: %i\n",
+    printf("matrix: %s (%lu,%lu) score: %i\n",
            MATRIX_NAME(curr_matrix), score_x-1, score_y-1, curr_score);
     #endif
 
@@ -425,11 +427,11 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
     if(score_x > 0 && score_y > 0)
     {
       alignment_reverse_move(&curr_matrix, &curr_score,
-                           &score_x, &score_y, &arr_index,
-                           score_width, score_height,
-                           // score matrices:
-                           match_score, gap_a_score, gap_b_score,
-                           seq_a, seq_b, scoring);
+                             &score_x, &score_y, &arr_index,
+                             score_width, score_height,
+                             // score matrices:
+                             match_score, gap_a_score, gap_b_score,
+                             seq_a, seq_b, scoring);
     }
   }
   

@@ -51,7 +51,7 @@ char min_score_set = 0;
 unsigned long max_hits_per_alignment = 0;
 char max_hits_per_alignment_set = 0;
 
-unsigned long print_context = 0;
+unsigned int print_context = 0;
 SCORING_SYSTEM* scoring;
 
 unsigned long alignment_index = 0;
@@ -157,10 +157,10 @@ void print_usage(char* err_fmt, ...)
 
 // Print one line of an alignment
 void print_alignment_part(const char* seq1, const char* seq2,
-                          unsigned int pos, unsigned int len,
+                          size_t pos, size_t len,
                           const char* context_str,
-                          unsigned int spaces_left, unsigned int spaces_right,
-                          unsigned int context_left, unsigned int context_right)
+                          size_t spaces_left, size_t spaces_right,
+                          size_t context_left, size_t context_right)
 {
   printf("  ");
 
@@ -175,7 +175,7 @@ void print_alignment_part(const char* seq1, const char* seq2,
       printf("%s", align_col_context);
     }
 
-    printf("%.*s", context_left, context_str+pos-context_left);
+    printf("%.*s", (int)context_left, context_str+pos-context_left);
 
     if(print_colour)
     {
@@ -199,7 +199,7 @@ void print_alignment_part(const char* seq1, const char* seq2,
       printf("%s", align_col_context);
     }
 
-    printf("%.*s", context_right, context_str+pos+len);
+    printf("%.*s", (int)context_right, context_str+pos+len);
 
     if(print_colour)
     {
@@ -210,7 +210,7 @@ void print_alignment_part(const char* seq1, const char* seq2,
   for(i = 0; i < spaces_right; i++)
     printf(" ");
 
-  printf("  [pos: %i; len: %u]\n", pos, len);
+  printf("  [pos: %li; len: %lu]\n", pos, len);
 }
 
 // Align two sequences against each other to find local alignments between them
@@ -235,10 +235,11 @@ void align(const char *seq_a, const char *seq_b,
 
   SW_COMPUTATION* smithwaterman = smith_waterman_align(seq_a, seq_b, scoring);
 
-  unsigned int len_a = smith_waterman_seq_a_strlen(smithwaterman);
-  unsigned int len_b = smith_waterman_seq_b_strlen(smithwaterman);
+  size_t len_a = smith_waterman_seq_a_strlen(smithwaterman);
+  size_t len_b = smith_waterman_seq_b_strlen(smithwaterman);
 
-  printf("== Alignment %lu lengths (%i, %i):\n", alignment_index, len_a, len_b);
+  printf("== Alignment %lu lengths (%lu, %lu):\n", alignment_index,
+         (unsigned long)len_a, (unsigned long)len_b);
 
   // seqA
   if(print_fasta && seq_a_name != NULL)
@@ -282,9 +283,9 @@ void align(const char *seq_a, const char *seq_b,
   unsigned long hit_index = 0;
 
   // For print context
-  unsigned int context_left = 0, context_right = 0;
-  unsigned int left_spaces_a = 0, left_spaces_b = 0;
-  unsigned int right_spaces_a = 0, right_spaces_b = 0;
+  size_t context_left = 0, context_right = 0;
+  size_t left_spaces_a = 0, left_spaces_b = 0;
+  size_t right_spaces_a = 0, right_spaces_b = 0;
 
   while(smith_waterman_get_hit(smithwaterman, alignment) &&
         alignment->score >= min_score &&
@@ -299,8 +300,8 @@ void align(const char *seq_a, const char *seq_b,
       context_left = MAX(alignment->pos_a, alignment->pos_b);
       context_left = MIN(context_left, print_context);
 
-      unsigned int rem_a = len_a - (alignment->pos_a + alignment->len_a);
-      unsigned int rem_b = len_b - (alignment->pos_b + alignment->len_b);
+      size_t rem_a = len_a - (alignment->pos_a + alignment->len_a);
+      size_t rem_b = len_b - (alignment->pos_b + alignment->len_b);
 
       context_right = MAX(rem_a, rem_b);
       context_right = MIN(context_right, print_context);
@@ -316,7 +317,7 @@ void align(const char *seq_a, const char *seq_b,
     }
 
     #ifdef DEBUG
-    printf("context left = %u; right = %u spacing: [%u,%u] [%u,%u]\n",
+    printf("context left = %lu; right = %lu spacing: [%lu,%lu] [%lu,%lu]\n",
            context_left, context_right,
            left_spaces_a, right_spaces_a,
            left_spaces_b, right_spaces_b);
@@ -334,10 +335,10 @@ void align(const char *seq_a, const char *seq_b,
     {
       printf("  ");
 
-      unsigned int max_left_spaces = MAX(left_spaces_a, left_spaces_b);
-      unsigned int max_right_spaces = MAX(right_spaces_a, right_spaces_b);
+      size_t max_left_spaces = MAX(left_spaces_a, left_spaces_b);
+      size_t max_right_spaces = MAX(right_spaces_a, right_spaces_b);
 
-      unsigned int spacer;
+      size_t spacer;
 
       // Print spaces for lefthand spacing
       for(spacer = 0; spacer < max_left_spaces; spacer++)
@@ -591,7 +592,7 @@ int main(int argc, char* argv[])
       }
       else if(strcasecmp(argv[argi], "--context") == 0)
       {
-        if(!parse_entire_ulong(argv[argi+1], &print_context))
+        if(!parse_entire_uint(argv[argi+1], &print_context))
         {
           print_usage("Invalid --context <c> argument (must be >= 0)");
         }

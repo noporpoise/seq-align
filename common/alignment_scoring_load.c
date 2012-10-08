@@ -239,6 +239,9 @@ void align_scoring_load_matrix(gzFile* file, const char* file_path,
       line_num++;
     }
   }
+
+  free(characters);
+  strbuf_free(sbuf);
 }
 
 
@@ -319,6 +322,8 @@ void align_scoring_load_pairwise(gzFile* file, const char* file_path,
     
     line_num++;
   }
+
+  strbuf_free(sbuf);
 
   if(num_pairs_added == 0)
   {

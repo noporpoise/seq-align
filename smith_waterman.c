@@ -54,16 +54,16 @@ struct SW_COMPUTATION
 
   unsigned long next_hit;
 
-  unsigned int score_width, score_height;
+  size_t score_width, score_height;
 };
 
 
-unsigned int smith_waterman_seq_a_strlen(SW_COMPUTATION *sw)
+size_t smith_waterman_seq_a_strlen(SW_COMPUTATION *sw)
 {
   return sw->score_width-1;
 }
 
-unsigned int smith_waterman_seq_b_strlen(SW_COMPUTATION *sw)
+size_t smith_waterman_seq_b_strlen(SW_COMPUTATION *sw)
 {
   return sw->score_width-1;
 }
@@ -229,18 +229,20 @@ SW_COMPUTATION* smith_waterman_align(const char* seq_a, const char* seq_b,
     memset(gap_b_score, 0, matrix_num_of_bytes);
   }
 
+  //memset(match_score, 0, matrix_num_of_bytes);
+
   int gap_open_penalty = scoring->gap_extend + scoring->gap_open;
 
-  for (i = 1; i < score_width; i++)
+  for(i = 1; i < score_width; i++)
   {
-    for (j = 1; j < score_height; j++)
+    for(j = 1; j < score_height; j++)
     {
       // It's an indexing thing...
       int seq_i = i - 1;
       int seq_j = j - 1;
 
       // Addressing array must be done with unsigned long
-      unsigned long new_index = (unsigned long)j*score_width + i;
+      unsigned long new_index = ARR_2D_INDEX(score_width, i, j);
       unsigned long old_index;
 
       // 1) Update match_score[i][j] from position [i-1][j-1]
@@ -252,7 +254,7 @@ SW_COMPUTATION* smith_waterman_align(const char* seq_a, const char* seq_b,
       }
       else
       {
-        old_index = (unsigned long)(j-1)*score_width + (i-1);
+        old_index = ARR_2D_INDEX(score_width, i-1, j-1);
 
         //substitution penalty
         int substitution_penalty = scoring_lookup(scoring,
@@ -261,31 +263,31 @@ SW_COMPUTATION* smith_waterman_align(const char* seq_a, const char* seq_b,
 
         // Long arithmetic needed to prevent overflow
         match_score[new_index]
-          = max4((long)match_score[old_index] + substitution_penalty,
-                 (long)gap_a_score[old_index] + substitution_penalty,
-                 (long)gap_b_score[old_index] + substitution_penalty,
-                 (long)0);
+          = (score_t)max4((long)match_score[old_index] + substitution_penalty,
+                          (long)gap_a_score[old_index] + substitution_penalty,
+                          (long)gap_b_score[old_index] + substitution_penalty,
+                          (long)0);
       }
 
       if(!scoring->no_gaps)
       {
         // 2) Update gap_a_score[i][j] from position [i][j-1]
-        old_index = (unsigned long)(j-1)*score_width + i;
+        old_index = ARR_2D_INDEX(score_width, i, j-1);
 
         gap_a_score[new_index]
-          = max4((long)match_score[old_index] + gap_open_penalty,
-                 (long)gap_a_score[old_index] + scoring->gap_extend,
-                 (long)gap_b_score[old_index] + gap_open_penalty,
-                 (long)0);
+          = (score_t)max4((long)match_score[old_index] + gap_open_penalty,
+                          (long)gap_a_score[old_index] + scoring->gap_extend,
+                          (long)gap_b_score[old_index] + gap_open_penalty,
+                          (long)0);
 
         // 3) Update gap_b_score[i][j] from position [i-1][j]
-        old_index = (unsigned long)j*score_width + (i-1);
+        old_index = ARR_2D_INDEX(score_width, i-1, j);
 
         gap_b_score[new_index]
-          = max4((long)match_score[old_index] + gap_open_penalty,
-                 (long)gap_a_score[old_index] + gap_open_penalty,
-                 (long)gap_b_score[old_index] + scoring->gap_extend,
-                 (long)0);
+          = (score_t)max4((long)match_score[old_index] + gap_open_penalty,
+                          (long)gap_a_score[old_index] + gap_open_penalty,
+                          (long)gap_b_score[old_index] + scoring->gap_extend,
+                          (long)0);
       }
     }
   }
@@ -328,7 +330,7 @@ SW_COMPUTATION* smith_waterman_align(const char* seq_a, const char* seq_b,
 
   unsigned long num_of_hits = 0;
 
-  unsigned long pos;
+  size_t pos;
   for(pos = 0; pos < arr_size; pos++)
   {
     if(match_score[pos] > 0)
@@ -369,21 +371,21 @@ SW_COMPUTATION* smith_waterman_align(const char* seq_a, const char* seq_b,
 }
 
 // Return 1 if alignment was found, 0 otherwise
-char _follow_hit(SW_COMPUTATION* sw_computation, unsigned long arr_index,
+char _follow_hit(SW_COMPUTATION* sw_computation, size_t arr_index,
                  SW_LOCAL_ALIGNMENT* result)
 {
   // Follow path through matrix
-  unsigned int score_x = ARR_2D_X(arr_index, sw_computation->score_width);
-  unsigned int score_y = ARR_2D_Y(arr_index, sw_computation->score_width);
+  size_t score_x = (size_t)ARR_2D_X(arr_index, sw_computation->score_width);
+  size_t score_y = (size_t)ARR_2D_Y(arr_index, sw_computation->score_width);
 
   // Local alignments always (start and) end with a match
   enum Matrix curr_matrix = MATCH;
   score_t curr_score = sw_computation->match_score[arr_index];
 
   // Store end arr_index and (x,y) coords for later
-  unsigned long end_arr_index = arr_index;
-  unsigned int end_score_x = score_x;
-  unsigned int end_score_y = score_y;
+  size_t end_arr_index = arr_index;
+  size_t end_score_x = score_x;
+  size_t end_score_y = score_y;
   score_t end_score = curr_score;
 
   unsigned int length;

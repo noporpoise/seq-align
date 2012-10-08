@@ -70,9 +70,9 @@ void alignment_print_spacer(const char* alignment_a, const char* alignment_b,
                             const SCORING_SYSTEM* scoring);
 
 void alignment_reverse_move(enum Matrix *curr_matrix, score_t* curr_score,
-                            unsigned int *score_x, unsigned int *score_y,
+                            size_t *score_x, size_t *score_y,
                             unsigned long *arr_index,
-                            unsigned int score_width, unsigned int score_height,
+                            size_t score_width, size_t score_height,
                             const score_t *match_score,
                             const score_t *gap_a_score,
                             const score_t *gap_b_score,

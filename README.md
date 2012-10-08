@@ -80,7 +80,7 @@ Smith-Waterman
         --pretty             Print with a descriptor line
         --colour             Print with colour
 
-Needleman-Wuncsh
+Needleman-Wunsch
 ====================
 
     usage: ./needleman_wunsch [OPTIONS] [seq1 seq2]

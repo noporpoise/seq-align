@@ -30,8 +30,8 @@ typedef struct NWAligner NWAligner
 */
 
 // alloc memory for result (returns length of seq_a + seq_b)
-int nw_alloc_mem(const char* seq_a, const char* seq_b,
-                 char** alignment_a, char** alignment_b);
+size_t nw_alloc_mem(const char* seq_a, const char* seq_b,
+                    char** alignment_a, char** alignment_b);
 
 // length is = length_a + length_b
 // Returns 1 on success, 0 on failure
