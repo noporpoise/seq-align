@@ -79,7 +79,7 @@ sub new
   #my $pid = open3($out, $in, $err, $cmdline)
   #  or die("Cannot run cmd: '$cmdline'");
 
-  print "running '$cmdline'\n";
+  #print "running '$cmdline'\n";
 
   my $pid = open2($in, $out, $cmdline)
     or die("Cannot run cmd: '$cmdline'");
