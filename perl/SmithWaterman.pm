@@ -111,12 +111,14 @@ sub destructor
   close($self->{_in});
   close($self->{_out});
   
-  waitpid($self->{_pid}, 1);
+  #waitpid($self->{_pid}, 1);
 }
 
 sub read_line
 {
   my ($self) = @_;
+
+  #print "SW Waiting...\n";
 
   my $in = $self->{_in};
   my $next_line = <$in>;
@@ -160,6 +162,8 @@ sub read_line
   {
     croak($next_line);
   }
+
+  #print STDERR "SW:$next_line\n";
 
   return $next_line;
 }
