@@ -110,8 +110,8 @@ sub destructor
 
   close($self->{_in});
   close($self->{_out});
-  
-  #waitpid($self->{_pid}, 1);
+
+  waitpid($self->{_pid}, 1);
 }
 
 sub read_line
