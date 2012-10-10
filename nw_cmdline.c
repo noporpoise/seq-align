@@ -558,7 +558,8 @@ int main(int argc, char* argv[])
     }
   }
 
-  if(match_set != mismatch_set)
+  if((match_set && !mismatch_set && !scoring->no_mismatches) ||
+     (!match_set && mismatch_set))
   {
     print_usage("--match --mismatch must both be set or neither set");
   }
