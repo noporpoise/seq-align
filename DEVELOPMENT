@@ -1,3 +1,5 @@
+0) Add --nogapsin1 --nogapsin2 to specify which sequence is allowed to have gaps
+
 1) Ensure memory reuse when doing nw/sw aligning (rather than free/malloc loops)
 Add structs:
 NWAligner, SWAligner
