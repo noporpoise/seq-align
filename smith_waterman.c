@@ -31,7 +31,6 @@
 
 #include "smith_waterman.h"
 #include "utility_lib.h"
-#include "mem_size.h"
 
 // Store alignment here
 struct SW_COMPUTATION

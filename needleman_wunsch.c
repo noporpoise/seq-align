@@ -27,7 +27,7 @@
 #include <limits.h>
 
 #include "needleman_wunsch.h"
-#include "mem_size.h"
+#include "utility_lib.h"
 
 /*
 struct
