@@ -28,7 +28,7 @@ sub new
     $options{lc($key)} = $options{$key};
   }
 
-  if(defined($options{'mismatch'}) != defined($options{'mismatch'}))
+  if(defined($options{'match'}) != defined($options{'mismatch'}))
   {
     carp("Cannot set only one of match/mismatch");
   }
@@ -215,7 +215,6 @@ sub do_alignment
     croak("New lines not allowed in sequences");
   }
 
-  my $in = $self->{_in};
   my $out = $self->{_out};
 
   $self->{_align_number}++;
@@ -254,7 +253,6 @@ sub get_next_hit
   my %result = ('seq1' => $self->{_seq1},
                 'seq2' => $self->{_seq2});
 
-  my $in = $self->{_in};
   my $line;
 
   if(!defined($line = $self->read_line()))
@@ -319,7 +317,7 @@ sub get_next_hit
   }
 }
 
-sub sw_print_hit
+sub print_hit
 {
   my ($self, $hit, $out) = @_;
 
