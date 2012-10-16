@@ -28,7 +28,8 @@ sub new
     $options{lc($key)} = $options{$key};
   }
 
-  if(defined($options{'match'}) != defined($options{'mismatch'}))
+  if(!defined($options{'nomismatches'}) &&
+     defined($options{'match'}) != defined($options{'mismatch'}))
   {
     carp("Cannot set only one of match/mismatch");
   }
@@ -160,6 +161,8 @@ sub read_line
 
   if(defined($next_line) && $next_line =~ /^SmithWaterman Error/i)
   {
+    print STDERR "ErrSeq1: '$self->{'seq1'}'\n";
+    print STDERR "ErrSeq2: '$self->{'seq2'}'\n";
     croak($next_line);
   }
 
@@ -195,6 +198,10 @@ sub do_alignment
   }
   elsif($seq1 =~ /[\n\r]/ || $seq2 =~ /[\n\r]/)
   {
+    print STDERR "ErrSeq1a: '$self->{'seq1'}'\n";
+    print STDERR "ErrSeq2a: '$self->{'seq2'}'\n";
+    print STDERR "ErrSeq1b: '$seq1'\n";
+    print STDERR "ErrSeq2b: '$seq2'\n";
     croak("New lines not allowed in sequences");
   }
 
@@ -212,12 +219,16 @@ sub do_alignment
   if(!defined($line = $self->read_line()) ||
      $line !~ /^== Alignment $expected/i)
   {
+    print STDERR "ErrSeq1: '$seq1'\n";
+    print STDERR "ErrSeq2: '$seq2'\n";
     die("Wasn't expecting '$line'");
   }
 
   if(!defined($line = $self->read_line()) ||
      $line !~ /^$/i)
   {
+    print STDERR "ErrSeq1: '$seq1'\n";
+    print STDERR "ErrSeq2: '$seq2'\n";
     die("Wasn't expecting '$line'");
   }
 }
