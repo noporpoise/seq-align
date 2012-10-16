@@ -189,12 +189,20 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
 
   // Fill in traceback matrix
 
-  if(scoring->no_gaps)
+  if(scoring->no_gaps_in_a)
   {
     unsigned int i;
     for(i = 0; i < arr_size; i++)
     {
       gap_a_score[i] = INT_MIN;
+    }
+  }
+
+  if(scoring->no_gaps_in_b)
+  {
+    unsigned int i;
+    for(i = 0; i < arr_size; i++)
+    {
       gap_b_score[i] = INT_MIN;
     }
   }
@@ -272,15 +280,15 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
                           (long)gap_b_score[old_index]) // close gap in seq_b
             + substitution_penalty;
       }                                     
-      
-      if(!scoring->no_gaps)
+
+      // Long arithmetic since some INTs are set to INT_MIN and penalty is -ve
+      // (adding as ints would cause an integer overflow)
+
+      if(!scoring->no_gaps_in_a)
       {
         // Update gap_a_score[i][j] from position [i][j-1]
         old_index = ARR_2D_INDEX(score_width, i, j-1);
-        
-        // Long arithmetic since some INTs are set to INT_MIN and penalty is -ve
-        // (adding as ints would cause an integer overflow)
-      
+
         if(i == score_width-1 && scoring->no_end_gap_penalty)
         {
           gap_a_score[new_index]
@@ -295,7 +303,10 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
                             (long)gap_a_score[old_index] + gap_extend_penalty,
                             (long)gap_b_score[old_index] + gap_open_penalty);
         }
+      }
 
+      if(!scoring->no_gaps_in_b)
+      {
         // Update gap_b_score[i][j] from position [i-1][j]
         old_index = ARR_2D_INDEX(score_width, i-1, j);
         
@@ -317,8 +328,9 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
     }
   }
 
-  if(scoring->no_gaps)
+  if(scoring->no_gaps_in_a)
   {
+    // Allow gaps only at the start/end of A
     unsigned long old_index = ARR_2D_INDEX(score_width, score_width-1, 0);
 
     for(j = 1; j < score_height; j++)
@@ -332,8 +344,12 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
     
       old_index = new_index;
     }
+  }
 
-    old_index = ARR_2D_INDEX(score_width, 0, score_height-1);
+  if(scoring->no_gaps_in_b)
+  {
+    // Allow gaps only at the start/end of B
+    unsigned long old_index = ARR_2D_INDEX(score_width, 0, score_height-1);
 
     for(i = 1; i < score_width; i++)
     {

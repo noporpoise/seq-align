@@ -173,29 +173,12 @@ sub do_alignment
   my ($self, $seq1, $seq2) = @_;
 
   my $line;
+  my $out = $self->{_out};
 
   if(!$self->{_waiting})
   {
     # Skip hits from previous alignment
-    while(defined($line = $self->read_line()) && $line =~ /^hit/i)
-    {
-      for(my $i = 0; $i < 3; $i++)
-      {
-        $line = $self->read_line();
-
-        if($line !~ /^  /)
-        {
-          die("Unexpected output '$line'");
-        }
-      }
-
-      $line = $self->read_line();
-
-      if($line !~ /^$/)
-      {
-        die("Unexpected output '$line'");
-      }
-    }
+    print $out "a\n";
 
     if($line ne "==")
     {
@@ -214,8 +197,6 @@ sub do_alignment
   {
     croak("New lines not allowed in sequences");
   }
-
-  my $out = $self->{_out};
 
   $self->{_align_number}++;
   $self->{_seq1} = $seq1;
@@ -250,6 +231,10 @@ sub get_next_hit
     return undef;
   }
 
+  # Print an 'h' to request next hit
+  my $out = $self->{'_out'};
+  print $out "h\n";
+
   my %result = ('seq1' => $self->{_seq1},
                 'seq2' => $self->{_seq2});
 
@@ -259,7 +244,10 @@ sub get_next_hit
   {
     die("No lines read in");
   }
-  elsif($line =~ /^==/i)
+
+  $line = substr($line, length("next [h]it or [a]lignment: "));
+
+  if($line =~ /^==/i)
   {
     # End of hits
     $self->{_waiting} = 1;

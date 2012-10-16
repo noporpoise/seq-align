@@ -38,7 +38,8 @@ SCORING_SYSTEM* scoring_create(int match, int mismatch,
                                int gap_open, int gap_extend,
                                char no_start_gap_penalty,
                                char no_end_gap_penalty,
-                               char no_gaps, char no_mismatches,
+                               char no_gaps_in_a, char no_gaps_in_b,
+                               char no_mismatches,
                                char case_sensitive)
 {
   SCORING_SYSTEM* scoring = (SCORING_SYSTEM*) malloc(sizeof(SCORING_SYSTEM));
@@ -51,7 +52,8 @@ SCORING_SYSTEM* scoring_create(int match, int mismatch,
   scoring->no_start_gap_penalty = no_start_gap_penalty;
   scoring->no_end_gap_penalty = no_end_gap_penalty;
 
-  scoring->no_gaps = no_gaps;
+  scoring->no_gaps_in_a = no_gaps_in_a;
+  scoring->no_gaps_in_b = no_gaps_in_b;
   scoring->no_mismatches = no_mismatches;
 
   scoring->use_match_mismatch = 1;
@@ -193,8 +195,8 @@ void scoring_print(const SCORING_SYSTEM* scoring)
   printf("  gap_open: %i; gap_extend: %i;\n",
          scoring->gap_open, scoring->gap_extend);
 
-  printf("  no_gaps: %i; no_mismatches: %i;\n",
-         scoring->no_gaps, scoring->no_mismatches);
+  printf("  no_gaps_in_a: %i; no_gaps_in_b: %i; no_mismatches: %i;\n",
+         scoring->no_gaps_in_a, scoring->no_gaps_in_b, scoring->no_mismatches);
 
   printf("  no_start_gap_penalty: %i; no_end_gap_penalty: %i;\n",
          scoring->no_start_gap_penalty, scoring->no_end_gap_penalty);
@@ -296,7 +298,7 @@ SCORING_SYSTEM* scoring_system_PAM30()
   // Gap open -9, gap extend -1
   // no_start_gap_penalty, no_end_gap_penalty = 0
   // case_sensitive = 0
-  SCORING_SYSTEM* scoring = scoring_create(1, -17, -9, -1, 0, 0, 0, 0, 0);
+  SCORING_SYSTEM* scoring = scoring_create(1, -17, -9, -1, 0, 0, 0, 0, 0, 0);
 
   // use_match_mismatch=1
   scoring_add_mutations(scoring, 24, bases, pam30, 1);
@@ -340,7 +342,7 @@ SCORING_SYSTEM* scoring_system_PAM70()
   // Gap open -10, gap extend -1
   // no_start_gap_penalty, no_end_gap_penalty = 0
   // case_sensitive = 0
-  SCORING_SYSTEM* scoring = scoring_create(1, -11, -10, -1, 0, 0, 0, 0, 0);
+  SCORING_SYSTEM* scoring = scoring_create(1, -11, -10, -1, 0, 0, 0, 0, 0, 0);
 
   // use_match_mismatch=1
   scoring_add_mutations(scoring, 24, bases, pam70, 1);
@@ -384,7 +386,7 @@ SCORING_SYSTEM* scoring_system_BLOSUM80()
   // Gap open -10, gap extend -1
   // no_start_gap_penalty, no_end_gap_penalty = 0
   // case_sensitive = 0
-  SCORING_SYSTEM* scoring = scoring_create(1, -8, -10, -1, 0, 0, 0, 0, 0);
+  SCORING_SYSTEM* scoring = scoring_create(1, -8, -10, -1, 0, 0, 0, 0, 0, 0);
   
   // use_match_mismatch=1
   scoring_add_mutations(scoring, 24, bases, blosum80, 1);
@@ -428,7 +430,7 @@ SCORING_SYSTEM* scoring_system_BLOSUM62()
   // Gap open -10, gap extend -1
   // no_start_gap_penalty, no_end_gap_penalty = 0
   // case_sensitive = 0
-  SCORING_SYSTEM* scoring = scoring_create(1, -4, -10, -1, 0, 0, 0, 0, 0);
+  SCORING_SYSTEM* scoring = scoring_create(1, -4, -10, -1, 0, 0, 0, 0, 0, 0);
   
   // use_match_mismatch=1
   scoring_add_mutations(scoring, 24, bases, blosum62, 1);
@@ -458,7 +460,7 @@ SCORING_SYSTEM* scoring_system_DNA_hybridization()
   // Gap open -10, gap extend -10
   // no_start_gap_penalty, no_end_gap_penalty = 0
   // case_sensitive = 0
-  SCORING_SYSTEM* scoring = scoring_create(0, 0, -10, -10, 0, 0, 0, 0, 0);
+  SCORING_SYSTEM* scoring = scoring_create(0, 0, -10, -10, 0, 0, 0, 0, 0, 0);
   
   // use_match_mismatch=0
   scoring_add_mutations(scoring, 8, bases, sub_matrix, 0);
@@ -478,7 +480,7 @@ SCORING_SYSTEM* scoring_system_default()
   // case_sensitive = 0
   SCORING_SYSTEM* scoring = scoring_create(match_default, mismatch_default,
                                            gap_open_default, gap_extend_default,
-                                           0, 0, 0, 0, 0);
+                                           0, 0, 0, 0, 0, 0);
 
   return scoring;
 }

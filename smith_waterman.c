@@ -222,9 +222,13 @@ SW_COMPUTATION* smith_waterman_align(const char* seq_a, const char* seq_b,
     gap_b_score[index] = 0;
   }
 
-  if(scoring->no_gaps)
+  if(scoring->no_gaps_in_a)
   {
     memset(gap_a_score, 0, matrix_num_of_bytes);
+  }
+
+  if(scoring->no_gaps_in_b)
+  {
     memset(gap_b_score, 0, matrix_num_of_bytes);
   }
 
@@ -268,7 +272,7 @@ SW_COMPUTATION* smith_waterman_align(const char* seq_a, const char* seq_b,
                           (long)0);
       }
 
-      if(!scoring->no_gaps)
+      if(!scoring->no_gaps_in_a)
       {
         // 2) Update gap_a_score[i][j] from position [i][j-1]
         old_index = ARR_2D_INDEX(score_width, i, j-1);
@@ -278,7 +282,10 @@ SW_COMPUTATION* smith_waterman_align(const char* seq_a, const char* seq_b,
                           (long)gap_a_score[old_index] + scoring->gap_extend,
                           (long)gap_b_score[old_index] + gap_open_penalty,
                           (long)0);
+      }
 
+      if(!scoring->no_gaps_in_b)
+      {
         // 3) Update gap_b_score[i][j] from position [i-1][j]
         old_index = ARR_2D_INDEX(score_width, i-1, j);
 

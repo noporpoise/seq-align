@@ -261,25 +261,21 @@ void alignment_reverse_move(enum Matrix *curr_matrix, score_t* curr_score,
 
   *arr_index = ARR_2D_INDEX(score_width, *score_x, *score_y);
 
-  if(!scoring->no_gaps ||
-     (score_width < score_height && (*score_x == 0 || *score_x == score_width-1)) ||
-     (score_width > score_height && (*score_y == 0 || *score_y == score_height-1)))
+  if((!scoring->no_gaps_in_a || *score_x == 0 || *score_x == score_width-1) &&
+     (long)gap_a_score[*arr_index] + prev_gap_a_penalty == *curr_score)
   {
-    if((long)gap_a_score[*arr_index] + prev_gap_a_penalty == *curr_score)
-    {
-      *curr_matrix = GAP_A;
-      *curr_score = gap_a_score[*arr_index];
-      return;
-    }
-    else if((long)gap_b_score[*arr_index] + prev_gap_b_penalty == *curr_score)
-    {
-      *curr_matrix = GAP_B;
-      *curr_score = gap_b_score[*arr_index];
-      return;
-    }
+    *curr_matrix = GAP_A;
+    *curr_score = gap_a_score[*arr_index];
+    return;
   }
-
-  if((long)match_score[*arr_index] + prev_match_penalty == *curr_score)
+  else if((!scoring->no_gaps_in_b || *score_y == 0 || *score_y == score_height-1) &&
+          (long)gap_b_score[*arr_index] + prev_gap_b_penalty == *curr_score)
+  {
+    *curr_matrix = GAP_B;
+    *curr_score = gap_b_score[*arr_index];
+  }
+  else if(!scoring->no_mismatches &&
+          (long)match_score[*arr_index] + prev_match_penalty == *curr_score)
   {
     *curr_matrix = MATCH;
     *curr_score = match_score[*arr_index];

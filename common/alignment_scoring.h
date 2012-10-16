@@ -55,7 +55,7 @@ struct SCORING_SYSTEM
   char no_end_gap_penalty;
 
   // Turn at most one of these on at a time to prevent gaps/mismatches
-  char no_gaps;
+  char no_gaps_in_a, no_gaps_in_b;
   char no_mismatches;
 
   // If swap_table != NULL, but char->char pair swap is not in the hashtable,
@@ -78,7 +78,8 @@ SCORING_SYSTEM* scoring_create(int match, int mismatch,
                                int gap_open, int gap_extend,
                                char no_start_gap_penalty,
                                char no_end_gap_penalty,
-                               char no_gaps, char no_mismatches,
+                               char no_gaps_in_a, char no_gaps_in_b,
+                               char no_mismatches,
                                char case_sensitive);
 
 void scoring_add_wildcard(SCORING_SYSTEM* scoring, char c, int s);

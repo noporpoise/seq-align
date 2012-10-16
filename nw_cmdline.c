@@ -103,8 +103,10 @@ void print_usage(char* err_fmt, ...)
 "    --gapopen <score>    [default: %i]\n"
 "    --gapextend <score>  [default: %i]\n"
 "\n"
-"    --nogaps             No gaps allowed in the alignment\n"
-"    --nomismatches       No mismatches allowed - not to be used with --nogaps\n"
+"    --nogapsin1          No gaps allowed in the first sequence\n"
+"    --nogapsin2          No gaps allowed in the second sequence\n"
+"    --nogaps             No gaps allowed in either sequence\n"
+"    --nomismatches       No mismatches allowed: cannot be used with --nogaps..\n"
 "\n"
 "    --scoring <PAM30|PAM70|BLOSUM80|BLOSUM62>\n"
 "    --substitution_matrix <file>  see details for formatting\n"
@@ -388,7 +390,16 @@ int main(int argc, char* argv[])
       }
       else if(strcasecmp(argv[argi], "--nogaps") == 0)
       {
-        scoring->no_gaps = 1;
+        scoring->no_gaps_in_a = 1;
+        scoring->no_gaps_in_b = 1;
+      }
+      else if(strcasecmp(argv[argi], "--nogapsin1") == 0)
+      {
+        scoring->no_gaps_in_a = 1;
+      }
+      else if(strcasecmp(argv[argi], "--nogapsin2") == 0)
+      {
+        scoring->no_gaps_in_b = 1;
       }
       else if(strcasecmp(argv[argi], "--nomismatches") == 0)
       {
@@ -569,15 +580,9 @@ int main(int argc, char* argv[])
     scoring->use_match_mismatch = 0;
   }
 
-  if(scoring->no_gaps && scoring->no_mismatches)
+  if((scoring->no_gaps_in_a || scoring->no_gaps_in_b) && scoring->no_mismatches)
   {
-    print_usage("--nogaps --nomismatches cannot be used at together");
-  }
-
-  if(scoring->no_gaps)
-  {
-    //scoring->no_start_gap_penalty = 1;
-    //scoring->no_end_gap_penalty = 1;
+    print_usage("--nogaps.. --nomismatches cannot be used at together");
   }
 
   // Check for extra unused arguments

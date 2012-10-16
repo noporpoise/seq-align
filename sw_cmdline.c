@@ -44,6 +44,7 @@
 // For this run
 char* cmd;
 char print_colour = 0, print_seq = 0, print_fasta = 0, print_pretty = 0;
+char interactive = 0;
 
 score_t min_score = 0;
 char min_score_set = 0;
@@ -213,6 +214,39 @@ void print_alignment_part(const char* seq1, const char* seq2,
   printf("  [pos: %li; len: %lu]\n", pos, len);
 }
 
+char get_next_hit()
+{
+  if(!interactive)
+    return 1;
+
+  int r;
+
+  char response = 0;
+  char next_hit = 0;
+
+  while(!response)
+  {
+    printf("next [h]it or [a]lignment: ");
+    fflush(stdout);
+
+    while((r = getc(stdin)) != -1 && r != '\n' && r != '\r')
+    {
+      if(r == 'h' || r == 'H')
+      {
+        next_hit = 1;
+        response = 1;
+      }
+      else if(r == 'a' || r == 'A')
+      {
+        next_hit = 0;
+        response = 1;
+      }
+    }
+  }
+
+  return next_hit;
+}
+
 // Align two sequences against each other to find local alignments between them
 void align(const char *seq_a, const char *seq_b,
            const char *seq_a_name, const char *seq_b_name)
@@ -268,7 +302,8 @@ void align(const char *seq_a, const char *seq_b,
   if(!min_score_set)
   {
     // If min_score hasn't been set, set a limit based on the lengths of seqs
-    min_score = scoring->match * MAX(0.2 * MIN(len_a, len_b), 2);
+    // or zero if we're running interactively
+    min_score = interactive ? 0 : scoring->match * MAX(0.2 * MIN(len_a, len_b), 2);
 
     #ifdef DEBUG
     printf("min_score: %i\n", min_score);
@@ -287,7 +322,9 @@ void align(const char *seq_a, const char *seq_b,
   size_t left_spaces_a = 0, left_spaces_b = 0;
   size_t right_spaces_a = 0, right_spaces_b = 0;
 
-  while(smith_waterman_get_hit(smithwaterman, alignment) &&
+
+  while(get_next_hit() &&
+        smith_waterman_get_hit(smithwaterman, alignment) &&
         alignment->score >= min_score &&
         (!max_hits_per_alignment_set || hit_index < max_hits_per_alignment))
   {
@@ -500,7 +537,16 @@ int main(int argc, char* argv[])
       // strcasecmp does case insensitive comparison
       if(strcasecmp(argv[argi], "--nogaps") == 0)
       {
-        scoring->no_gaps = 1;
+        scoring->no_gaps_in_a = 1;
+        scoring->no_gaps_in_b = 1;
+      }
+      else if(strcasecmp(argv[argi], "--nogapsin1") == 0)
+      {
+        scoring->no_gaps_in_a = 1;
+      }
+      else if(strcasecmp(argv[argi], "--nogapsin2") == 0)
+      {
+        scoring->no_gaps_in_b = 1;
       }
       else if(strcasecmp(argv[argi], "--nomismatches") == 0)
       {
@@ -531,6 +577,7 @@ int main(int argc, char* argv[])
       {
         // Similar to --file argument below
         cmdline_add_files("-", NULL);
+        interactive = 1;
       }
       else if(argi == argc-1)
       {
@@ -703,11 +750,6 @@ int main(int argc, char* argv[])
     // if substitution table set and not match/mismatch
     scoring->use_match_mismatch = 0;
   }
-
-  /*if(scoring->no_gaps && scoring->no_mismatches)
-  {
-    print_usage("--nogaps --nomismatches cannot be used at together");
-  }*/
 
   // Check for extra unused arguments
   // and set seq1 and seq2 if they have been passed
