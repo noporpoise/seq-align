@@ -183,8 +183,10 @@ sub do_alignment
     # Skip hits from previous alignment
     print $out "a\n";
 
-    if($line ne "==")
+    if(!defined($line = $self->read_line()) || $line ne "==")
     {
+      print STDERR "ErrSeq: '$self->{'seq1'}'\n";
+      print STDERR "ErrSeq: '$self->{'seq2'}'\n";
       die("Unexpected output '$line'");
     }
 
@@ -198,10 +200,8 @@ sub do_alignment
   }
   elsif($seq1 =~ /[\n\r]/ || $seq2 =~ /[\n\r]/)
   {
-    print STDERR "ErrSeq1a: '$self->{'seq1'}'\n";
-    print STDERR "ErrSeq2a: '$self->{'seq2'}'\n";
-    print STDERR "ErrSeq1b: '$seq1'\n";
-    print STDERR "ErrSeq2b: '$seq2'\n";
+    print STDERR "ErrSeq1: '$self->{'seq1'}'\n";
+    print STDERR "ErrSeq2: '$self->{'seq2'}'\n";
     croak("New lines not allowed in sequences");
   }
 
