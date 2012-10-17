@@ -30,6 +30,7 @@
 #include "string_buffer.h"
 
 /*
+// Proposal:
 typedef struct Alignment Alignment // previously SW_LOCAL_ALIGNMENT
 */
 

@@ -101,24 +101,23 @@ void scoring_add_wildcard(SCORING_SYSTEM* scoring, char c, int s)
   scoring->num_of_wildcards++;
 }
 
-char scoring_check_wildcards(const SCORING_SYSTEM* scoring, char a, char b)
+// a, b must be lowercase if !scoring->case_sensitive
+char _scoring_check_wildcards(const SCORING_SYSTEM* scoring, char a, char b,
+                              int* score)
 {
-  if(!scoring->case_sensitive)
-  {
-    a = tolower(a);
-    b = tolower(b);
-  }
-
   // Check if either characters are wildcards
   unsigned int i;
+
   for(i = 0; i < scoring->num_of_wildcards; i++)
   {
     if(scoring->wildcards[i] == a || scoring->wildcards[i] == b)
     {
+      *score = scoring->wildscores[i];
       return 1;
     }
   }
 
+  *score = 0;
   return 0;
 }
 
@@ -130,7 +129,9 @@ char scoring_is_match(const SCORING_SYSTEM* scoring, char a, char b)
     b = tolower(b);
   }
 
-  return (a == b || scoring_check_wildcards(scoring, a, b));
+  int score;
+
+  return (a == b || _scoring_check_wildcards(scoring, a, b, &score));
 }
 
 void scoring_add_mutations(SCORING_SYSTEM* scoring,
@@ -204,8 +205,11 @@ void scoring_print(const SCORING_SYSTEM* scoring)
   printf("  swap_table: %s\n", (scoring->swap_table == NULL ? "no" : "yes"));
 }
 
-int scoring_lookup(const SCORING_SYSTEM* scoring, char a, char b)
-//, char* is_match)
+
+// Considered match if lc(a)==lc(b) or if a or b are wildcards
+// Always sets score and is_match
+void scoring_lookup(const SCORING_SYSTEM* scoring, char a, char b,
+                    int* score, char* is_match)
 {
   if(!scoring->case_sensitive)
   {
@@ -217,7 +221,14 @@ int scoring_lookup(const SCORING_SYSTEM* scoring, char a, char b)
   //printf(" scoring_lookup(%c,%c)\n", a, b);
   //#endif
 
-  //*is_match = (a == b);
+  *is_match = (a == b);
+
+  if(scoring->no_mismatches && !*is_match)
+  {
+    // Check wildcards
+    *is_match = _scoring_check_wildcards(scoring, a, b, score);
+    return;
+  }
 
   // Look up in table
   if(scoring->swap_table != NULL)
@@ -229,27 +240,25 @@ int scoring_lookup(const SCORING_SYSTEM* scoring, char a, char b)
 
     if(result != NULL)
     {
-      return result->swap_score;
+      *score = result->swap_score;
+      return;
     }
   }
 
   // Check wildcards
   // Wildcards are used in the order they are given
   // e.g. if we specify '--wildcard X 2 --wildcard Y 3' X:Y align with score 2
-  unsigned int i;
-  for(i = 0; i < scoring->num_of_wildcards; i++)
+  if(_scoring_check_wildcards(scoring, a, b, score))
   {
-    if(scoring->wildcards[i] == a || scoring->wildcards[i] == b)
-    {
-      //*is_match = 1;
-      return scoring->wildscores[i];
-    }
+    *is_match = 1;
+    return;
   }
 
   // Use match/mismatch
   if(scoring->use_match_mismatch)
   {
-    return a == b ? scoring->match : scoring->mismatch;
+    *score = (*is_match ? scoring->match : scoring->mismatch);
+    return;
   }
 
   // Error

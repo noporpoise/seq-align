@@ -259,19 +259,20 @@ int needleman_wunsch(const char* seq_a, const char* seq_b,
       unsigned long new_index = (unsigned long)j*score_width + i;
       unsigned long old_index;
       
-      if(scoring->no_mismatches &&
-         !scoring_is_match(scoring, seq_a[seq_i], seq_b[seq_j]))
+      // substitution penalty
+      int substitution_penalty;
+      char is_match;
+
+      scoring_lookup(scoring, seq_a[seq_i], seq_b[seq_j],
+                     &substitution_penalty, &is_match);
+
+      if(scoring->no_mismatches && !is_match)
       {
         match_score[new_index] = INT_MIN;
       }
       else
       {
         old_index = ARR_2D_INDEX(score_width, i-1, j-1);
-
-        // substitution penalty
-        int substitution_penalty = scoring_lookup(scoring,
-                                                  seq_a[seq_i],
-                                                  seq_b[seq_j]);
 
         // substitution
         match_score[new_index]

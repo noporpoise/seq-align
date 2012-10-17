@@ -250,19 +250,20 @@ SW_COMPUTATION* smith_waterman_align(const char* seq_a, const char* seq_b,
 
       // 1) Update match_score[i][j] from position [i-1][j-1]
 
-      if(scoring->no_mismatches &&
-         !scoring_is_match(scoring, seq_a[seq_i], seq_b[seq_j]))
+      // substitution penalty
+      int substitution_penalty;
+      char is_match;
+
+      scoring_lookup(scoring, seq_a[seq_i], seq_b[seq_j],
+                     &substitution_penalty, &is_match);
+
+      if(scoring->no_mismatches && !is_match)
       {
         match_score[new_index] = 0;
       }
       else
       {
         old_index = ARR_2D_INDEX(score_width, i-1, j-1);
-
-        //substitution penalty
-        int substitution_penalty = scoring_lookup(scoring,
-                                                  seq_a[seq_i],
-                                                  seq_b[seq_j]);
 
         // Long arithmetic needed to prevent overflow
         match_score[new_index]

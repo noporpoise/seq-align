@@ -219,7 +219,7 @@ char get_next_hit()
   if(!interactive)
     return 1;
 
-  int r;
+  int r = 0;
 
   char response = 0;
   char next_hit = 0;
@@ -241,6 +241,13 @@ char get_next_hit()
         next_hit = 0;
         response = 1;
       }
+    }
+
+    if(r == -1)
+    {
+      // We're done here
+      putc('\n', stdout);
+      exit(EXIT_SUCCESS);
     }
   }
 

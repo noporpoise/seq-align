@@ -39,6 +39,7 @@ char* align_col_context = "\033[95m";
 char* align_col_stop = "\033[0m";
 
 /*
+// Proposal:
 struct Alignment
 {
   // Store local alignment result here
@@ -217,7 +218,10 @@ void alignment_reverse_move(enum Matrix *curr_matrix, score_t* curr_score,
   size_t seq_x = (*score_x)-1;
   size_t seq_y = (*score_y)-1;
 
-  int match_penalty = scoring_lookup(scoring, seq_a[seq_x], seq_b[seq_y]);
+  char is_match;
+  int match_penalty;
+
+  scoring_lookup(scoring, seq_a[seq_x], seq_b[seq_y], &match_penalty, &is_match);
 
   int gap_open_penalty = scoring->gap_extend + scoring->gap_open;
   int gap_extend_penalty = scoring->gap_extend;
@@ -274,7 +278,7 @@ void alignment_reverse_move(enum Matrix *curr_matrix, score_t* curr_score,
     *curr_matrix = GAP_B;
     *curr_score = gap_b_score[*arr_index];
   }
-  else if(!scoring->no_mismatches &&
+  else if((!scoring->no_mismatches || is_match) &&
           (long)match_score[*arr_index] + prev_match_penalty == *curr_score)
   {
     *curr_matrix = MATCH;
