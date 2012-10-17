@@ -3,7 +3,8 @@ package SmithWaterman;
 use strict;
 use warnings;
 
-use constant DEFAULT_CMD => 'smith_waterman';
+use constant {DEFAULT_CMD => 'smith_waterman',
+              PROMPT_LINE => 'next [h]it or [a]lignment: '};
 
 use Carp;
 use FileHandle;
@@ -178,12 +179,15 @@ sub do_alignment
   my $line;
   my $out = $self->{_out};
 
+  # _waiting is true if we have see the '==' line, indicating that the C
+  # program is waiting for our sequence input
   if(!$self->{_waiting})
   {
     # Skip hits from previous alignment
     print $out "a\n";
 
-    if(!defined($line = $self->read_line()) || $line ne "==")
+    if(!defined($line = $self->read_line()) ||
+       $line ne PROMPT_LINE."==")
     {
       print STDERR "ErrSeq: '$self->{'seq1'}'\n";
       print STDERR "ErrSeq: '$self->{'seq2'}'\n";
@@ -256,7 +260,7 @@ sub get_next_hit
     die("No lines read in");
   }
 
-  $line = substr($line, length("next [h]it or [a]lignment: "));
+  $line = substr($line, length(PROMPT_LINE));
 
   if($line =~ /^==/i)
   {

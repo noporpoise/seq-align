@@ -35,7 +35,8 @@ for my $align (@aligns)
   print "Doing '$align->[0]' vs '$align->[1]'\n";
   $sw->do_alignment(@$align);
 
-  while(defined(my $hit = $sw->get_next_hit()))
+  #while
+  if(defined(my $hit = $sw->get_next_hit()))
   {
     print "hit:\n";
     print "  ".$hit->{'align1'}."\n";
