@@ -10,11 +10,6 @@ use Carp;
 use FileHandle;
 
 use IPC::Open2;
-use IPC::Open3;
-use IO::Select;
-
-#use base 'Exporter';
-#our @EXPORT = qw(method_name);
 
 sub new
 {
@@ -78,9 +73,6 @@ sub new
   $cmdline .= " 2>&1";
 
   my ($in, $out, $err);
-  #use Symbol 'gensym'; $err = gensym;
-  #my $pid = open3($out, $in, $err, $cmdline)
-  #  or die("Cannot run cmd: '$cmdline'");
 
   #print "running '$cmdline'\n";
 
@@ -126,39 +118,7 @@ sub read_line
   my $next_line = <$in>;
 
   chomp($next_line);
-  #print "line: '$next_line'\n";
-
-  #my $next_line;
-  #my $in = $self->{_in};
-  #my $err = $self->{_err};
-
-  #my $select = new IO::Select();
-
-  #$select->add($in);
-  #$select->add($err);
-
-  #my $timeout = 1;
-
-  #foreach my $h ($select->can_read($timeout))
-  #{
-  #  if($h eq $err)
-  #  {
-      #sysread($err,$buf,4096);
-     #if($buf){print "ERROR-> $buf\n"}
-  #    print "Reading STDERR\n";
-  #    $next_line = <$err>;
-  #    croak("Error: $next_line\n");
-  #  }
-  #  else
-  #  {
-     #sysread($in,$buf,4096);
-     #if($buf){print "in: $buf\n"}
-  #    print "Reading STDOUT\n";
-  #    $next_line = <$in>;
-  #    chomp($next_line);
-  #    print "STDOUT: '$next_line'\n";
-  #  }
-  #}
+  #print "IN: '$next_line'\n";
 
   if(defined($next_line) && $next_line =~ /^SmithWaterman Error/i)
   {
@@ -166,8 +126,6 @@ sub read_line
     print STDERR "ErrSeq2: '$self->{'seq2'}'\n";
     croak($next_line);
   }
-
-  #print STDERR "SW:$next_line\n";
 
   return $next_line;
 }
