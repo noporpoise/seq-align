@@ -5,10 +5,9 @@ use warnings;
 
 use constant DEFAULT_CMD => 'needleman_wunsch';
 
-use Carp;
-use FileHandle;
-
-use IPC::Open2;
+use Carp; # for reporting warnings and errors
+use FileHandle; # provides autoflush
+use IPC::Open2; # for opening handle to a process
 
 sub new
 {
@@ -89,7 +88,7 @@ sub new
     _cmd => $cmdline
   };
   
-  bless $self, $class;
+  bless($self, $class);
 
   return $self;
 }

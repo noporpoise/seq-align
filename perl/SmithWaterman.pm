@@ -6,10 +6,9 @@ use warnings;
 use constant {DEFAULT_CMD => 'smith_waterman',
               PROMPT_LINE => 'next [h]it or [a]lignment: '};
 
-use Carp;
-use FileHandle;
-
-use IPC::Open2;
+use Carp; # for reporting warnings and errors
+use FileHandle; # provides autoflush
+use IPC::Open2; # for opening handle to a process
 
 sub new
 {
@@ -93,7 +92,7 @@ sub new
     _cmd => $cmdline
   };
   
-  bless $self, $class;
+  bless($self, $class);
 
   return $self;
 }
