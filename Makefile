@@ -22,7 +22,7 @@ override HTS_PATH:=$(HTS_PATH)/htslib/
 
 # Add data type for alignment scoring
 CFLAGS := $(CFLAGS) -Wall -Wextra \
-          -I. -Icommon/ -I$(SEQ_FILE_PATH) -I$(UTILITY_LIB_PATH) \
+          -I. -Icommon/ -Ilibs/ -I$(SEQ_FILE_PATH) -I$(UTILITY_LIB_PATH) \
           -I$(BIT_ARRAY_PATH) -I$(STRING_BUF_PATH) -I$(HTS_PATH)
 
 LIB_INCS = -L$(SEQ_FILE_PATH) -L$(UTILITY_LIB_PATH) \
