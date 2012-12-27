@@ -33,11 +33,23 @@ Features:
 Build
 =====
 
+Fetch and build dependencies (requires `git`, `make` and `zlib`)
+
+    $ cd libs
+    $ make
+    $ cd ..
+
+Build seq-align:
+
     $ make
 
-or
+For the interested, the depedencies used are:
 
-    $ make DEBUG=1
+* htslib [https://github.com/samtools/htslib]
+* bit_array [https://github.com/noporpoise/BitArray]
+* string_buffer [https://github.com/noporpoise/string_buffer]
+* seq_file [https://github.com/noporpoise/seq_file]
+* utility_lib [https://github.com/noporpoise/UtilityLibrary]
 
 Smith-Waterman
 ==============
@@ -81,7 +93,7 @@ Smith-Waterman
         --colour             Print with colour
 
 Needleman-Wunsch
-====================
+================
 
     usage: ./needleman_wunsch [OPTIONS] [seq1 seq2]
       Needleman-Wunsch optimal global alignment (maximises score). Takes a pair 
