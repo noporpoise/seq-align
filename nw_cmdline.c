@@ -103,11 +103,6 @@ void print_usage(char* err_fmt, ...)
 "    --gapopen <score>    [default: %i]\n"
 "    --gapextend <score>  [default: %i]\n"
 "\n"
-"    --nogapsin1          No gaps allowed in the first sequence\n"
-"    --nogapsin2          No gaps allowed in the second sequence\n"
-"    --nogaps             No gaps allowed in either sequence\n"
-"    --nomismatches       No mismatches allowed: cannot be used with --nogaps..\n"
-"\n"
 "    --scoring <PAM30|PAM70|BLOSUM80|BLOSUM62>\n"
 "    --substitution_matrix <file>  see details for formatting\n"
 "    --substitution_pairs <file>   see details for formatting\n"
@@ -126,6 +121,12 @@ void print_usage(char* err_fmt, ...)
 "    --pretty             Print with a descriptor line\n"
 "    --colour             Print with colour\n"
 "    --zam                A funky type of output\n"
+"\n"
+"  EXPERIMENTAL (and buggy):\n"
+"    --nogapsin1          No gaps allowed in the first sequence\n"
+"    --nogapsin2          No gaps allowed in the second sequence\n"
+"    --nogaps             No gaps allowed in either sequence\n"
+"    --nomismatches       No mismatches allowed: cannot be used with --nogaps..\n"
 "\n"
 " DETAILS:\n"
 "  * For help choosing scoring, see the README file. \n"
@@ -263,11 +264,10 @@ void align(const char *seq_a, const char *seq_b,
   fflush(stdout);
 }
 
-void align_pair_from_file(StrBuf *seq1, StrBuf *seq2,
-                          const char *seq1_name, const char *seq2_name)
+void align_pair_from_file(read_t *read1, read_t *read2)
 {
   // Check memory
-  t_buf_pos new_max_alignment = seq1->len + seq2->len;
+  t_buf_pos new_max_alignment = read1->seq.end + read2->seq.end;
 
   if(new_max_alignment > alignment_max_length)
   {
@@ -281,7 +281,9 @@ void align_pair_from_file(StrBuf *seq1, StrBuf *seq2,
     }
   }
 
-  align(seq1->buff, seq2->buff, seq1_name, seq2_name);
+  align(read1->seq.b, read2->seq.b,
+        (read1->name.end == 0 ? NULL : read1->name.b),
+        (read2->name.end == 0 ? NULL : read2->name.b));
 }
 
 int main(int argc, char* argv[])

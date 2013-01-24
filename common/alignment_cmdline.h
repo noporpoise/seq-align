@@ -27,6 +27,7 @@
 #define ALIGNMENT_CMDLINE_HEADER_SEEN
 
 #include "string_buffer.h"
+#include "seq_file.h"
 
 void cmdline_init();
 void cmdline_finish();
@@ -37,6 +38,6 @@ char* cmdline_get_file1(int i);
 char* cmdline_get_file2(int i);
 
 void align_from_file(const char *path1, const char *path2,
-                     void (align)(StrBuf*, StrBuf*, const char*, const char*));
+                     void (align)(read_t *r1, read_t *r2));
 
 #endif

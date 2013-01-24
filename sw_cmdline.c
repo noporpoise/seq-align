@@ -120,10 +120,6 @@ void print_usage(char* err_fmt, ...)
 "    --gapopen <score>    [default: %i]\n"
 "    --gapextend <score>  [default: %i]\n"
 "\n"
-"    --nogaps             No gaps allowed in the alignment\n"
-"    --nomismatches       No mismatches allowed. \n"
-"      When used together, prints longest common substrings in order of length\n"
-"\n"
 "    --scoring <PAM30|PAM70|BLOSUM80|BLOSUM62>\n"
 "    --substitution_matrix <file>  see details for formatting\n"
 "    --substitution_pairs <file>   see details for formatting\n"
@@ -143,6 +139,11 @@ void print_usage(char* err_fmt, ...)
 "    --printseq           Print sequences before local alignments\n"
 "    --pretty             Print with a descriptor line\n"
 "    --colour             Print with colour\n"
+"\n"
+"  EXPERIMENTAL (and buggy):\n"
+"    --nogaps             No gaps allowed in the alignment\n"
+"    --nomismatches       No mismatches allowed. \n"
+"      When used together, prints longest common substrings in order of length\n"
 "\n"
 " DETAILS:\n"
 "  * For help choosing scoring, see the README file. \n"
@@ -258,6 +259,14 @@ char get_next_hit()
 void align(const char *seq_a, const char *seq_b,
            const char *seq_a_name, const char *seq_b_name)
 {
+  if((seq_a_name != NULL || seq_b_name != NULL) && interactive)
+  {
+    fprintf(stderr, "SmithWaterman Error: Interactive input takes seq only "
+                    "(no FASTA/FASTQ) '%s:%s'\n", seq_a_name, seq_b_name);
+    fflush(stderr);
+    exit(EXIT_FAILURE);
+  }
+
   // Check both arguments have length > 0
   if(seq_a[0] == '\0' || seq_b[0] == '\0')
   {
@@ -440,10 +449,11 @@ void align(const char *seq_a, const char *seq_b,
   alignment_index++;
 }
 
-void align_pair_from_file(StrBuf* seq_a, StrBuf *seq_b,
-                          const char *seq_a_name, const char *seq_b_name)
+void align_pair_from_file(read_t *read1, read_t *read2)
 {
-  align(seq_a->buff, seq_b->buff, seq_a_name, seq_b_name);
+  align(read1->seq.b, read2->seq.b,
+       (read1->name.end == 0 ? NULL : read1->name.b),
+       (read2->name.end == 0 ? NULL : read2->name.b));
 }
 
 int main(int argc, char* argv[])

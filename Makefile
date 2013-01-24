@@ -3,7 +3,7 @@ LIBS_PATH=libs
 UTILITY_LIB_PATH = $(LIBS_PATH)/utility_lib
 STRING_BUF_PATH = $(LIBS_PATH)/string_buffer
 BIT_ARRAY_PATH = $(LIBS_PATH)/bit_array
-SEQ_FILE_PATH = $(LIBS_PATH)/seq_file
+SEQ_FILE_PATH = $(LIBS_PATH)/seq_file/new_api
 HTS_PATH = $(LIBS_PATH)/htslib
 
 ifndef CC
@@ -25,10 +25,10 @@ CFLAGS := $(CFLAGS) -Wall -Wextra \
           -I. -Icommon/ -Ilibs/ -I$(SEQ_FILE_PATH) -I$(UTILITY_LIB_PATH) \
           -I$(BIT_ARRAY_PATH) -I$(STRING_BUF_PATH) -I$(HTS_PATH)
 
-LIB_INCS = -L$(SEQ_FILE_PATH) -L$(UTILITY_LIB_PATH) \
+LIB_INCS = -L$(UTILITY_LIB_PATH) \
            -L$(BIT_ARRAY_PATH) -L$(STRING_BUF_PATH) -L$(HTS_PATH) -L.
 
-LIB_LIST = -lseqfile -lstrbuf -lbitarr -lutil -lhts -lz
+LIB_LIST = -lstrbuf -lbitarr -lutil -lhts -lz
 
 NW_ARGS = -DSCORE_TYPE='int'
 SW_ARGS = -DSCORE_TYPE='unsigned int'

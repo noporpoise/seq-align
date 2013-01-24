@@ -31,8 +31,9 @@
 
 #include "alignment_cmdline.h"
 
-#include "string_buffer.h"
 #include "seq_file.h"
+
+SETUP_SEQ_FILE();
 
 // File loading
 int file_list_length = 0;
@@ -110,53 +111,37 @@ char* cmdline_get_file2(int i)
 // If seq2 is NULL, read pair of entries from first file
 // Otherwise read an entry from each
 void align_from_file(const char *path1, const char *path2,
-                     void (align)(StrBuf*, StrBuf*, const char*, const char*))
+                     void (align)(read_t *r1, read_t *r2))
 {
-  SeqFile *sf1 = seq_file_open(path1);
-  SeqFile *sf2;
+  seq_file_t *sf1, *sf2;
 
-  if(sf1 == NULL)
+  if((sf1 = seq_open(path1)) == NULL)
   {
     fprintf(stderr, "Alignment Error: couldn't open file %s\n", path1);
     fflush(stderr);
     return;
   }
 
-  if(path2 != NULL)
-  {
-    sf2 = seq_file_open(path2);
-
-    if(sf2 == NULL)
-    {
-      fprintf(stderr, "Alignment Error: couldn't open file %s\n", path1);
-      fflush(stderr);
-      return;
-    }
-  }
-  else
+  if(path2 == NULL)
   {
     sf2 = sf1;
   }
+  else if((sf2 = seq_open(path2)) == NULL)
+  {
+    fprintf(stderr, "Alignment Error: couldn't open file %s\n", path1);
+    fflush(stderr);
+    return;
+  }
 
-  StrBuf *entry1_title = strbuf_new();
-  StrBuf *entry2_title = strbuf_new();
-  StrBuf *entry1_seq = strbuf_new();
-  StrBuf *entry2_seq = strbuf_new();
-
-  char *title1 = NULL, *title2 = NULL;
+  read_t *read1 = seq_read_alloc();
+  read_t *read2 = seq_read_alloc();
 
   // Loop while we can read a sequence from the first file
-  while(seq_next_read(sf1))
+  unsigned long alignments;
+
+  for(alignments = 0; seq_read(sf1, read1) > 0; alignments++)
   {
-    seq_read_all_bases(sf1, entry1_seq);
-
-    if(seq_file_get_type(sf1) != SEQ_PLAIN)
-    {
-      strbuf_set(entry1_title, seq_get_read_name(sf1));
-      title1 = entry1_title->buff;
-    }
-
-    if(!seq_next_read(sf2))
+    if(seq_read(sf2, read2) <= 0)
     {
       fprintf(stderr, "Alignment Error: Odd number of sequences - "
                       "I read in pairs!\n");
@@ -164,33 +149,23 @@ void align_from_file(const char *path1, const char *path2,
       break;
     }
 
-    seq_read_all_bases(sf2, entry2_seq);
-
-    if(seq_file_get_type(sf2) != SEQ_PLAIN)
-    {
-      strbuf_set(entry2_title, seq_get_read_name(sf2));
-      title2 = entry2_title->buff;
-    }
-
-    (align)(entry1_seq, entry2_seq, title1, title2);
+    (align)(read1, read2);
   }
 
   // warn if no bases read
-  if(seq_total_bases_passed(sf1) == 0)
+  if(alignments == 0)
   {
     fprintf(stderr, "Alignment Warning: empty input\n");
     fflush(stderr);
   }
 
   // Close files
-  seq_file_close(sf1);
+  seq_close(sf1);
 
   if(path2 != NULL)
-    seq_file_close(sf2);
+    seq_close(sf2);
 
   // Free memory
-  strbuf_free(entry1_title);
-  strbuf_free(entry2_title);
-  strbuf_free(entry1_seq);
-  strbuf_free(entry2_seq);
+  seq_read_destroy(read1);
+  seq_read_destroy(read2);
 }
