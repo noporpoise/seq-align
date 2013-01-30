@@ -28,7 +28,7 @@ CFLAGS := $(CFLAGS) -Wall -Wextra \
 LIB_INCS = -L$(UTILITY_LIB_PATH) \
            -L$(BIT_ARRAY_PATH) -L$(STRING_BUF_PATH) -L$(HTS_PATH) -L.
 
-LIB_LIST = -lstrbuf -lbitarr -lutil -lhts -lz
+LIB_LIST = -lstrbuf -lbitarr -lutil -lhts -lpthread -lz
 
 NW_ARGS = -DSCORE_TYPE='int'
 SW_ARGS = -DSCORE_TYPE='unsigned int'
