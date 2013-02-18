@@ -48,7 +48,7 @@ SCORING_SYSTEM* scoring = NULL;
 
 // Alignment results stored here
 char *alignment_a = NULL, *alignment_b = NULL;
-t_buf_pos alignment_max_length;
+size_t alignment_max_length;
 
 void set_default_scoring()
 {
@@ -267,7 +267,7 @@ void align(const char *seq_a, const char *seq_b,
 void align_pair_from_file(read_t *read1, read_t *read2)
 {
   // Check memory
-  t_buf_pos new_max_alignment = read1->seq.end + read2->seq.end;
+  size_t new_max_alignment = read1->seq.end + read2->seq.end;
 
   if(new_max_alignment > alignment_max_length)
   {

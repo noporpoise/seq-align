@@ -65,7 +65,7 @@ void align_scoring_load_matrix(gzFile* file, const char* file_path,
                                SCORING_SYSTEM* scoring, char case_sensitive)
 {
   StrBuf* sbuf = strbuf_init(500);
-  t_buf_pos read_length;
+  size_t read_length;
   int line_num = 0;
 
   // Read first line (column headings)
@@ -172,7 +172,7 @@ void align_scoring_load_matrix(gzFile* file, const char* file_path,
   }
   else
   {
-    t_buf_pos i;
+    size_t i;
 
     for(i = 0; i < sbuf->len; i += 2)
     {
@@ -251,7 +251,7 @@ void align_scoring_load_pairwise(gzFile* file, const char* file_path,
   // Adds to hash table in scoring->swap_table (it needs to be already malloc'ed)
 
   StrBuf* sbuf = strbuf_init(200);
-  t_buf_pos read_length;
+  size_t read_length;
   int line_num = 0;
 
   char a, b;
@@ -276,7 +276,7 @@ void align_scoring_load_pairwise(gzFile* file, const char* file_path,
         // split by whitespace
         a = sbuf->buff[0];
 
-        t_buf_pos char2_pos;
+        size_t char2_pos;
 
         for(char2_pos = 1;
             sbuf->buff[char2_pos] != '\0' && isspace(sbuf->buff[char2_pos]);
