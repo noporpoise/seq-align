@@ -608,7 +608,7 @@ int main(int argc, char* argv[])
       }
       else if(strcasecmp(argv[argi], "--substitution_matrix") == 0)
       {
-        gzFile* sub_matrix_file = gzopen(argv[argi+1], "r");
+        gzFile sub_matrix_file = gzopen(argv[argi+1], "r");
         // gzbuffer(sub_matrix_file, 16384); // doesn't seem to work
 
         align_scoring_load_matrix(sub_matrix_file, argv[argi+1],
@@ -622,7 +622,7 @@ int main(int argc, char* argv[])
       }
       else if(strcasecmp(argv[argi], "--substitution_pairs") == 0)
       {
-        gzFile* sub_pairs_file = gzopen(argv[argi+1], "r");
+        gzFile sub_pairs_file = gzopen(argv[argi+1], "r");
         //gzbuffer(sub_pairs_file, 16384); // doesn't seem to work
         
         align_scoring_load_pairwise(sub_pairs_file, argv[argi+1],

@@ -61,7 +61,7 @@ void _loading_error(const char* err_msg, const char* file_path,
   exit(EXIT_FAILURE);
 }
 
-void align_scoring_load_matrix(gzFile* file, const char* file_path,
+void align_scoring_load_matrix(gzFile file, const char* file_path,
                                SCORING_SYSTEM* scoring, char case_sensitive)
 {
   StrBuf* sbuf = strbuf_init(500);
@@ -245,7 +245,7 @@ void align_scoring_load_matrix(gzFile* file, const char* file_path,
 }
 
 
-void align_scoring_load_pairwise(gzFile* file, const char* file_path,
+void align_scoring_load_pairwise(gzFile file, const char* file_path,
                                  SCORING_SYSTEM* scoring, char case_sensitive)
 {
   // Adds to hash table in scoring->swap_table (it needs to be already malloc'ed)
