@@ -8,21 +8,14 @@
 #ifndef SMITH_WATERMAN_HEADER_SEEN
 #define SMITH_WATERMAN_HEADER_SEEN
 
-#include "bit_array.h"
 #include "alignment.h"
 
-// Store alignment here
-typedef struct
-{
-  aligner_t aligner;
-
-  // For iterating through local alignments
-  BIT_ARRAY* match_scores_mask;
-  size_t *sorted_match_indices, hits_capacity, num_of_hits, next_hit;
-} sw_aligner_t;
+typedef struct sw_aligner_t sw_aligner_t;
 
 sw_aligner_t *smith_waterman_new();
 void smith_waterman_free(sw_aligner_t *sw_aligner);
+
+aligner_t* smith_waterman_get_aligner(sw_aligner_t *sw);
 
 /*
  Do not alter seq_a, seq_b or scoring whilst calling this method

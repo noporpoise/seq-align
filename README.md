@@ -49,7 +49,6 @@ For the interested, the depedencies used are:
 * bit_array [https://github.com/noporpoise/BitArray]
 * string_buffer [https://github.com/noporpoise/string_buffer]
 * seq_file [https://github.com/noporpoise/seq_file]
-* utility_lib [https://github.com/noporpoise/UtilityLibrary]
 
 Smith-Waterman
 ==============

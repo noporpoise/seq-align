@@ -17,6 +17,19 @@
 #include "smith_waterman.h"
 #include "sort_r.h"
 
+// For iterating through local alignments
+typedef struct
+{
+  BIT_ARRAY* match_scores_mask;
+  size_t *sorted_match_indices, hits_capacity, num_of_hits, next_hit;
+} sw_history_t;
+
+// Store alignment here
+struct sw_aligner_t
+{
+  aligner_t aligner;
+  sw_history_t history;
+};
 
 // Sort indices by their matrix values
 // Struct used to pass data to sort_match_indices
@@ -44,57 +57,72 @@ int sort_match_indices(const void *aa, const void *bb, void *arg)
   else return diff > 0 ? 1 : -1;
 }
 
+static void _init_history(sw_history_t *hist)
+{
+  hist->match_scores_mask = bit_array_create(256);
+  hist->hits_capacity = 256;
+  size_t mem = hist->hits_capacity * sizeof(*(hist->sorted_match_indices));
+  hist->sorted_match_indices = malloc(mem);
+}
+
+static void _ensure_history_capacity(sw_history_t *hist, size_t arr_size)
+{
+  if(arr_size > hist->hits_capacity) {
+    hist->hits_capacity = ROUNDUP2POW(arr_size);
+    bit_array_resize(hist->match_scores_mask, hist->hits_capacity);
+
+    size_t mem = hist->hits_capacity * sizeof(*(hist->sorted_match_indices));
+    hist->sorted_match_indices = realloc(hist->sorted_match_indices, mem);
+    if(hist->sorted_match_indices == NULL) {
+      fprintf(stderr, "%s:%i: Out of memory\n", __FILE__, __LINE__);
+      exit(EXIT_FAILURE);
+    }
+  }
+}
+
 sw_aligner_t* smith_waterman_new()
 {
   sw_aligner_t *sw = calloc(1, sizeof(sw_aligner_t));
-  sw->match_scores_mask = bit_array_create(256);
-  sw->hits_capacity = 256;
-  size_t mem = sw->hits_capacity * sizeof(*sw->sorted_match_indices);
-  sw->sorted_match_indices = malloc(mem);
+  _init_history(&(sw->history));
   return sw;
 }
 
 void smith_waterman_free(sw_aligner_t *sw)
 {
   aligner_destroy(&(sw->aligner));
-  bit_array_free(sw->match_scores_mask);
-  free(sw->sorted_match_indices);
+  bit_array_free(sw->history.match_scores_mask);
+  free(sw->history.sorted_match_indices);
   free(sw);
+}
+
+aligner_t* smith_waterman_get_aligner(sw_aligner_t *sw)
+{
+  return &sw->aligner;
 }
 
 void smith_waterman_align(const char *a, const char *b,
                           const scoring_t *scoring, sw_aligner_t *sw)
 {
-  aligner_t *aligner = &(sw->aligner);
+  aligner_t *aligner = &sw->aligner;
+  sw_history_t *hist = &sw->history;
   aligner_align(aligner, a, b, scoring, 1);
 
   size_t arr_size = aligner->score_width * aligner->score_height;
+  _ensure_history_capacity(hist, arr_size);
 
   // Set number of hits
-  if(arr_size > sw->hits_capacity) {
-    sw->hits_capacity = ROUNDUP2POW(arr_size);
-    bit_array_resize(sw->match_scores_mask, sw->hits_capacity);
-
-    size_t mem = sw->hits_capacity * sizeof(*(sw->sorted_match_indices));
-    sw->sorted_match_indices = realloc(sw->sorted_match_indices, mem);
-    if(sw->sorted_match_indices == NULL) {
-      fprintf(stderr, "%s:%i: Out of memory\n", __FILE__, __LINE__);
-      exit(EXIT_FAILURE);
-    }
-  }
-
-  bit_array_set_all(sw->match_scores_mask);
-  sw->num_of_hits = sw->next_hit = 0;
+  bit_array_set_all(hist->match_scores_mask);
+  hist->num_of_hits = hist->next_hit = 0;
 
   size_t pos;
   for(pos = 0; pos < arr_size; pos++) {
     if(aligner->match_scores[pos] > 0)
-      sw->sorted_match_indices[sw->num_of_hits++] = pos;
+      hist->sorted_match_indices[hist->num_of_hits++] = pos;
   }
 
   // Now sort matched hits
   MatrixSort tmp_struct = {aligner->match_scores, aligner->score_width};
-  sort_r(sw->sorted_match_indices, sw->num_of_hits,
+  sort_r(hist->sorted_match_indices, hist->num_of_hits,
          sizeof(size_t), sort_match_indices, &tmp_struct);
 }
 
@@ -104,6 +132,7 @@ static char _follow_hit(sw_aligner_t* sw, size_t arr_index,
                         alignment_t* result)
 {
   const aligner_t *aligner = &(sw->aligner);
+  const sw_history_t *hist = &(sw->history);
 
   // Follow path through matrix
   size_t score_x = (size_t)ARR_2D_X(arr_index, aligner->score_width);
@@ -123,8 +152,8 @@ static char _follow_hit(sw_aligner_t* sw, size_t arr_index,
 
   for(length = 0; ; length++)
   {
-    if(!bit_array_get_bit(sw->match_scores_mask, arr_index)) return 0;
-    bit_array_clear_bit(sw->match_scores_mask, arr_index);
+    if(!bit_array_get_bit(hist->match_scores_mask, arr_index)) return 0;
+    bit_array_clear_bit(hist->match_scores_mask, arr_index);
 
     if(curr_score == 0) break;
 
@@ -200,12 +229,14 @@ static char _follow_hit(sw_aligner_t* sw, size_t arr_index,
 
 int smith_waterman_fetch(sw_aligner_t *sw, alignment_t *result)
 {
-  while(sw->next_hit < sw->num_of_hits)
-  {
-    size_t arr_index = sw->sorted_match_indices[sw->next_hit++];
-    // printf("hit %lu/%lu\n", sw->next_hit, sw->num_of_hits);
+  sw_history_t *hist = &(sw->history);
 
-    if(bit_array_get_bit(sw->match_scores_mask, arr_index) &&
+  while(hist->next_hit < hist->num_of_hits)
+  {
+    size_t arr_index = hist->sorted_match_indices[hist->next_hit++];
+    // printf("hit %lu/%lu\n", hist->next_hit, hist->num_of_hits);
+
+    if(bit_array_get_bit(hist->match_scores_mask, arr_index) &&
        _follow_hit(sw, arr_index, result))
     {
       return 1;

@@ -237,7 +237,7 @@ void align(const char *seq_a, const char *seq_b,
 
   smith_waterman_align(seq_a, seq_b, &scoring, sw);
 
-  aligner_t *aligner = &(sw->aligner);
+  aligner_t *aligner = smith_waterman_get_aligner(sw);
   size_t len_a = aligner->score_width-1, len_b = aligner->score_height-1;
 
   printf("== Alignment %zu lengths (%lu, %lu):\n", alignment_index, len_a, len_b);
