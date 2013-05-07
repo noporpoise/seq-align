@@ -1,14 +1,15 @@
 /*
- alignment_cmdline.h
+ alignment_scoring_load.h
  project: AlignmentScoring
  author: Isaac Turner <turner.isaac@gmail.com>
  Used in SmithWaterman and NeedlemanWunsch projects
  url: http://sourceforge.net/projects/needlemanwunsch
  url: http://sourceforge.net/projects/smithwaterman
  Copyright (C) 06-Dec-2011
+ 
+ see: README
 
- see README
-
+ == License
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -23,21 +24,15 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ALIGNMENT_CMDLINE_HEADER_SEEN
-#define ALIGNMENT_CMDLINE_HEADER_SEEN
+#ifndef ALIGNMENT_SCORING_LOAD_HEADER_SEEN
+#define ALIGNMENT_SCORING_LOAD_HEADER_SEEN
 
-#include "string_buffer.h"
-#include "seq_file.h"
+#include "alignment_scoring.h"
 
-void cmdline_init();
-void cmdline_finish();
+void align_scoring_load_matrix(gzFile file, const char* file_path,
+                               scoring_t* scoring, char case_sensitive);
 
-void cmdline_add_files(char* p1, char* p2);
-int cmdline_get_num_of_file_pairs();
-char* cmdline_get_file1(int i);
-char* cmdline_get_file2(int i);
-
-void align_from_file(const char *path1, const char *path2,
-                     void (align)(read_t *r1, read_t *r2));
+void align_scoring_load_pairwise(gzFile file, const char* file_path,
+                                 scoring_t* scoring, char case_sensitive);
 
 #endif

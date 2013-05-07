@@ -1,8 +1,0 @@
-Smith-Waterman optimal local alignment Example
-Isaac Turner
-turner.isaac@gmail.com
-
-== Build ==
-
-$ make SWPATH=~/smith_waterman/
-

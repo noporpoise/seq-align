@@ -1,18 +1,16 @@
 
-all: bit_array string_buffer utility_lib htslib seq_file
+all: bit_array string_buffer htslib seq_file
 	cd htslib; git pull; make
 	cd bit_array; git pull; make
 	cd string_buffer; git pull; make
-	cd utility_lib; git pull; make
 	cd seq_file; git pull; make STRING_BUF_PATH=../string_buffer HTS_PATH=../htslib
 
 clean:
 	cd htslib; make clean
 	cd bit_array; make clean
 	cd string_buffer; make clean
-	cd utility_lib; make clean
 	cd seq_file; make clean
-	rm -rf BitArray UtilityLibrary
+	rm -rf BitArray
 
 .PHONY: all clean
 
@@ -25,10 +23,6 @@ bit_array:
 
 string_buffer:
 	git clone git@github.com:noporpoise/string_buffer.git
-
-utility_lib:
-	git clone git@github.com:noporpoise/UtilityLibrary.git
-	mv UtilityLibrary utility_lib
 
 seq_file:
 	git clone git@github.com:noporpoise/seq_file.git

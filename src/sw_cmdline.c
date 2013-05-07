@@ -1,28 +1,9 @@
 /*
  sw_cmdline.c
- project: SmithWaterman
  author: Isaac Turner <turner.isaac@gmail.com>
- url: http://sourceforge.net/projects/smithwaterman/
- Copyright (C) 18-Dec-2011
-
- see README
-
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- 
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ url: https://github.com/noporpoise/seq-align
+ May 2013
  */
-
-#define MAX(a,b)   ((a) >= (b) ? (a) : (b))
-#define MIN(a,b)   ((a) <= (b) ? (a) : (b))
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -33,7 +14,6 @@
 // my utility functions
 #include "string_buffer.h"
 #include "seq_file.h"
-#include "utility_lib.h"
 
 // Alignment scoring and loading
 #include "alignment_scoring_load.h"
@@ -49,48 +29,42 @@ char interactive = 0;
 score_t min_score = 0;
 char min_score_set = 0;
 
-unsigned long max_hits_per_alignment = 0;
+unsigned int max_hits_per_alignment = 0;
 char max_hits_per_alignment_set = 0;
 
 unsigned int print_context = 0;
-SCORING_SYSTEM* scoring;
 
-unsigned long alignment_index = 0;
+scoring_t scoring;
+
+// Alignment results stored here
+sw_aligner_t *sw;
+alignment_t *result;
+
+size_t alignment_index = 0;
 
 void set_default_scoring()
 {
-  scoring = scoring_system_default();
+  scoring_system_default(&scoring);
 
   // Change slightly
-  scoring->match = 2;
-  scoring->mismatch = -2;
-  scoring->gap_open = -2;
-  scoring->gap_open = -1;
+  scoring.match = 2;
+  scoring.mismatch = -2;
+  scoring.gap_open = -2;
+  scoring.gap_open = -1;
 }
 
-void print_usage(char* err_fmt, ...)
-{
-  if(err_fmt != NULL)
-  {
-    va_list argptr;
-    va_start(argptr, err_fmt);
-    
-    StrBuf *error = strbuf_init(200);
-    strbuf_append_str(error, "SmithWaterman Error: ");
-    strbuf_vsprintf(error, strbuf_len(error), err_fmt, argptr);
-    strbuf_chomp(error);
 
+static void print_usage(const char* errfmt, ...) __attribute__((noreturn));
+static void print_usage(const char *errfmt,  ...)
+{
+  if(errfmt != NULL) {
+    fprintf(stderr, "Error: ");
+    va_list argptr;
+    va_start(argptr, errfmt);
+    vfprintf(stderr, errfmt, argptr);
     va_end(argptr);
 
-    fprintf(stderr, "%s\n", error->buff);
-    fprintf(stderr, "Use -h option to print help\n");
-    fflush(stderr);
-    exit(EXIT_FAILURE);
-  }
-
-  if(scoring != NULL)
-  {
-    scoring_free(scoring);
+    if(errfmt[strlen(errfmt)-1] != '\n') fprintf(stderr, "\n");
   }
 
   // Get and print defaults
@@ -126,8 +100,8 @@ void print_usage(char* err_fmt, ...)
 "\n"
 "    --wildcard <w> <s>   Character <w> matches all characters with score <s>\n"
 "\n",
-          scoring->match, scoring->mismatch,
-          scoring->gap_open, scoring->gap_extend);
+          scoring.match, scoring.mismatch,
+          scoring.gap_open, scoring.gap_extend);
 
   fprintf(stderr,
 "    --minscore <score>   Minimum required score\n"
@@ -164,53 +138,31 @@ void print_alignment_part(const char* seq1, const char* seq2,
                           size_t spaces_left, size_t spaces_right,
                           size_t context_left, size_t context_right)
 {
+  size_t i;
   printf("  ");
 
-  unsigned int i;
-  for(i = 0; i < spaces_left; i++)
-    printf(" ");
+  for(i = 0; i < spaces_left; i++) printf(" ");
 
   if(context_left > 0)
   {
-    if(print_colour)
-    {
-      printf("%s", align_col_context);
-    }
-
+    if(print_colour) printf("%s", align_col_context);
     printf("%.*s", (int)context_left, context_str+pos-context_left);
-
-    if(print_colour)
-    {
-      printf("%s", align_col_stop);
-    }
+    if(print_colour) printf("%s", align_col_stop);
   }
 
   if(print_colour)
-  {
-    alignment_colour_print_against(seq1, seq2, scoring->case_sensitive);
-  }
+    alignment_colour_print_against(seq1, seq2, scoring.case_sensitive);
   else
-  {
     printf("%s", seq1);
-  }
   
   if(context_right > 0)
   {
-    if(print_colour)
-    {
-      printf("%s", align_col_context);
-    }
-
+    if(print_colour) printf("%s", align_col_context);
     printf("%.*s", (int)context_right, context_str+pos+len);
-
-    if(print_colour)
-    {
-      printf("%s", align_col_stop);
-    }
+    if(print_colour) printf("%s", align_col_stop);
   }
 
-  for(i = 0; i < spaces_right; i++)
-    printf(" ");
+  for(i = 0; i < spaces_right; i++) printf(" ");
 
   printf("  [pos: %li; len: %lu]\n", pos, len);
 }
@@ -283,13 +235,12 @@ void align(const char *seq_a, const char *seq_b,
     return;
   }
 
-  SW_COMPUTATION* smithwaterman = smith_waterman_align(seq_a, seq_b, scoring);
+  smith_waterman_align(seq_a, seq_b, &scoring, sw);
 
-  size_t len_a = smith_waterman_seq_a_strlen(smithwaterman);
-  size_t len_b = smith_waterman_seq_b_strlen(smithwaterman);
+  aligner_t *aligner = &(sw->aligner);
+  size_t len_a = aligner->score_width-1, len_b = aligner->score_height-1;
 
-  printf("== Alignment %lu lengths (%lu, %lu):\n", alignment_index,
-         (unsigned long)len_a, (unsigned long)len_b);
+  printf("== Alignment %zu lengths (%lu, %lu):\n", alignment_index, len_a, len_b);
 
   // seqA
   if(print_fasta && seq_a_name != NULL)
@@ -319,7 +270,7 @@ void align(const char *seq_a, const char *seq_b,
   {
     // If min_score hasn't been set, set a limit based on the lengths of seqs
     // or zero if we're running interactively
-    min_score = interactive ? 0 : scoring->match * MAX(0.2 * MIN(len_a, len_b), 2);
+    min_score = interactive ? 0 : scoring.match * MAX2(0.2 * MIN2(len_a, len_b), 2);
 
     #ifdef DEBUG
     printf("min_score: %i\n", min_score);
@@ -328,10 +279,7 @@ void align(const char *seq_a, const char *seq_b,
 
   fflush(stdout);
 
-  // Allocate memory for storing result
-  SW_LOCAL_ALIGNMENT* alignment = smith_waterman_create_hit();
-
-  unsigned long hit_index = 0;
+  size_t hit_index = 0;
 
   // For print context
   size_t context_left = 0, context_right = 0;
@@ -340,30 +288,28 @@ void align(const char *seq_a, const char *seq_b,
 
 
   while(get_next_hit() &&
-        smith_waterman_get_hit(smithwaterman, alignment) &&
-        alignment->score >= min_score &&
+        smith_waterman_fetch(sw, result) && result->score >= min_score &&
         (!max_hits_per_alignment_set || hit_index < max_hits_per_alignment))
   {
-    printf("hit %lu.%lu score: %i\n", alignment_index, hit_index++,
-           alignment->score);
+    printf("hit %zu.%zu score: %i\n", alignment_index, hit_index++, result->score);
     
     if(print_context)
     {
       // Calculate number of characters of context to print either side
-      context_left = MAX(alignment->pos_a, alignment->pos_b);
-      context_left = MIN(context_left, print_context);
+      context_left = MAX2(result->pos_a, result->pos_b);
+      context_left = MIN2(context_left, print_context);
 
-      size_t rem_a = len_a - (alignment->pos_a + alignment->len_a);
-      size_t rem_b = len_b - (alignment->pos_b + alignment->len_b);
+      size_t rem_a = len_a - (result->pos_a + result->len_a);
+      size_t rem_b = len_b - (result->pos_b + result->len_b);
 
-      context_right = MAX(rem_a, rem_b);
-      context_right = MIN(context_right, print_context);
+      context_right = MAX2(rem_a, rem_b);
+      context_right = MIN2(context_right, print_context);
     
-      left_spaces_a = (context_left > alignment->pos_a)
-                      ? context_left - alignment->pos_a : 0;
+      left_spaces_a = (context_left > result->pos_a)
+                      ? context_left - result->pos_a : 0;
 
-      left_spaces_b = (context_left > alignment->pos_b)
-                      ? context_left - alignment->pos_b : 0;
+      left_spaces_b = (context_left > result->pos_b)
+                      ? context_left - result->pos_b : 0;
     
       right_spaces_a = (context_right > rem_a) ? context_right - rem_a : 0;
       right_spaces_b = (context_right > rem_b) ? context_right - rem_b : 0;
@@ -377,8 +323,8 @@ void align(const char *seq_a, const char *seq_b,
     #endif
 
     // seq a
-    print_alignment_part(alignment->result_a, alignment->result_b,
-                         alignment->pos_a, alignment->len_a,
+    print_alignment_part(result->result_a, result->result_b,
+                         result->pos_a, result->len_a,
                          seq_a,
                          left_spaces_a, right_spaces_a,
                          context_left-left_spaces_a,
@@ -388,8 +334,8 @@ void align(const char *seq_a, const char *seq_b,
     {
       printf("  ");
 
-      size_t max_left_spaces = MAX(left_spaces_a, left_spaces_b);
-      size_t max_right_spaces = MAX(right_spaces_a, right_spaces_b);
+      size_t max_left_spaces = MAX2(left_spaces_a, left_spaces_b);
+      size_t max_right_spaces = MAX2(right_spaces_a, right_spaces_b);
 
       size_t spacer;
 
@@ -405,7 +351,7 @@ void align(const char *seq_a, const char *seq_b,
         printf(".");
       }
       
-      alignment_print_spacer(alignment->result_a, alignment->result_b, scoring);
+      alignment_print_spacer(result->result_a, result->result_b, &scoring);
 
       // Print dots for righthand context sequence
       for(spacer = 0; spacer < context_right-max_right_spaces; spacer++)
@@ -423,8 +369,8 @@ void align(const char *seq_a, const char *seq_b,
     }
 
     // seq b
-    print_alignment_part(alignment->result_b, alignment->result_a,
-                         alignment->pos_b, alignment->len_b,
+    print_alignment_part(result->result_b, result->result_a,
+                         result->pos_b, result->len_b,
                          seq_b,
                          left_spaces_b, right_spaces_b,
                          context_left-left_spaces_b,
@@ -438,12 +384,6 @@ void align(const char *seq_a, const char *seq_b,
 
   printf("==\n");
   fflush(stdout);
-
-  // Free memory used for holding results
-  smith_waterman_free_hit(alignment);
-
-  // Free alignment between the two sequences
-  smith_waterman_free(smithwaterman);
 
   // Increment sequence alignment counter
   alignment_index++;
@@ -477,13 +417,13 @@ int main(int argc, char* argv[])
 
   cmdline_init();
 
-  scoring = NULL;
   char case_sensitive = 0;
+  char scoring_set = 0;
 
   // First run through arguments to set up case_sensitive and scoring system
 
   // case sensitive needs to be dealt with first
-  // (it is used to construct hash table for swap_table)
+  // (it is used to construct hash table for swap_scores)
   int argi;
   for(argi = 1; argi < argc; argi++)
   {
@@ -499,47 +439,48 @@ int main(int argc, char* argv[])
     }
     else if(strcasecmp(argv[argi], "--scoring") == 0)
     {
-      if(scoring != NULL)
+      if(scoring_set)
       {
         print_usage("More than one scoring system specified - not permitted");
       }
     
       if(strcasecmp(argv[argi+1], "PAM30") == 0)
       {
-        scoring = scoring_system_PAM30();
+        scoring_system_PAM30(&scoring);
       }
       else if(strcasecmp(argv[argi+1], "PAM70") == 0)
       {
-        scoring = scoring_system_PAM70();
+        scoring_system_PAM70(&scoring);
       }
       else if(strcasecmp(argv[argi+1], "BLOSUM80") == 0)
       {
-        scoring = scoring_system_BLOSUM80();
+        scoring_system_BLOSUM80(&scoring);
       }
       else if(strcasecmp(argv[argi+1], "BLOSUM62") == 0)
       {
-        scoring = scoring_system_BLOSUM62();
+        scoring_system_BLOSUM62(&scoring);
       }
       else if(strcasecmp(argv[argi+1], "DNA_HYBRIDIZATION") == 0)
       {
-        scoring = scoring_system_DNA_hybridization();
+        scoring_system_DNA_hybridization(&scoring);
       }
       else {
         print_usage("Unknown --scoring choice, not one of "
                     "PAM30|PAM70|BLOSUM80|BLOSUM62");
       }
 
+      scoring_set = 1;
       argi++; // took an argument
     }
   }
 
   // Set up default scoring now
-  if(scoring == NULL)
+  if(!scoring_set)
   {
     set_default_scoring();
   }
 
-  scoring->case_sensitive = case_sensitive;
+  scoring.case_sensitive = case_sensitive;
   // Scoring is now initiated - may tweak later
 
   // Keep track of what is set
@@ -554,20 +495,20 @@ int main(int argc, char* argv[])
       // strcasecmp does case insensitive comparison
       if(strcasecmp(argv[argi], "--nogaps") == 0)
       {
-        scoring->no_gaps_in_a = 1;
-        scoring->no_gaps_in_b = 1;
+        scoring.no_gaps_in_a = 1;
+        scoring.no_gaps_in_b = 1;
       }
       else if(strcasecmp(argv[argi], "--nogapsin1") == 0)
       {
-        scoring->no_gaps_in_a = 1;
+        scoring.no_gaps_in_a = 1;
       }
       else if(strcasecmp(argv[argi], "--nogapsin2") == 0)
       {
-        scoring->no_gaps_in_b = 1;
+        scoring.no_gaps_in_b = 1;
       }
       else if(strcasecmp(argv[argi], "--nomismatches") == 0)
       {
-        scoring->no_mismatches = 1;
+        scoring.no_mismatches = 1;
       }
       else if(strcasecmp(argv[argi], "--case_sensitive") == 0)
       {
@@ -612,7 +553,7 @@ int main(int argc, char* argv[])
         // gzbuffer(sub_matrix_file, 16384); // doesn't seem to work
 
         align_scoring_load_matrix(sub_matrix_file, argv[argi+1],
-                                  scoring, case_sensitive);
+                                  &scoring, case_sensitive);
 
         //gzclose_r(sub_matrix_file); // doesn't seem to work
         gzclose(sub_matrix_file);
@@ -626,7 +567,7 @@ int main(int argc, char* argv[])
         //gzbuffer(sub_pairs_file, 16384); // doesn't seem to work
         
         align_scoring_load_pairwise(sub_pairs_file, argv[argi+1],
-                                    scoring, case_sensitive);
+                                    &scoring, case_sensitive);
         
         //gzclose_r(sub_pairs_file); // doesn't seem to work
         gzclose(sub_pairs_file);
@@ -636,7 +577,7 @@ int main(int argc, char* argv[])
       }
       else if(strcasecmp(argv[argi], "--minscore") == 0)
       {
-        if(!parse_entire_uint(argv[argi+1], &min_score))
+        if(!parse_entire_int(argv[argi+1], &min_score))
         {
           print_usage("Invalid --minscore <score> argument (must be a +ve int)");
         }
@@ -646,7 +587,7 @@ int main(int argc, char* argv[])
       }
       else if(strcasecmp(argv[argi], "--maxhits") == 0)
       {
-        if(!parse_entire_ulong(argv[argi+1], &max_hits_per_alignment))
+        if(!parse_entire_uint(argv[argi+1], &max_hits_per_alignment))
         {
           print_usage("Invalid --maxhits <hits> argument (must be a +ve int)");
         }
@@ -665,7 +606,7 @@ int main(int argc, char* argv[])
       }
       else if(strcasecmp(argv[argi], "--match") == 0)
       {
-        if(!parse_entire_int(argv[argi+1], &scoring->match))
+        if(!parse_entire_int(argv[argi+1], &scoring.match))
         {
           print_usage("Invalid --match argument ('%s') must be an int",
                       argv[argi+1]);
@@ -676,7 +617,7 @@ int main(int argc, char* argv[])
       }
       else if(strcasecmp(argv[argi], "--mismatch") == 0)
       {
-        if(!parse_entire_int(argv[argi+1], &scoring->mismatch))
+        if(!parse_entire_int(argv[argi+1], &scoring.mismatch))
         {
           print_usage("Invalid --mismatch <penalty> argument (must be an int)");
         }
@@ -686,7 +627,7 @@ int main(int argc, char* argv[])
       }
       else if(strcasecmp(argv[argi], "--gapopen") == 0)
       {
-        if(!parse_entire_int(argv[argi+1], &scoring->gap_open))
+        if(!parse_entire_int(argv[argi+1], &scoring.gap_open))
         {
           print_usage("Invalid --gapopen <penalty> argument (must be an int)");
         }
@@ -695,7 +636,7 @@ int main(int argc, char* argv[])
       }
       else if(strcasecmp(argv[argi], "--gapextend") == 0)
       {
-        if(!parse_entire_int(argv[argi+1], &scoring->gap_extend))
+        if(!parse_entire_int(argv[argi+1], &scoring.gap_extend))
         {
           print_usage("Invalid --gapextend <penalty> argument (must be an int)");
         }
@@ -737,7 +678,7 @@ int main(int argc, char* argv[])
           print_usage("--wildcard <w> <s> takes a single character and a number");
         }
 
-        scoring_add_wildcard(scoring, argv[argi+1][0], wildscore);
+        scoring_add_wildcard(&scoring, argv[argi+1][0], wildscore);
 
         argi += 2; // took two arguments
       }
@@ -757,7 +698,7 @@ int main(int argc, char* argv[])
     }
   }
 
-  if((match_set && !mismatch_set && !scoring->no_mismatches) ||
+  if((match_set && !mismatch_set && !scoring.no_mismatches) ||
      (!match_set && mismatch_set))
   {
     print_usage("--match --mismatch must both be set or neither set");
@@ -765,7 +706,7 @@ int main(int argc, char* argv[])
   else if(substitutions_set && !match_set)
   {
     // if substitution table set and not match/mismatch
-    scoring->use_match_mismatch = 0;
+    scoring.use_match_mismatch = 0;
   }
 
   // Check for extra unused arguments
@@ -784,6 +725,9 @@ int main(int argc, char* argv[])
   }
 
   // ALIGN!
+  sw = smith_waterman_new();
+  result = alignment_create(256);
+
   if(seq1 != NULL)
   {
     // Align seq1 and seq2
@@ -800,7 +744,9 @@ int main(int argc, char* argv[])
 
   cmdline_finish();
 
-  scoring_free(scoring);
+  // Free memory for storing alignment results
+  smith_waterman_free(sw);
+  alignment_free(result);
 
   return EXIT_SUCCESS;
 }

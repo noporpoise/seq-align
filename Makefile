@@ -1,45 +1,54 @@
-LIBS_PATH=libs
+LIBS_PATH=./libs
 
-UTILITY_LIB_PATH = $(LIBS_PATH)/utility_lib
-STRING_BUF_PATH = $(LIBS_PATH)/string_buffer
-BIT_ARRAY_PATH = $(LIBS_PATH)/bit_array
-SEQ_FILE_PATH = $(LIBS_PATH)/seq_file/new_api
-HTS_PATH = $(LIBS_PATH)/htslib
+STRING_BUF_PATH = $(LIBS_PATH)/string_buffer/
+BIT_ARRAY_PATH = $(LIBS_PATH)/bit_array/
+SEQ_FILE_PATH = $(LIBS_PATH)/seq_file/new_api/
+HTS_PATH = $(LIBS_PATH)/htslib/
 
 ifndef CC
 	CC = gcc
 endif
 
 ifdef DEBUG
-	CFLAGS := -DDEBUG=1 --debug -g
+	CFLAGS := -O0 -DDEBUG=1 --debug -g
 else
 	CFLAGS := -O3
 endif
 
 override HTS_PATH:=$(HTS_PATH)/htslib/
 
-#LIBS=libstrbuf.a libseqfile.a libbitarr.a libhts.a libutil.a
-
 # Add data type for alignment scoring
-CFLAGS := $(CFLAGS) -Wall -Wextra \
-          -I. -Icommon/ -Ilibs/ -I$(SEQ_FILE_PATH) -I$(UTILITY_LIB_PATH) \
-          -I$(BIT_ARRAY_PATH) -I$(STRING_BUF_PATH) -I$(HTS_PATH)
+CFLAGS := $(CFLAGS) -Wall -Wextra
 
-LIB_INCS = -L$(UTILITY_LIB_PATH) \
-           -L$(BIT_ARRAY_PATH) -L$(STRING_BUF_PATH) -L$(HTS_PATH) -L.
+LIBPATHS = -L $(BIT_ARRAY_PATH) -L $(STRING_BUF_PATH) -L $(HTS_PATH) -L .
 
-LIB_LIST = -lstrbuf -lbitarr -lutil -lhts -lpthread -lz
+INCS = -I $(BIT_ARRAY_PATH) -I $(STRING_BUF_PATH) \
+       -I $(HTS_PATH) -I $(SEQ_FILE_PATH) -I src
 
-NW_ARGS = -DSCORE_TYPE='int'
-SW_ARGS = -DSCORE_TYPE='unsigned int'
+LIBS = -lstrbuf -lbitarr -lhts -lpthread -lz
 
-NW_FILES = nw_cmdline.c needleman_wunsch.c common/*.c
-SW_FILES = sw_cmdline.c smith_waterman.c common/*.c
+ALIGN_FILES=$(wildcard src/*.c) src/sort_r.c src/needleman_wunsch.c src/smith_waterman.c
+OBJ_FILES=$(ALIGN_FILES:.c=.o)
 
-all: clean
-	$(CC) -o needleman_wunsch $(CFLAGS) $(LIB_INCS) $(NW_ARGS) $(NW_FILES) $(LIB_LIST)
-	$(CC) -o smith_waterman $(CFLAGS) $(LIB_INCS) $(SW_ARGS) $(SW_FILES) $(LIB_LIST)
+all: bin/needleman_wunsch bin/smith_waterman libalign.a examples
+
+libalign.a: $(OBJ_FILES)
+	ar -csru libalign.a $(OBJ_FILES)
+
+%.o: %.c
+	$(CC) $(CFLAGS) $(OPT) $(INCS) -c $< -o $@
+
+bin/needleman_wunsch: src/nw_cmdline.c libalign.a
+	$(CC) -o bin/needleman_wunsch $(CFLAGS) $(INCS) $(LIBPATHS) src/nw_cmdline.c -lalign $(LIBS)
+
+bin/smith_waterman: src/sw_cmdline.c libalign.a
+	$(CC) -o bin/smith_waterman $(CFLAGS) $(INCS) $(LIBPATHS) src/sw_cmdline.c -lalign $(LIBS)
+
+examples: libalign.a
+	cd examples; make
 
 clean:
-	rm -rf needleman_wunsch needleman_wunsch.dSYM needleman_wunsch.greg
-	rm -rf smith_waterman smith_waterman.dSYM smith_waterman.greg
+	rm -rf bin/* src/*.o libalign.a
+	cd examples; make clean
+
+.PHONY: all clean examples

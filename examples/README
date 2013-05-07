@@ -1,0 +1,10 @@
+
+Example code for Needleman-Wunsch and Smith-Waterman optimal sequence alignment
+
+Isaac Turner
+turner.isaac@gmail.com
+
+== Build ==
+
+$ make all
+

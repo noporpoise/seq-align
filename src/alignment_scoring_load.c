@@ -1,27 +1,8 @@
 /*
  alignment_scoring_load.c
- project: AlignmentScoring
  author: Isaac Turner <turner.isaac@gmail.com>
- Used in SmithWaterman and NeedlemanWunsch projects
- url: http://sourceforge.net/projects/needlemanwunsch
- url: http://sourceforge.net/projects/smithwaterman
- Copyright (C) 06-Dec-2011
- 
- see: README
-
- == License
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- 
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ url: https://github.com/noporpoise/seq-align
+ May 2013
  */
 
 #include <stdlib.h>
@@ -30,39 +11,29 @@
 #include <ctype.h> // tolower isspace
 #include <limits.h> // INT_MAX, INT_MIN
 
-// utility lib for parse_entire_int
-#include "utility_lib.h"
 #include "string_buffer.h"
 
+#include "alignment_cmdline.h"
 #include "alignment_scoring_load.h"
 
-void _loading_error(const char* err_msg, const char* file_path,
-                    int line_num, char is_matrix)
+static void _loading_error(const char* err_msg, const char* file_path,
+                           int line_num, char is_matrix)
+  __attribute__((noreturn));
+
+static void _loading_error(const char* err_msg, const char* file_path,
+                           int line_num, char is_matrix)
 {
-  if(is_matrix)
-  {
-    fprintf(stderr, "Error: substitution matrix : %s\n", err_msg);
-  }
-  else
-  {
-    fprintf(stderr, "Error: substitution pairs : %s\n", err_msg);
-  }
-  
-  if(file_path != NULL)
-  {
-    fprintf(stderr, "File: %s\n", file_path);
-  }
-  
-  if(line_num != -1)
-  {
-    fprintf(stderr, "Line: %s\n", file_path);
-  }
+  if(is_matrix) fprintf(stderr, "Error: substitution matrix : %s\n", err_msg);
+  else fprintf(stderr, "Error: substitution pairs : %s\n", err_msg);
+
+  if(file_path != NULL) fprintf(stderr, "File: %s\n", file_path);
+  if(line_num != -1) fprintf(stderr, "Line: %s\n", file_path);
 
   exit(EXIT_FAILURE);
 }
 
 void align_scoring_load_matrix(gzFile file, const char* file_path,
-                               SCORING_SYSTEM* scoring, char case_sensitive)
+                               scoring_t* scoring, char case_sensitive)
 {
   StrBuf* sbuf = strbuf_init(500);
   size_t read_length;
@@ -246,10 +217,8 @@ void align_scoring_load_matrix(gzFile file, const char* file_path,
 
 
 void align_scoring_load_pairwise(gzFile file, const char* file_path,
-                                 SCORING_SYSTEM* scoring, char case_sensitive)
+                                 scoring_t* scoring, char case_sensitive)
 {
-  // Adds to hash table in scoring->swap_table (it needs to be already malloc'ed)
-
   StrBuf* sbuf = strbuf_init(200);
   size_t read_length;
   int line_num = 0;

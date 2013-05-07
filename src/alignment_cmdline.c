@@ -28,17 +28,52 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <limits.h>
 
 #include "alignment_cmdline.h"
 
 #include "seq_file.h"
 
-SETUP_SEQ_FILE();
-
 // File loading
 int file_list_length = 0;
 int file_list_capacity = 0;
 char **file_paths1 = NULL, **file_paths2 = NULL;
+
+char parse_entire_int(char *str, int *result)
+{
+  size_t len = strlen(str);
+
+  char *strtol_last_char_ptr = str;
+  long tmp = strtol(str, &strtol_last_char_ptr, 10);
+
+  if(tmp > INT_MAX || tmp < INT_MIN || strtol_last_char_ptr != str+len)
+  {
+    return 0;
+  }
+  else
+  {
+    *result = (int)tmp;
+    return 1;
+  }
+}
+
+char parse_entire_uint(char *str, unsigned int *result)
+{
+  size_t len = strlen(str);
+
+  char *strtol_last_char_ptr = str;
+  unsigned long tmp = strtoul(str, &strtol_last_char_ptr, 10);
+
+  if(tmp > UINT_MAX || strtol_last_char_ptr != str+len)
+  {
+    return 0;
+  }
+  else
+  {
+    *result = (unsigned int)tmp;
+    return 1;
+  }
+}
 
 void cmdline_init()
 {
