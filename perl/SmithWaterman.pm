@@ -3,12 +3,12 @@ package SmithWaterman;
 use strict;
 use warnings;
 
-use constant {DEFAULT_CMD => 'smith_waterman',
-              PROMPT_LINE => 'next [h]it or [a]lignment: '};
-
+use File::Basename; # dirname
 use Carp; # for reporting warnings and errors
 use FileHandle; # provides autoflush
 use IPC::Open2; # for opening handle to a process
+
+use constant {PROMPT_LINE => 'next [h]it or [a]lignment: '};
 
 sub new
 {
@@ -16,7 +16,8 @@ sub new
 
   my %options = (@args);
 
-  my $cmdline = DEFAULT_CMD;
+  my $cmdline = dirname(__FILE__)."/../bin/smith_waterman";
+  my $timeout = 5;
 
   for my $key (keys %options)
   {
@@ -57,6 +58,9 @@ sub new
         $cmdline .= " --scoring $value";
       }
     }
+    elsif($key eq "timeout") {
+      $timeout = $value;
+    }
     elsif(grep(/^$key$/i, qw(substitution_matrix substitution_pairs
                              match mismatch gapopen gapextend
                              minscore maxhits wildcard)))
@@ -78,6 +82,7 @@ sub new
   my $pid = open2($in, $out, $cmdline)
     or die("Cannot run cmd: '$cmdline'");
 
+  $in->autoflush();
   $out->autoflush();
 
   my $self = {
@@ -85,6 +90,7 @@ sub new
     _out => $out,
     _err => $err,
     _pid => $pid,
+    _timeout => $timeout,
     _align_number => -1,
     _seq1 => undef,
     _seq2 => undef,
@@ -114,19 +120,45 @@ sub read_line
   #print "SW Waiting...\n";
 
   my $in = $self->{_in};
-  my $next_line = <$in>;
+  my $next_line;
 
-  chomp($next_line);
-  #print "IN: '$next_line'\n";
+  # Reading with time out
+  # http://www.perlmonks.org/?node_id=43304
+  eval {
+    local $SIG{ALRM} = sub { die "timeout\n" };
+    alarm($self->{_timeout});
+    $next_line = <$in>;
+  };
 
-  if(defined($next_line) && $next_line =~ /^SmithWaterman Error/i)
+  if($@ eq "timeout\n") { die("Error: timeout reading NW output"); }
+  elsif($@) { die("Error: couldn't read output"); }
+  alarm(0);
+
+  if(defined($next_line))
   {
-    print STDERR "ErrSeq1: '$self->{'seq1'}'\n";
-    print STDERR "ErrSeq2: '$self->{'seq2'}'\n";
-    croak($next_line);
+    chomp($next_line);
+    #print "IN: '$next_line'\n";
+
+    if($next_line =~ /^Error/i)
+    {
+      print STDERR "ErrSeq1: '$self->{'seq1'}'\n";
+      print STDERR "ErrSeq2: '$self->{'seq2'}'\n";
+      croak($next_line);
+    }
   }
 
   return $next_line;
+}
+
+sub read_line_fatal
+{
+  my ($self,$pattern) = @_;
+  my $line = $self->read_line();
+  if(!defined($line)) {
+    croak("Error: cannot read from aligner.  Have you compiled?");
+  } elsif($line !~ /$pattern/) {
+    croak("Error: aligner said: $line (expected: $pattern)");
+  }
 }
 
 sub do_alignment
@@ -142,15 +174,7 @@ sub do_alignment
   {
     # Skip hits from previous alignment
     print $out "a\n";
-
-    if(!defined($line = $self->read_line()) ||
-       $line ne PROMPT_LINE."==")
-    {
-      print STDERR "ErrSeq: '$self->{'seq1'}'\n";
-      print STDERR "ErrSeq: '$self->{'seq2'}'\n";
-      die("Unexpected output '$line'");
-    }
-
+    $line = $self->read_line_fatal(quotemeta(PROMPT_LINE."=="));
     $self->{_waiting} = 1;
   }
 
@@ -177,21 +201,8 @@ sub do_alignment
 
   $self->{_waiting} = 0;
 
-  if(!defined($line = $self->read_line()) ||
-     $line !~ /^== Alignment $expected/i)
-  {
-    print STDERR "ErrSeq1: '$seq1'\n";
-    print STDERR "ErrSeq2: '$seq2'\n";
-    die("Wasn't expecting '$line'");
-  }
-
-  if(!defined($line = $self->read_line()) ||
-     $line !~ /^$/i)
-  {
-    print STDERR "ErrSeq1: '$seq1'\n";
-    print STDERR "ErrSeq2: '$seq2'\n";
-    die("Wasn't expecting '$line'");
-  }
+  $line = $self->read_line_fatal("^== Alignment $expected");
+  $line = $self->read_line_fatal('^$');
 }
 
 sub get_next_hit

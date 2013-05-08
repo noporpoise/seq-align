@@ -3,11 +3,11 @@ package NeedlemanWunsch;
 use strict;
 use warnings;
 
-use constant DEFAULT_CMD => 'needleman_wunsch';
-
+use File::Basename; #dirname
 use Carp; # for reporting warnings and errors
 use FileHandle; # provides autoflush
 use IPC::Open2; # for opening handle to a process
+use List::Util qw(max);
 
 sub new
 {
@@ -15,7 +15,9 @@ sub new
 
   my %options = (@args);
 
-  my $cmdline = DEFAULT_CMD;
+  my $cmdline = dirname(__FILE__)."/../bin/needleman_wunsch";
+  my ($gapopen, $gapextend) = (-4, -1);
+  my $timeout = 5;
 
   for my $key (keys %options)
   {
@@ -55,9 +57,15 @@ sub new
         $cmdline .= " --scoring $value";
       }
     }
+    elsif($key eq "timeout") {
+      $timeout = $value;
+    }
     elsif(grep(/^$key$/i, qw(substitution_matrix substitution_pairs
                              match mismatch gapopen gapextend wildcard)))
     {
+      if(lc($key) eq "gapopen") { $gapopen = $value; }
+      if(lc($key) eq "gapextend") { $gapextend = $value; }
+
       $cmdline .= " --$key $value";
     }
     else
@@ -75,6 +83,7 @@ sub new
   my $pid = open2($in, $out, $cmdline)
     or die("Cannot run cmd: '$cmdline'");
 
+  $in->autoflush();
   $out->autoflush();
 
   my $self = {
@@ -82,7 +91,10 @@ sub new
     _out => $out,
     _err => $err,
     _pid => $pid,
+    _gapopen => $gapopen,
+    _gapextend => $gapextend,
     _align_number => -1,
+    _timeout => $timeout,
     _seq1 => undef,
     _seq2 => undef,
     _cmd => $cmdline
@@ -107,17 +119,32 @@ sub read_line
 {
   my ($self) = @_;
 
-  #print "SW Waiting...\n";
+  # print "NW Waiting...\n";
 
   my $in = $self->{_in};
-  my $next_line = <$in>;
+  my $next_line;
 
-  chomp($next_line);
-  #print "IN: '$next_line'\n";
+  # Reading with time out
+  # http://www.perlmonks.org/?node_id=43304
+  eval {
+    local $SIG{ALRM} = sub { die "timeout\n" };
+    alarm($self->{_timeout});
+    $next_line = <$in>;
+  };
 
-  if(defined($next_line) && $next_line =~ /^NeedlemanWunsch Error/i)
+  if($@ eq "timeout\n") { die("Error: timeout reading NW output"); }
+  elsif($@) { die("Error: couldn't read output"); }
+  alarm(0);
+  
+  if(defined($next_line))
   {
-    croak($next_line);
+    chomp($next_line);
+    # print "IN: '$next_line'\n";
+
+    if($next_line =~ /^Error:/i)
+    {
+      croak($next_line);
+    }
   }
 
   return $next_line;
@@ -127,28 +154,36 @@ sub do_alignment
 {
   my ($self, $seq1, $seq2) = @_;
 
+  my %result = ('seq1' => $seq1, 'seq2' => $seq2,
+                'number' => $self->{_align_number}++);
+
   if($seq1 =~ /[\n\r]/ || $seq2 =~ /[\n\r]/)
   {
     croak("New lines not allowed in sequences");
   }
+  elsif($seq1 eq '' || $seq2 eq '')
+  {
+    $result{'align1'} = $seq1;
+    $result{'align2'} = $seq2;
+    my $len = max(length($seq1), length($seq2));
+    $result{'sep'} = '-' x $len;
+    $result{'score'} = ($len>0 ? $self->{_gapopen}+$len*$self->{_gapextend} : 0);
+    return \%result;
+  }
 
   my $out = $self->{_out};
 
-  print $out "$seq1\n";
-  print $out "$seq2\n";
-
-  my %result = ('seq1' => $seq1, 'seq2' => $seq2,
-                'number' => $self->{_align_number}++);
+  print $out "$seq1\n$seq2\n";
 
   $result{'align1'} = $self->read_line();
   $result{'sep'} = $self->read_line();
   $result{'align2'} = $self->read_line();
   my $score_line = $self->read_line();
 
-  if(!defined($result{'align1'} || !defined($result{'sep'}) ||
-     !defined($result{'align2'}) || !defined($score_line)))
+  if(!defined($result{'align1'}) || !defined($result{'sep'}) ||
+     !defined($result{'align2'}) || !defined($score_line))
   {
-    die("Missing lines when reading in");
+    die("Missing lines when reading in - have you compiled?");
   }
 
   if($score_line =~ /(-?\d+)$/i)

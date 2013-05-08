@@ -353,7 +353,7 @@ void scoring_system_BLOSUM62(scoring_t* scoring)
   // no_start_gap_penalty, no_end_gap_penalty = 0
   // case_sensitive = 0
   scoring_init(scoring, 1, -4, -10, -1, 0, 0, 0, 0, 0, 0);
-  
+
   // use_match_mismatch=1
   scoring_add_mutations(scoring, amino_acids, blosum62, 1);
 }
@@ -370,7 +370,7 @@ void scoring_system_DNA_hybridization(scoring_t* scoring)
   // no_start_gap_penalty, no_end_gap_penalty = 0
   // case_sensitive = 0
   scoring_init(scoring, 0, 0, -10, -10, 0, 0, 0, 0, 0, 0);
-  
+
   // use_match_mismatch=0
   scoring_add_mutations(scoring, dna_bases, sub_matrix, 0);
 }

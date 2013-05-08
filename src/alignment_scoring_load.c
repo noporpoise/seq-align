@@ -77,7 +77,7 @@ void align_scoring_load_matrix(gzFile file, const char* file_path,
 
   char* characters = (char*)malloc(sbuf->len);
   int num_of_chars = 0;
-  
+
   if(isspace(sep))
   {
     char* next = sbuf->buff;
@@ -116,23 +116,23 @@ void align_scoring_load_matrix(gzFile file, const char* file_path,
           _loading_error("Expected whitespace between elements - found character",
                          file_path, line_num, 1);
         }
-      
+
         score_txt = string_next_nonwhitespace(score_txt+1);
-        
+
         char* strtol_last_char_ptr = score_txt;
         score = (int)strtol(strtol_last_char_ptr, &strtol_last_char_ptr, 10);
-  
+
         // If pointer to end of number string hasn't moved -> error
         if(strtol_last_char_ptr == score_txt)
         {
           _loading_error("Missing number value on line", file_path, line_num, 1);
         }
-        
+
         scoring_add_mutation(scoring, from_char, to_char, score);
-        
+
         score_txt = strtol_last_char_ptr;
       }
-      
+
       if(*score_txt != '\0' && !string_is_all_whitespace(score_txt))
       {
         _loading_error("Too many columns on row", file_path, line_num, 1);
@@ -155,9 +155,9 @@ void align_scoring_load_matrix(gzFile file, const char* file_path,
       char c = case_sensitive ? sbuf->buff[i+1] : tolower(sbuf->buff[i+1]);
       characters[num_of_chars++] = c;
     }
-    
+
     int score;
-    
+
     // Read rows
     while((read_length = strbuf_reset_gzreadline(sbuf, file)) > 0)
     {
@@ -170,7 +170,7 @@ void align_scoring_load_matrix(gzFile file, const char* file_path,
         // skip this line
         continue;
       }
-      
+
       char* str_pos = sbuf->buff;
 
       int to_char_index = 0;
@@ -184,13 +184,13 @@ void align_scoring_load_matrix(gzFile file, const char* file_path,
         {
           _loading_error("Separator missing from line", file_path, line_num, 1);
         }
-        
+
         // Move past separator
         str_pos++;
 
         char* after_num_str = str_pos;
         score = (int)strtol(str_pos, &after_num_str, 10);
-  
+
         // If pointer to end of number string hasn't moved -> error
         if(str_pos == after_num_str)
         {
@@ -206,7 +206,7 @@ void align_scoring_load_matrix(gzFile file, const char* file_path,
 
         str_pos = after_num_str;
       }
-      
+
       line_num++;
     }
   }
@@ -239,7 +239,7 @@ void align_scoring_load_pairwise(gzFile file, const char* file_path,
       {
         _loading_error("Too few column headings", file_path, line_num, 0);
       }
-      
+
       if(isspace(sbuf->buff[1]))
       {
         // split by whitespace
@@ -255,7 +255,7 @@ void align_scoring_load_pairwise(gzFile file, const char* file_path,
         {
           _loading_error("Line too short", file_path, line_num, 0);
         }
-        
+
         b = sbuf->buff[char2_pos];
 
         if(!parse_entire_int(sbuf->buff+char2_pos+2, &score))
@@ -269,7 +269,7 @@ void align_scoring_load_pairwise(gzFile file, const char* file_path,
         {
           _loading_error("Inconsistent separators used", file_path, line_num, 0);
         }
-        
+
         a = sbuf->buff[0];
         b = sbuf->buff[2];
 
@@ -288,7 +288,7 @@ void align_scoring_load_pairwise(gzFile file, const char* file_path,
       scoring_add_mutation(scoring, a, b, score);
       num_pairs_added++;
     }
-    
+
     line_num++;
   }
 

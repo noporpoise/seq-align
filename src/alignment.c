@@ -22,22 +22,13 @@ const char align_col_indel[] = "\033[91m"; // Insertion / deletion (RED)
 const char align_col_context[] = "\033[95m";
 const char align_col_stop[] = "\033[0m";
 
-// long max4(long a, long b, long c, long d)
-// {
-//   long result = a;
-//   if(b > result) result = b;
-//   if(c > result) result = c;
-//   if(d > result) result = d;
-//   return result;
-// }
-
-static score_t nw_combine(long a, long b, long c) {
-  return MAX3(a,b,c);
-}
-
-static score_t sw_combine(long a, long b, long c) {
-  score_t x = MAX3(a,b,c);
-  return MAX2(x,0);
+static long max4(long a, long b, long c, long d)
+{
+  long result = a;
+  if(b > result) result = b;
+  if(c > result) result = c;
+  if(d > result) result = d;
+  return result;
 }
 
 // Fill in traceback matrix
@@ -52,16 +43,10 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
 
   size_t i, j, arr_size = score_width * score_height;
 
-  score_t min;
-  score_t (*combine)(long a, long b, long c);
+  score_t min = is_sw ? 0 : INT_MIN;
 
-  if(is_sw) {
-    min = 0;
-    combine = sw_combine;
-  } else {
-    min = INT_MIN;
-    combine = nw_combine;
-  }
+  size_t seq_i, seq_j, len_i = score_width-1, len_j = score_height-1;
+  size_t index, index_left, index_up, index_upleft;
 
   if(scoring->no_gaps_in_a) {
     for(i = 0; i < arr_size; i++) gap_a_scores[i] = min;
@@ -80,7 +65,7 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
   for(i = 1; i < score_width; i++)
   {
     match_scores[i] = min;
-    
+
     // Think carefully about which way round these are
     gap_a_scores[i] = min;
     gap_b_scores[i] = scoring->no_start_gap_penalty ? 0
@@ -88,59 +73,58 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
   }
 
   // work down first column -> [0][j]
-  for(j = 1; j < score_height; j++)
+  for(j = 1, index = score_width; j < score_height; j++, index += score_width)
   {
-    size_t index = j * score_width;
     match_scores[index] = min;
-    
+
     // Think carefully about which way round these are
     gap_a_scores[index]
       = (score_t)(scoring->no_start_gap_penalty ? 0
                   : scoring->gap_open + (long)i * scoring->gap_extend);
     gap_b_scores[index] = min;
   }
-  
-  //
-  // Update Dynamic Programming arrays
-  //
 
   // These are longs to force addition to be done with higher accuracy
   long gap_open_penalty = scoring->gap_extend + scoring->gap_open;
   long gap_extend_penalty = scoring->gap_extend;
+  long substitution_penalty;
 
-  for (i = 1; i < score_width; i++)
+  // start at position [1][1]
+  index_upleft = 0;
+  index_up = 1;
+  index_left = score_width;
+  index = score_width+1;
+
+  for(seq_j = 0; seq_j < len_j; seq_j++)
   {
-    for (j = 1; j < score_height; j++)
+    for(seq_i = 0; seq_i < len_i; seq_i++)
     {
-      // It's an indexing thing...
-      size_t seq_i = i - 1, seq_j = j - 1;
-      
       // Update match_scores[i][j] with position [i-1][j-1]
-      // Addressing array must be done with unsigned long
-      size_t old_index, new_index = j*score_width + i;
-      
       // substitution penalty
-      int substitution_penalty;
       char is_match;
+      int tmp_penalty;
 
       scoring_lookup(scoring, aligner->seq_a[seq_i], aligner->seq_b[seq_j],
-                     &substitution_penalty, &is_match);
+                     &tmp_penalty, &is_match);
 
       if(scoring->no_mismatches && !is_match)
       {
-        match_scores[new_index] = min;
+        match_scores[index] = min;
       }
       else
       {
-        old_index = ARR_2D_INDEX(score_width, i-1, j-1);
+        substitution_penalty = tmp_penalty;
 
         // substitution
-        match_scores[new_index]
-          = combine(match_scores[old_index], // continue alignment
-                    gap_a_scores[old_index], // close gap in seq_a
-                    gap_b_scores[old_index]) // close gap in seq_b
-            + substitution_penalty;
-      }                                     
+        // 1) continue alignment
+        // 2) close gap in seq_a
+        // 3) close gap in seq_b
+        match_scores[index]
+          = max4(match_scores[index_upleft] + substitution_penalty,
+                 gap_a_scores[index_upleft] + substitution_penalty,
+                 gap_b_scores[index_upleft] + substitution_penalty,
+                 min);
+      }
 
       // Long arithmetic since some INTs are set to min and penalty is -ve
       // (adding as ints would cause an integer overflow)
@@ -148,80 +132,94 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
       if(!scoring->no_gaps_in_a)
       {
         // Update gap_a_scores[i][j] from position [i][j-1]
-        old_index = ARR_2D_INDEX(score_width, i, j-1);
 
         if(i == score_width-1 && scoring->no_end_gap_penalty)
         {
-          gap_a_scores[new_index]
-            = combine(match_scores[old_index],
-                      gap_a_scores[old_index],
-                      gap_b_scores[old_index] + (j == 1 ? 0 : gap_open_penalty));
+          gap_a_scores[index]
+            = max4(match_scores[index_up],
+                   gap_a_scores[index_up],
+                   gap_b_scores[index_up] + (j == 1 ? 0 : gap_open_penalty),
+                   min);
         }
         else
         {
-          gap_a_scores[new_index]
-            = combine(match_scores[old_index] + gap_open_penalty,
-                      gap_a_scores[old_index] + gap_extend_penalty,
-                      gap_b_scores[old_index] + gap_open_penalty);
+          gap_a_scores[index]
+            = max4(match_scores[index_up] + gap_open_penalty,
+                   gap_a_scores[index_up] + gap_extend_penalty,
+                   gap_b_scores[index_up] + gap_open_penalty,
+                   min);
         }
       }
 
       if(!scoring->no_gaps_in_b)
       {
         // Update gap_b_scores[i][j] from position [i-1][j]
-        old_index = ARR_2D_INDEX(score_width, i-1, j);
-        
+
         if(j == score_height-1 && scoring->no_end_gap_penalty)
         {
-          gap_b_scores[new_index]
-            = combine(match_scores[old_index],
-                      gap_a_scores[old_index] + (i == 1 ? 0 : gap_open_penalty),
-                      gap_b_scores[old_index]);
+          gap_b_scores[index]
+            = max4(match_scores[index_left],
+                   gap_a_scores[index_left] + (i == 1 ? 0 : gap_open_penalty),
+                   gap_b_scores[index_left],
+                   min);
         }
         else
         {
-          gap_b_scores[new_index]
-            = combine(match_scores[old_index] + gap_open_penalty,
-                      gap_a_scores[old_index] + gap_open_penalty,
-                      gap_b_scores[old_index] + gap_extend_penalty);
+          gap_b_scores[index]
+            = max4(match_scores[index_left] + gap_open_penalty,
+                   gap_a_scores[index_left] + gap_open_penalty,
+                   gap_b_scores[index_left] + gap_extend_penalty,
+                   min);
         }
       }
+
+      index++;
+      index_left++;
+      index_up++;
+      index_upleft++;
     }
+
+    index++;
+    index_left++;
+    index_up++;
+    index_upleft++;
   }
 
   if(scoring->no_gaps_in_a)
   {
     // Allow gaps only at the start/end of A
-    size_t old_index = ARR_2D_INDEX(score_width, score_width-1, 0);
+    // Fill right hand column of traceback matrix
+    index_up = score_width-1;
+    index = index_up+score_width;
 
-    for(j = 1; j < score_height; j++)
+    while(index < arr_size)
     {
-      size_t new_index = ARR_2D_INDEX(score_width, score_width-1, j);
+      gap_a_scores[index]
+        = MAX3(match_scores[index_up] + gap_open_penalty,
+               gap_a_scores[index_up] + gap_extend_penalty,
+               min);
 
-      gap_a_scores[new_index]
-        = combine(match_scores[old_index] + gap_open_penalty,
-                  gap_a_scores[old_index] + gap_extend_penalty,
-                  min);
-
-      old_index = new_index;
+      index_up = index;
+      index += score_width;
     }
   }
 
   if(scoring->no_gaps_in_b)
   {
     // Allow gaps only at the start/end of B
-    size_t old_index = ARR_2D_INDEX(score_width, 0, score_height-1);
+    // Fill bottom row of traceback matrix
+    index_left = (score_height-1)*score_width;
+    index = index_left+1;
 
-    for(i = 1; i < score_width; i++)
+    while(index < arr_size)
     {
-      size_t new_index = ARR_2D_INDEX(score_width, i, score_height-1);
+      gap_b_scores[index]
+        = MAX3(match_scores[index_left] + gap_open_penalty,
+               gap_b_scores[index_left] + gap_extend_penalty,
+               min);
 
-      gap_b_scores[new_index]
-        = combine(match_scores[old_index] + gap_open_penalty,
-                  gap_b_scores[old_index] + gap_extend_penalty,
-                  min);
-
-      old_index = new_index;
+      index_left++;
+      index++;
     }
   }
 }
@@ -390,13 +388,12 @@ void alignment_reverse_move(enum Matrix *curr_matrix, score_t *curr_score,
   }
   else
   {
-    fprintf(stderr, "Program error: traceback fail (get_reverse_move)\n");
-    fprintf(stderr, "This may be due to an integer overflow if your "
-                    "sequences are long or if scores are large.  \n");
-    fprintf(stderr, "If this is the case using smaller scores or "
-                    "shorter sequences may work around this problem.  \n");
-    fprintf(stderr, " If you think this is a bug, please report it to: "
-                    "turner.isaac@gmail.com\n");
+    fprintf(stderr,
+"Program error: traceback fail (get_reverse_move)\n"
+"This may be due to an integer overflow if your sequences are long or scores\n"
+"are large. If this is the case using smaller scores or shorter sequences may\n"
+"work around this problem.  \n"
+"  If you think this is a bug, please report it to: turner.isaac@gmail.com\n");
     exit(EXIT_FAILURE);
   }
 }
@@ -418,7 +415,7 @@ void alignment_print_matrices(const aligner_t *aligner)
     {
       printf(" %3i", (int)ARR_LOOKUP(match_scores, aligner->score_width, i, j));
     }
-    printf("\n");
+    putc('\n', stdout);
   }
   printf("gap_a_scores:\n");
   for(j = 0; j < aligner->score_height; j++)
@@ -428,7 +425,7 @@ void alignment_print_matrices(const aligner_t *aligner)
     {
       printf(" %3i", (int)ARR_LOOKUP(gap_a_scores, aligner->score_width, i, j));
     }
-    printf("\n");
+    putc('\n', stdout);
   }
   printf("gap_b_scores:\n");
   for(j = 0; j < aligner->score_height; j++)
@@ -438,7 +435,7 @@ void alignment_print_matrices(const aligner_t *aligner)
     {
       printf(" %3i", (int)ARR_LOOKUP(gap_b_scores, aligner->score_width, i, j));
     }
-    printf("\n");
+    putc('\n', stdout);
   }
 }
 
@@ -455,14 +452,14 @@ void alignment_colour_print_against(const char *alignment_a,
     {
       if(!red)
       {
-        printf("%s", align_col_indel);
+        fputs(align_col_indel, stdout);
         red = 1;
       }
     }
     else if(red)
     {
       red = 0;
-      printf("%s", align_col_stop);
+      fputs(align_col_stop, stdout);
     }
 
     if(((case_sensitive && alignment_a[i] != alignment_b[i]) ||
@@ -471,23 +468,23 @@ void alignment_colour_print_against(const char *alignment_a,
     {
       if(!green)
       {
-        printf("%s", align_col_mismatch);
+        fputs(align_col_mismatch, stdout);
         green = 1;
       }
     }
     else if(green)
     {
       green = 0;
-      printf("%s", align_col_stop);
+      fputs(align_col_stop, stdout);
     }
 
-    printf("%c", alignment_a[i]);
+    putc(alignment_a[i], stdout);
   }
 
   if(green || red)
   {
     // Stop all colours
-    printf("%s", align_col_stop);
+    fputs(align_col_stop, stdout);
   }
 }
 
@@ -501,17 +498,17 @@ void alignment_print_spacer(const char* alignment_a, const char* alignment_b,
   {
     if(alignment_a[i] == '-' || alignment_b[i] == '-')
     {
-      printf(" ");
+      putc(' ', stdout);
     }
     else if(alignment_a[i] == alignment_b[i] ||
             (!scoring->case_sensitive &&
              tolower(alignment_a[i]) == tolower(alignment_b[i])))
     {
-      printf("|");
+      putc('|', stdout);
     }
     else
     {
-      printf("*");
+      putc('*', stdout);
     }
   }
 }

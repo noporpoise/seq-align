@@ -44,7 +44,7 @@ void needleman_wunsch_align(const char *a, const char *b,
   // Get max score (and therefore current matrix)
   enum Matrix curr_matrix = MATCH;
   score_t curr_score = nw->match_scores[arr_size-1];
-  
+
   if(nw->gap_b_scores[arr_size-1] >= curr_score)
   {
     curr_matrix = GAP_B;
@@ -104,7 +104,7 @@ void needleman_wunsch_align(const char *a, const char *b,
                              &score_x, &score_y, &arr_index, nw);
     }
   }
-  
+
   // Gap in A
   while(score_y > 0)
   {
@@ -126,7 +126,7 @@ void needleman_wunsch_align(const char *a, const char *b,
   // Shift alignment strings back into 0th position in char arrays
   int first_char = next_char+1;
   int alignment_len = longest_alignment - first_char;
-  
+
   // Use memmove
   memmove(alignment_a, alignment_a+first_char, alignment_len);
   memmove(alignment_b, alignment_b+first_char, alignment_len);
