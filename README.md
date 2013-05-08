@@ -31,7 +31,7 @@ Features:
 * Default behaviour is case-insensitve matching, change using `--case_sensitive`
 
 Build
-=====
+-----
 
 Fetch and build dependencies (requires `git`, `make` and `zlib`)
 
@@ -43,7 +43,7 @@ Build seq-align:
 
     $ make
 
-For the interested, the depedencies used are:
+For those interested, the depedencies used are:
 
 * htslib [https://github.com/samtools/htslib]
 * bit_array [https://github.com/noporpoise/BitArray]
@@ -186,7 +186,7 @@ Set different scoring systems:
 
 
 Scoring Penalties
-=================
+-----------------
 
 Proteins:
 
@@ -201,16 +201,14 @@ Proteins:
 
     gap (of length N) penalty: gap_open + N*gap_extend
 
-NCBI BLAST Quote:
------------------
+NCBI BLAST Quote [from: http://www.ncbi.nlm.nih.gov/BLAST/blastcgihelp.shtml#Reward-penalty]:
 
-Many nucleotide searches use a simple scoring system that consists of a "reward"
-for a match and a "penalty" for a mismatch. The (absolute) reward/penalty ratio
-should be increased as one looks at more divergent sequences. A ratio of 0.33
-(1/-3) is appropriate for sequences that are about 99% conserved; a ratio of 0.5
-(1/-2) is best for sequences that are 95% conserved; a ratio of about one (1/-1)
-is best for sequences that are 75% conserved [1].
-[from: http://www.ncbi.nlm.nih.gov/BLAST/blastcgihelp.shtml#Reward-penalty]
+    Many nucleotide searches use a simple scoring system that consists of a "reward"
+    for a match and a "penalty" for a mismatch. The (absolute) reward/penalty ratio
+    should be increased as one looks at more divergent sequences. A ratio of 0.33
+    (1/-3) is appropriate for sequences that are about 99% conserved; a ratio of 0.5
+    (1/-2) is best for sequences that are 95% conserved; a ratio of about one (1/-1)
+    is best for sequences that are 75% conserved [1].
 
 NCBI Gap (open, extend) values:
 
@@ -228,8 +226,14 @@ Our default (for now) are:
 gap_open/gap_extend: (-4,-1)  
 match/mismatch: (1,-2)
 
+ for help on choosing scoring matrices see:
+ http://www.ebi.ac.uk/help/matrix.html
+
 License
-=======
+-------
+
+ NCBI protein align matices from:
+ ftp://ftp.ncbi.nih.gov/blast/matrices/
 
 GPLv3
 
@@ -246,14 +250,25 @@ GPLv3
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-============= scores/* ====================
- NCBI protein align matices from:
- ftp://ftp.ncbi.nih.gov/blast/matrices/
-
- for help on choosing scoring matrices see:
- http://www.ebi.ac.uk/help/matrix.html
-
 DEVELOPMENT
 ===========
 
 Feel free to contact me to request features.  Bug reports are appreciated.  
+(turner.isaac@gmail.com)
+
+1) Add tests
+2) Finish adding the following options:
+
+* No unneeded gaps:
+--nogapsin1  
+--nogapsin2  
+--nogaps
+
+* Penalised gaps at ends:
+--gapsonlyatendsin1  
+--gapsonlyatendsin2  
+--gapsonlyatends
+
+* free gaps at ends:
+--freestartgap  
+--freeendgap

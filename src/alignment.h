@@ -34,10 +34,10 @@ typedef struct
   score_t score;
 } alignment_t;
 
-#define MATRIX_NAME(x) ((x) == MATCH ? "MATCH" : ((x) == GAP_A ? "GAP_A" : "GAP_B"))
-
 // Matrix names
 enum Matrix { MATCH,GAP_A,GAP_B };
+
+#define MATRIX_NAME(x) ((x) == MATCH ? "MATCH" : ((x) == GAP_A ? "GAP_A" : "GAP_B"))
 
 // Printing colour codes
 extern const char align_col_mismatch[], align_col_indel[], align_col_context[],
