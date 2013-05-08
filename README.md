@@ -4,7 +4,7 @@ Smith-Waterman & Needleman-Wunsch Alignment in C
 url: https://github.com/noporpoise/seq-align  
 author: Isaac Turner <turner.isaac@gmail.com>  
 license: GPLv3
-updated: 8 Oct 2012
+updated: 8 May 2013
 
 About
 =====
@@ -256,19 +256,19 @@ DEVELOPMENT
 Feel free to contact me to request features.  Bug reports are appreciated.  
 (turner.isaac@gmail.com)
 
-1) Add tests
+1) Add tests  
 2) Finish adding the following options:
 
-* No unneeded gaps:
+* No unneeded gaps:  
 --nogapsin1  
 --nogapsin2  
 --nogaps
 
-* Penalised gaps at ends:
+* Penalised gaps at ends:  
 --gapsonlyatendsin1  
 --gapsonlyatendsin2  
 --gapsonlyatends
 
-* free gaps at ends:
+* free gaps at ends:  
 --freestartgap  
 --freeendgap
