@@ -32,11 +32,14 @@ src/libalign.a: $(OBJ_FILES)
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
 
-bin/needleman_wunsch: src/nw_cmdline.c src/libalign.a
+bin/needleman_wunsch: bin src/nw_cmdline.c src/libalign.a
 	$(CC) -o bin/needleman_wunsch $(CFLAGS) $(INCS) -L src src/nw_cmdline.c $(LIBS)
 
-bin/smith_waterman: src/sw_cmdline.c src/libalign.a
+bin/smith_waterman: bin src/sw_cmdline.c src/libalign.a
 	$(CC) -o bin/smith_waterman $(CFLAGS) $(INCS) -L src src/sw_cmdline.c $(LIBS)
+
+bin:
+	mkdir -p bin
 
 examples: src/libalign.a
 	cd examples; make
