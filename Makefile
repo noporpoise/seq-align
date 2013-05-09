@@ -1,3 +1,5 @@
+LIBS_PATH=libs
+
 ifndef CC
 	CC = gcc
 endif
@@ -10,13 +12,14 @@ endif
 
 CFLAGS = -Wall -Wextra $(OPT)
 
-INCS = -I libs/bit_array -I libs/string_buffer \
-       -I libs/htslib/htslib -I libs/seq_file/new_api -I src
+INCS = -I $(LIBS_PATH)/bit_array -I $(LIBS_PATH)/string_buffer \
+       -I $(LIBS_PATH)/htslib/htslib -I $(LIBS_PATH)/seq_file/new_api -I src
 
 LIBS = -lalign -lpthread -lz
 
-LIB_OBJS=$(wildcard libs/bit_array/*.o) $(wildcard libs/string_buffer/*.o) \
-         $(wildcard libs/htslib/htslib/*.o)
+LIB_OBJS=$(wildcard $(LIBS_PATH)/bit_array/*.o) \
+         $(wildcard $(LIBS_PATH)/string_buffer/*.o) \
+         $(wildcard $(LIBS_PATH)/htslib/htslib/*.o)
 
 ALIGN_FILES=$(wildcard src/*.c)
 OBJ_FILES=$(ALIGN_FILES:.c=.o)
