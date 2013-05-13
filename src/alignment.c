@@ -80,7 +80,7 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
     // Think carefully about which way round these are
     gap_a_scores[index]
       = (score_t)(scoring->no_start_gap_penalty ? 0
-                  : scoring->gap_open + (long)i * scoring->gap_extend);
+                  : scoring->gap_open + (long)j * scoring->gap_extend);
     gap_b_scores[index] = min;
   }
 
@@ -113,7 +113,7 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
       }
       else
       {
-        substitution_penalty = tmp_penalty;
+        substitution_penalty = tmp_penalty; // cast to long
 
         // substitution
         // 1) continue alignment
@@ -133,13 +133,11 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
       {
         // Update gap_a_scores[i][j] from position [i][j-1]
 
-        if(i == score_width-1 && scoring->no_end_gap_penalty)
+        if(seq_i == len_i-1 && scoring->no_end_gap_penalty)
         {
-          gap_a_scores[index]
-            = max4(match_scores[index_up],
-                   gap_a_scores[index_up],
-                   gap_b_scores[index_up] + (j == 1 ? 0 : gap_open_penalty),
-                   min);
+          gap_a_scores[index] = MAX3(match_scores[index_up],
+                                     gap_a_scores[index_up],
+                                     gap_b_scores[index_up]);
         }
         else
         {
@@ -155,13 +153,11 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
       {
         // Update gap_b_scores[i][j] from position [i-1][j]
 
-        if(j == score_height-1 && scoring->no_end_gap_penalty)
+        if(seq_j == len_j-1 && scoring->no_end_gap_penalty)
         {
-          gap_b_scores[index]
-            = max4(match_scores[index_left],
-                   gap_a_scores[index_left] + (i == 1 ? 0 : gap_open_penalty),
-                   gap_b_scores[index_left],
-                   min);
+          gap_b_scores[index] = MAX3(match_scores[index_left],
+                                     gap_a_scores[index_left],
+                                     gap_b_scores[index_left]);
         }
         else
         {
@@ -229,33 +225,29 @@ void aligner_align(aligner_t *aligner,
                    size_t len_a, size_t len_b,
                    const scoring_t *scoring, char is_sw)
 {
-  aligner_t tmp = {.scoring = scoring, .seq_a = seq_a, .seq_b = seq_b,
-                   .score_width = len_a+1, .score_height = len_b+1};
+  aligner->scoring = scoring;
+  aligner->seq_a = seq_a;
+  aligner->seq_b = seq_b;
+  aligner->score_width = len_a+1;
+  aligner->score_height = len_b+1;
 
-  size_t new_capacity = tmp.score_width * tmp.score_height;
+  size_t new_capacity = aligner->score_width * aligner->score_height;
 
   if(aligner->capacity == 0 || aligner->capacity < new_capacity)
   {
-    tmp.capacity = ROUNDUP2POW(new_capacity);
-    size_t mem = sizeof(score_t) * tmp.capacity;
+    aligner->capacity = ROUNDUP2POW(new_capacity);
+    size_t mem = sizeof(score_t) * aligner->capacity;
 
     if(aligner->capacity == 0) {
-      tmp.match_scores = malloc(mem);
-      tmp.gap_a_scores = malloc(mem);
-      tmp.gap_b_scores = malloc(mem);
+      aligner->match_scores = malloc(mem);
+      aligner->gap_a_scores = malloc(mem);
+      aligner->gap_b_scores = malloc(mem);
     } else {
-      tmp.match_scores = realloc(aligner->match_scores, mem);
-      tmp.gap_a_scores = realloc(aligner->gap_a_scores, mem);
-      tmp.gap_b_scores = realloc(aligner->gap_b_scores, mem);
+      aligner->match_scores = realloc(aligner->match_scores, mem);
+      aligner->gap_a_scores = realloc(aligner->gap_a_scores, mem);
+      aligner->gap_b_scores = realloc(aligner->gap_b_scores, mem);
     }
-  } else {
-    tmp.capacity = aligner->capacity;
-    tmp.match_scores = aligner->match_scores;
-    tmp.gap_a_scores = aligner->gap_a_scores;
-    tmp.gap_b_scores = aligner->gap_b_scores;
   }
-
-  memcpy(aligner, &tmp, sizeof(aligner_t));
 
   alignment_fill_matrices(aligner, is_sw);
 }

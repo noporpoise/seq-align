@@ -19,7 +19,7 @@ typedef struct
 {
   const scoring_t* scoring;
   const char *seq_a, *seq_b;
-  const size_t score_width, score_height;
+  size_t score_width, score_height;
   score_t *match_scores, *gap_a_scores, *gap_b_scores;
   size_t capacity;
 } aligner_t;
