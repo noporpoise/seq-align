@@ -44,7 +44,9 @@ extern const char align_col_mismatch[], align_col_indel[], align_col_context[],
                   align_col_stop[];
 
 #define aligner_init(a) (memset(a, 0, sizeof(aligner_t)))
-void aligner_align(aligner_t *aligner, const char *seq_a, const char *seq_b,
+void aligner_align(aligner_t *aligner,
+                   const char *seq_a, const char *seq_b,
+                   size_t len_a, size_t len_b,
                    const scoring_t *scoring, char is_sw);
 void aligner_destroy(aligner_t *aligner);
 

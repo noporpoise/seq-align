@@ -224,12 +224,11 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
   }
 }
 
-void aligner_align(aligner_t *aligner, const char *seq_a, const char *seq_b,
+void aligner_align(aligner_t *aligner,
+                   const char *seq_a, const char *seq_b,
+                   size_t len_a, size_t len_b,
                    const scoring_t *scoring, char is_sw)
 {
-  size_t len_a = strlen(seq_a);
-  size_t len_b = strlen(seq_b);
-
   aligner_t tmp = {.scoring = scoring, .seq_a = seq_a, .seq_b = seq_b,
                    .score_width = len_a+1, .score_height = len_b+1};
 

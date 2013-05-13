@@ -28,7 +28,15 @@ void needleman_wunsch_align(const char *a, const char *b,
                             const scoring_t *scoring,
                             nw_aligner_t *nw, alignment_t *result)
 {
-  aligner_align(nw, a, b, scoring, 0);
+  needleman_wunsch_align2(a, b, strlen(a), strlen(b), scoring, nw, result);
+}
+
+void needleman_wunsch_align2(const char *a, const char *b,
+                             size_t len_a, size_t len_b,
+                             const scoring_t *scoring,
+                             nw_aligner_t *nw, alignment_t *result)
+{
+  aligner_align(nw, a, b, len_a, len_b, scoring, 0);
 
   // work backwards re-tracing optimal alignment, then shift sequences into place
 

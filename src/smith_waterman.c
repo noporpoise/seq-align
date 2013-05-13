@@ -103,9 +103,16 @@ aligner_t* smith_waterman_get_aligner(sw_aligner_t *sw)
 void smith_waterman_align(const char *a, const char *b,
                           const scoring_t *scoring, sw_aligner_t *sw)
 {
+  smith_waterman_align2(a, b, strlen(a), strlen(b), scoring, sw);
+}
+
+void smith_waterman_align2(const char *a, const char *b,
+                           size_t len_a, size_t len_b,
+                           const scoring_t *scoring, sw_aligner_t *sw)
+{
   aligner_t *aligner = &sw->aligner;
   sw_history_t *hist = &sw->history;
-  aligner_align(aligner, a, b, scoring, 1);
+  aligner_align(aligner, a, b, len_a, len_b, scoring, 1);
 
   size_t arr_size = aligner->score_width * aligner->score_height;
   _ensure_history_capacity(hist, arr_size);
@@ -125,7 +132,6 @@ void smith_waterman_align(const char *a, const char *b,
   sort_r(hist->sorted_match_indices, hist->num_of_hits,
          sizeof(size_t), sort_match_indices, &tmp_struct);
 }
-
 
 // Return 1 if alignment was found, 0 otherwise
 static char _follow_hit(sw_aligner_t* sw, size_t arr_index,
