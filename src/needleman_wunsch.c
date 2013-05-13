@@ -141,4 +141,6 @@ void needleman_wunsch_align2(const char *a, const char *b,
 
   alignment_a[alignment_len] = '\0';
   alignment_b[alignment_len] = '\0';
+
+  result->length = alignment_len;
 }
