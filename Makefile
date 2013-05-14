@@ -13,7 +13,7 @@ endif
 CFLAGS = -Wall -Wextra $(OPT)
 
 INCS = -I $(LIBS_PATH)/bit_array -I $(LIBS_PATH)/string_buffer \
-       -I $(LIBS_PATH)/htslib/htslib -I $(LIBS_PATH)/seq_file/new_api -I src
+       -I $(LIBS_PATH)/htslib/htslib -I $(LIBS_PATH)/seq_file -I src
 
 LIBS = -lalign -lpthread -lz
 

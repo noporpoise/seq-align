@@ -3,7 +3,7 @@ all: bit_array string_buffer htslib seq_file
 	cd htslib; git pull; make
 	cd bit_array; git pull; make
 	cd string_buffer; git pull; make
-	cd seq_file; git pull; make STRING_BUF_PATH=../string_buffer HTS_PATH=../htslib
+	cd seq_file; git pull; make HTSLIB=../htslib
 
 clean:
 	cd htslib; make clean
