@@ -272,3 +272,9 @@ Feel free to contact me to request features.  Bug reports are appreciated.
 * free gaps at ends:  
 --freestartgap  
 --freeendgap
+
+Algorithms to investigate:
+Gotoh
+Hirschberg's algorithm using linear space
+Myer's bit-vector algorithm
+Combination of Myer's and Hirschberg's algorithm

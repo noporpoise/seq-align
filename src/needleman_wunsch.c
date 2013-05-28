@@ -47,7 +47,7 @@ void needleman_wunsch_align2(const char *a, const char *b,
   // Position of next alignment character in buffer (working backwards)
   size_t next_char = longest_alignment-1;
 
-  size_t arr_index, arr_size = nw->score_width * nw->score_height;
+  size_t arr_size = nw->score_width * nw->score_height;
 
   // Get max score (and therefore current matrix)
   enum Matrix curr_matrix = MATCH;
@@ -73,8 +73,8 @@ void needleman_wunsch_align2(const char *a, const char *b,
   char *alignment_a = result->result_a, *alignment_b = result->result_b;
 
   // coords in score matrices
-  size_t score_x = nw->score_width-1;
-  size_t score_y = nw->score_height-1;
+  size_t score_x = nw->score_width-1, score_y = nw->score_height-1;
+  size_t arr_index = arr_size - 1;
 
   for(; score_x > 0 && score_y > 0; next_char--)
   {

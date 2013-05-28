@@ -304,10 +304,8 @@ void alignment_reverse_move(enum Matrix *curr_matrix, score_t *curr_score,
                             size_t *score_x, size_t *score_y,
                             size_t *arr_index, const aligner_t *aligner)
 {
-  int prev_match_penalty, prev_gap_a_penalty, prev_gap_b_penalty;
-
-  size_t seq_x = (*score_x)-1;
-  size_t seq_y = (*score_y)-1;
+  size_t seq_x = (*score_x)-1, seq_y = (*score_y)-1;
+  size_t len_i = aligner->score_width-1, len_j = aligner->score_height-1;
 
   char is_match;
   int match_penalty;
@@ -316,15 +314,23 @@ void alignment_reverse_move(enum Matrix *curr_matrix, score_t *curr_score,
   scoring_lookup(scoring, aligner->seq_a[seq_x], aligner->seq_b[seq_y],
                  &match_penalty, &is_match);
 
-  int gap_open_penalty = scoring->gap_extend + scoring->gap_open;
-  int gap_extend_penalty = scoring->gap_extend;
+  int gap_a_open_penalty, gap_b_open_penalty;
+  int gap_a_extend_penalty, gap_b_extend_penalty;
 
-  if(scoring->no_end_gap_penalty &&
-     (*score_x == aligner->score_width-1 || *score_y == aligner->score_height-1))
-  {
-    gap_open_penalty = 0;
-    gap_extend_penalty = 0;
+  gap_a_open_penalty = gap_b_open_penalty = scoring->gap_extend + scoring->gap_open;
+  gap_a_extend_penalty = gap_b_extend_penalty = scoring->gap_extend;
+
+  // Free gaps at the ends
+  if(scoring->no_end_gap_penalty) {
+    if(*score_x == len_i) gap_a_open_penalty = gap_a_extend_penalty = 0;
+    if(*score_y == len_j) gap_b_open_penalty = gap_b_extend_penalty = 0;
   }
+  if(scoring->no_start_gap_penalty) {
+    if(*score_x == 0) gap_a_open_penalty = gap_a_extend_penalty = 0;
+    if(*score_y == 0) gap_b_open_penalty = gap_b_extend_penalty = 0;
+  }
+
+  long prev_match_penalty, prev_gap_a_penalty, prev_gap_b_penalty;
 
   switch(*curr_matrix)
   {
@@ -334,20 +340,23 @@ void alignment_reverse_move(enum Matrix *curr_matrix, score_t *curr_score,
       prev_gap_b_penalty = match_penalty;
       (*score_x)--;
       (*score_y)--;
+      (*arr_index) -= aligner->score_width + 1;
       break;
 
     case GAP_A:
-      prev_match_penalty = gap_open_penalty;
-      prev_gap_a_penalty = gap_extend_penalty;
-      prev_gap_b_penalty = gap_open_penalty;
+      prev_match_penalty = gap_a_open_penalty;
+      prev_gap_a_penalty = gap_a_extend_penalty;
+      prev_gap_b_penalty = gap_a_open_penalty;
       (*score_y)--;
+      (*arr_index) -= aligner->score_width;
       break;
 
     case GAP_B:
-      prev_match_penalty = gap_open_penalty;
-      prev_gap_a_penalty = gap_open_penalty;
-      prev_gap_b_penalty = gap_extend_penalty;
+      prev_match_penalty = gap_b_open_penalty;
+      prev_gap_a_penalty = gap_b_open_penalty;
+      prev_gap_b_penalty = gap_b_extend_penalty;
       (*score_x)--;
+      (*arr_index)--;
       break;
 
     default:
@@ -356,16 +365,15 @@ void alignment_reverse_move(enum Matrix *curr_matrix, score_t *curr_score,
       exit(EXIT_FAILURE);
   }
 
-  *arr_index = ARR_2D_INDEX(aligner->score_width, *score_x, *score_y);
+  // *arr_index = ARR_2D_INDEX(aligner->score_width, *score_x, *score_y);
 
-  if((!scoring->no_gaps_in_a || *score_x == 0 || *score_x == aligner->score_width-1) &&
+  if((!scoring->no_gaps_in_a || *score_x == 0 || *score_x == len_i) &&
      (long)aligner->gap_a_scores[*arr_index] + prev_gap_a_penalty == *curr_score)
   {
     *curr_matrix = GAP_A;
     *curr_score = aligner->gap_a_scores[*arr_index];
-    return;
   }
-  else if((!scoring->no_gaps_in_b || *score_y == 0 || *score_y == aligner->score_height-1) &&
+  else if((!scoring->no_gaps_in_b || *score_y == 0 || *score_y == len_j) &&
           (long)aligner->gap_b_scores[*arr_index] + prev_gap_b_penalty == *curr_score)
   {
     *curr_matrix = GAP_B;
@@ -379,6 +387,15 @@ void alignment_reverse_move(enum Matrix *curr_matrix, score_t *curr_score,
   }
   else
   {
+    fprintf(stderr, "[%s:%zu,%zu]: %i\n",
+            MATRIX_NAME(*curr_matrix), *score_x, *score_y, *curr_score);
+    fprintf(stderr, " match: %li gap_open: %li gap_extend: %li\n",
+            prev_match_penalty, prev_gap_a_penalty, prev_gap_b_penalty);
+    fprintf(stderr, " MATCH: %i GAP_A: %i GAP_B: %i\n",
+            aligner->match_scores[*arr_index],
+            aligner->gap_a_scores[*arr_index],
+            aligner->gap_b_scores[*arr_index]);
+
     fprintf(stderr,
 "Program error: traceback fail (get_reverse_move)\n"
 "This may be due to an integer overflow if your sequences are long or scores\n"
