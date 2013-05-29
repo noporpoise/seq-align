@@ -565,15 +565,16 @@ void align_from_file(const char *path1, const char *path2,
     return;
   }
 
-  read_t *read1 = seq_read_alloc();
-  read_t *read2 = seq_read_alloc();
+  read_t read1, read2;
+  seq_read_alloc(&read1);
+  seq_read_alloc(&read2);
 
   // Loop while we can read a sequence from the first file
   unsigned long alignments;
 
-  for(alignments = 0; seq_read(sf1, read1) > 0; alignments++)
+  for(alignments = 0; seq_read(sf1, &read1) > 0; alignments++)
   {
-    if(seq_read(sf2, read2) <= 0)
+    if(seq_read(sf2, &read2) <= 0)
     {
       fprintf(stderr, "Alignment Error: Odd number of sequences - "
                       "I read in pairs!\n");
@@ -581,7 +582,7 @@ void align_from_file(const char *path1, const char *path2,
       break;
     }
 
-    (align)(read1, read2);
+    (align)(&read1, &read2);
   }
 
   // warn if no bases read
@@ -598,6 +599,6 @@ void align_from_file(const char *path1, const char *path2,
     seq_close(sf2);
 
   // Free memory
-  seq_read_destroy(read1);
-  seq_read_destroy(read2);
+  seq_read_dealloc(&read1);
+  seq_read_dealloc(&read2);
 }
