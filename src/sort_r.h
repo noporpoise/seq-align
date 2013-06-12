@@ -1,9 +1,3 @@
-/*
- sort_r.c
- author: Isaac Turner <turner.isaac@gmail.com>
- url: https://github.com/noporpoise/seq-align
- May 2013
- */
 
 #include <stdlib.h>
 

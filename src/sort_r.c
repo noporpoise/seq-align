@@ -1,13 +1,3 @@
-/*
- sort_r.c
- author: Isaac Turner <turner.isaac@gmail.com>
- url: https://github.com/noporpoise/seq-align
- May 2013
- */
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <search.h>
 
 #include "sort_r.h"
 
@@ -64,4 +54,4 @@ void sort_r(void *base, size_t nel, size_t width,
   #endif
 }
 
-#endif
+#endif /* !QSORT_WITH_NESTED_FUNCTIONS */
