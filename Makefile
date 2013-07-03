@@ -12,31 +12,32 @@ endif
 
 CFLAGS = -Wall -Wextra $(OPT)
 
-INCS = -I $(LIBS_PATH)/bit_array -I $(LIBS_PATH)/string_buffer \
-       -I $(LIBS_PATH)/htslib/htslib -I $(LIBS_PATH)/seq_file -I src
+INCS=-I $(LIBS_PATH)/bit_array -I $(LIBS_PATH)/string_buffer \
+     -I $(LIBS_PATH)/htslib/htslib -I $(LIBS_PATH)/seq_file -I src
 
-LIBS = -lalign -lpthread -lz
+LIBS=-L $(LIBS_PATH)/bit_array -L $(LIBS_PATH)/string_buffer \
+     -L $(LIBS_PATH)/htslib/htslib -L src
 
-LIB_OBJS=$(wildcard $(LIBS_PATH)/bit_array/*.o) \
-         $(wildcard $(LIBS_PATH)/string_buffer/*.o) \
-         $(wildcard $(LIBS_PATH)/htslib/htslib/*.o)
+LINK=-lalign -lstrbuf -lbitarr -lhts -lpthread -lz
 
-ALIGN_FILES=$(wildcard src/*.c)
+# Compile and bundle all non-main files into library
+CFILES=$(wildcard src/*.c)
+ALIGN_FILES=$(filter-out src/*_cmdline.c,$(CFILES))
 OBJ_FILES=$(ALIGN_FILES:.c=.o)
 
 all: bin/needleman_wunsch bin/smith_waterman src/libalign.a examples
 
 src/libalign.a: $(OBJ_FILES)
-	ar -csru src/libalign.a $(OBJ_FILES) $(LIB_OBJS)
+	ar -csru src/libalign.a $(OBJ_FILES)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
 
 bin/needleman_wunsch: bin src/nw_cmdline.c src/libalign.a
-	$(CC) -o bin/needleman_wunsch $(CFLAGS) $(INCS) -L src src/nw_cmdline.c $(LIBS)
+	$(CC) -o bin/needleman_wunsch $(CFLAGS) $(INCS) $(LIBS) src/nw_cmdline.c $(LINK)
 
 bin/smith_waterman: bin src/sw_cmdline.c src/libalign.a
-	$(CC) -o bin/smith_waterman $(CFLAGS) $(INCS) -L src src/sw_cmdline.c $(LIBS)
+	$(CC) -o bin/smith_waterman $(CFLAGS) $(INCS) $(LIBS) src/sw_cmdline.c $(LINK)
 
 bin:
 	mkdir -p bin
