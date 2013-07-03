@@ -43,7 +43,7 @@ bin:
 	mkdir -p bin
 
 examples: src/libalign.a
-	cd examples; make
+	cd examples; make LIBS_PATH=$(abspath $(LIBS_PATH))
 
 clean:
 	rm -rf bin/* src/*.o src/libalign.a
