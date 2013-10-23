@@ -53,81 +53,107 @@ For those interested, the depedencies used are:
 Smith-Waterman
 ==============
 
-    usage: ./smith_waterman [OPTIONS] [seq1 seq2]
-      Smith-Waterman optimal local alignment (maximises score).  
-      Takes a pair of sequences on the command line, or can read from a
-      file and from sequence piped in.  Can read gzip files and FASTA.
-    
-      OPTIONS:
-        --file <file>        Sequence file reading with gzip support - read two
-                             sequences at a time and align them
-        --files <f1> <f2>    Read one sequence from each file to align at one time
-        --stdin              Read from STDIN (same as '--file -')
-    
-        --case_sensitive     Use case sensitive character comparison [default: off]
-    
-        --match <score>      [default: 2]
-        --mismatch <score>   [default: -2]
-        --gapopen <score>    [default: -1]
-        --gapextend <score>  [default: -1]
-    
-        --nogaps             No gaps allowed in the alignment
-        --nomismatches       No mismatches allowed. 
-          When used together, prints longest common substrings in order of length
-    
-        --scoring <PAM30|PAM70|BLOSUM80|BLOSUM62>
-        --substitution_matrix <file>  see details for formatting
-        --substitution_pairs <file>   see details for formatting
-    
-        --wildcard <w> <s>   Character <w> matches all characters with score <s>
-    
-        --minscore <score>   Minimum required score
-                             [default: match * MAX(0.2 * length, 2)]
-        --maxhits <hits>     Maximum number of results per alignment
-                             [default: no limit]
-        --context <n>        Print <n> bases of context
-        --printfasta         Print fasta header lines
-        --printseq           Print sequences before local alignments
-        --pretty             Print with a descriptor line
-        --colour             Print with colour
+        usage: ./bin/smith_waterman [OPTIONS] [seq1 seq2]
+          Smith-Waterman optimal local alignment (maximises score).  
+          Takes a pair of sequences on the command line, or can read from a
+          file and from sequence piped in.  Can read gzip files and FASTA.
+
+          OPTIONS:
+            --file <file>        Sequence file reading with gzip support - read two
+                                 sequences at a time and align them
+            --files <f1> <f2>    Read one sequence from each file to align at one time
+            --stdin              Read from STDIN (same as '--file -')
+
+            --case_sensitive     Use case sensitive character comparison [default: off]
+
+            --match <score>      [default: 2]
+            --mismatch <score>   [default: -2]
+            --gapopen <score>    [default: -1]
+            --gapextend <score>  [default: -1]
+
+            --scoring <PAM30|PAM70|BLOSUM80|BLOSUM62>
+            --substitution_matrix <file>  see details for formatting
+            --substitution_pairs <file>   see details for formatting
+
+            --wildcard <w> <s>   Character <w> matches all characters with score <s>
+
+            --minscore <score>   Minimum required score
+                                 [default: match * MAX(0.2 * length, 2)]
+            --maxhits <hits>     Maximum number of results per alignment
+                                 [default: no limit]
+
+            --context <n>        Print <n> bases of context
+            --printseq           Print sequences before local alignments
+            --printfasta         Print fasta header lines
+            --pretty             Print with a descriptor line
+            --colour             Print with colour
+
+          EXPERIMENTAL (and buggy):
+            --nogapsin1          No gaps allowed in the first sequence
+            --nogapsin2          No gaps allowed in the second sequence
+            --nogaps             No gaps allowed in either sequence
+            --nomismatches       No mismatches allowed: cannot be used with --nogaps..
+
+         DETAILS:
+          * For help choosing scoring, see the README file. 
+          * Gap (of length N) penalty is: (open+N*extend)
+          * To do alignment without affine gap penalty, set '--gapopen 0'.
+          * Scoring files should be matrices, with entries separated by a single
+            character or whitespace. See files in the 'scores' directory for examples.
+
+          turner.isaac@gmail.com  (compiled: Oct 23 2013 19:08:54)
 
 Needleman-Wunsch
 ================
 
-    usage: ./needleman_wunsch [OPTIONS] [seq1 seq2]
-      Needleman-Wunsch optimal global alignment (maximises score). Takes a pair 
-      of sequences on the command line, reads from a file and from sequence 
-      piped in.  Can read gzip files and those in FASTA, FASTQ or plain format.
-    
-      OPTIONS:
-        --file <file>        Sequence file reading with gzip support
-        --files <f1> <f2>    Read one sequence from each file at a time to align
-        --stdin              Read from STDIN (same as '--file -')
-    
-        --case_sensitive     Case sensitive character comparison
-    
-        --match <score>      [default: 1]
-        --mismatch <score>   [default: -2]
-        --gapopen <score>    [default: -4]
-        --gapextend <score>  [default: -1]
-    
-        --nogaps             No gaps allowed in the alignment
-        --nomismatches       No mismatches allowed - not to be used with --nogaps
-    
-        --scoring <PAM30|PAM70|BLOSUM80|BLOSUM62>
-        --substitution_matrix <file>  see details for formatting
-        --substitution_pairs <file>   see details for formatting
-    
-        --wildcard <w> <s>   Character <w> matches all characters with score <s>
-    
-        --freestartgap       No penalty for gap at start of alignment
-        --freeendgap         No penalty for gap at end of alignment
-    
-        --printscores        Print optimal alignment scores
-        --printfasta         Print fasta header lines
-        --pretty             Print with a descriptor line
-        --colour             Print with colour
-        --zam                A funky type of output
+        usage: ./bin/needleman_wunsch [OPTIONS] [seq1 seq2]
+          Needleman-Wunsch optimal global alignment (maximises score).  
+          Takes a pair of sequences on the command line, or can read from a
+          file and from sequence piped in.  Can read gzip files and FASTA.
+
+          OPTIONS:
+            --file <file>        Sequence file reading with gzip support - read two
+                                 sequences at a time and align them
+            --files <f1> <f2>    Read one sequence from each file to align at one time
+            --stdin              Read from STDIN (same as '--file -')
+
+            --case_sensitive     Use case sensitive character comparison [default: off]
+
+            --match <score>      [default: 1]
+            --mismatch <score>   [default: -2]
+            --gapopen <score>    [default: -4]
+            --gapextend <score>  [default: -1]
+
+            --scoring <PAM30|PAM70|BLOSUM80|BLOSUM62>
+            --substitution_matrix <file>  see details for formatting
+            --substitution_pairs <file>   see details for formatting
+
+            --wildcard <w> <s>   Character <w> matches all characters with score <s>
+
+
+            --freestartgap       No penalty for gap at start of alignment
+            --freeendgap         No penalty for gap at end of alignment
+
+            --printscores        Print optimal alignment scores
+            --zam                A funky type of output
+            --printfasta         Print fasta header lines
+            --pretty             Print with a descriptor line
+            --colour             Print with colour
+
+          EXPERIMENTAL (and buggy):
+            --nogapsin1          No gaps allowed in the first sequence
+            --nogapsin2          No gaps allowed in the second sequence
+            --nogaps             No gaps allowed in either sequence
+            --nomismatches       No mismatches allowed: cannot be used with --nogaps..
+
+         DETAILS:
+          * For help choosing scoring, see the README file. 
+          * Gap (of length N) penalty is: (open+N*extend)
+          * To do alignment without affine gap penalty, set '--gapopen 0'.
+          * Scoring files should be matrices, with entries separated by a single
+            character or whitespace. See files in the 'scores' directory for examples.
+
+          turner.isaac@gmail.com  (compiled: Oct 23 2013 19:08:54)
 
 
 Baiscs:
