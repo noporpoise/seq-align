@@ -16,8 +16,9 @@ INCS=-I $(LIBS_PATH)/bit_array -I $(LIBS_PATH)/string_buffer \
      -I $(LIBS_PATH)/seq_file -I src
 
 LIBS=-L $(LIBS_PATH)/bit_array -L $(LIBS_PATH)/string_buffer -L src
-
 LINK=-lalign -lstrbuf -lbitarr -lpthread -lz
+
+REQ=$(LIBS_PATH)/bit_array/Makefile $(LIBS_PATH)/string_buffer/Makefile $(LIBS_PATH)/seq_file/Makefile
 
 # Compile and bundle all non-main files into library
 CFILES=$(wildcard src/*.c)
@@ -29,8 +30,10 @@ all: bin/needleman_wunsch bin/smith_waterman src/libalign.a examples
 src/libalign.a: $(OBJ_FILES)
 	ar -csru src/libalign.a $(OBJ_FILES)
 
-$(LIBS_PATH)/bit_array/Makefile $(LIBS_PATH)/string_buffer/Makefile $(LIBS_PATH)/seq_file/Makefile:
+$(LIBS_PATH)/%/Makefile:
 	cd libs; make;
+
+$(OBJ_FILES): $(REQ)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
