@@ -1,9 +1,8 @@
 
-all: bit_array string_buffer htslib seq_file
-	cd htslib; git pull; make
+all: bit_array string_buffer seq_file
 	cd bit_array; git pull; make
 	cd string_buffer; git pull; make
-	cd seq_file; git pull; make HTSLIB=../htslib
+	cd seq_file; git pull; make
 
 clean:
 	cd htslib; make clean
@@ -13,9 +12,6 @@ clean:
 	rm -rf BitArray
 
 .PHONY: all clean
-
-htslib:
-	git clone git://github.com/samtools/htslib.git
 
 bit_array:
 	git clone git@github.com:noporpoise/BitArray.git

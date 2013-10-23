@@ -13,12 +13,11 @@ endif
 CFLAGS = -Wall -Wextra $(OPT)
 
 INCS=-I $(LIBS_PATH)/bit_array -I $(LIBS_PATH)/string_buffer \
-     -I $(LIBS_PATH)/htslib/htslib -I $(LIBS_PATH)/seq_file -I src
+     -I $(LIBS_PATH)/seq_file -I src
 
-LIBS=-L $(LIBS_PATH)/bit_array -L $(LIBS_PATH)/string_buffer \
-     -L $(LIBS_PATH)/htslib/htslib -L src
+LIBS=-L $(LIBS_PATH)/bit_array -L $(LIBS_PATH)/string_buffer -L src
 
-LINK=-lalign -lstrbuf -lbitarr -lhts -lpthread -lz
+LINK=-lalign -lstrbuf -lbitarr -lpthread -lz
 
 # Compile and bundle all non-main files into library
 CFILES=$(wildcard src/*.c)
@@ -29,6 +28,9 @@ all: bin/needleman_wunsch bin/smith_waterman src/libalign.a examples
 
 src/libalign.a: $(OBJ_FILES)
 	ar -csru src/libalign.a $(OBJ_FILES)
+
+$(LIBS_PATH)/bit_array/Makefile $(LIBS_PATH)/string_buffer/Makefile $(LIBS_PATH)/seq_file/Makefile:
+	cd libs; make;
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
