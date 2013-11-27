@@ -1,3 +1,4 @@
+ /* Isaac Turner; Nov 2013; License: Public Domain */
 
 #include <stdlib.h>
 #include "sort_r.h"

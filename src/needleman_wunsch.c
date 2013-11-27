@@ -2,7 +2,7 @@
  needleman_wunsch.c
  author: Isaac Turner <turner.isaac@gmail.com>
  url: https://github.com/noporpoise/seq-align
- May 2013
+ Nov 2013; License: Public Domain
  */
 
 #include <stdlib.h>

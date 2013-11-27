@@ -1,10 +1,10 @@
 seq-align
 =========
-Smith-Waterman & Needleman-Wunsch Alignment in C    
+Smith-Waterman & Needleman-Wunsch Alignment in C  
 url: https://github.com/noporpoise/seq-align  
 author: Isaac Turner <turner.isaac@gmail.com>  
-license: GPLv3
-updated: 8 May 2013
+license: Public Domain  
+updated: 27 Nov 2013
 
 About
 =====
@@ -45,7 +45,6 @@ Build seq-align:
 
 For those interested, the depedencies used are:
 
-* htslib [https://github.com/samtools/htslib]
 * bit_array [https://github.com/noporpoise/BitArray]
 * string_buffer [https://github.com/noporpoise/string_buffer]
 * seq_file [https://github.com/noporpoise/seq_file]
@@ -261,20 +260,32 @@ License
  NCBI protein align matices from:
  ftp://ftp.ncbi.nih.gov/blast/matrices/
 
-GPLv3
+seq-align: Public Domain
+    This is free and unencumbered software released into the public domain.
 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- 
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    Anyone is free to copy, modify, publish, use, compile, sell, or
+    distribute this software, either in source code form or as a compiled
+    binary, for any purpose, commercial or non-commercial, and by any
+    means.
+
+    In jurisdictions that recognize copyright laws, the author or authors
+    of this software dedicate any and all copyright interest in the
+    software to the public domain. We make this dedication for the benefit
+    of the public at large and to the detriment of our heirs and
+    successors. We intend this dedication to be an overt act of
+    relinquishment in perpetuity of all present and future rights to this
+    software under copyright law.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+    OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+    ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+    OTHER DEALINGS IN THE SOFTWARE.
+
+    For more information, please refer to <http://unlicense.org>
+
 
 DEVELOPMENT
 ===========
