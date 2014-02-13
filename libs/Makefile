@@ -1,13 +1,13 @@
 
 all: bit_array string_buffer seq_file
-	cd bit_array; git pull; make
-	cd string_buffer; git pull; make
-	cd seq_file; git pull; make
+	cd bit_array &&  git pull && make
+	cd string_buffer && git pull && make
+	cd seq_file && git pull && make
 
 clean:
-	cd bit_array; make clean
-	cd string_buffer; make clean
-	cd seq_file; make clean
+	cd bit_array && make clean
+	cd string_buffer && make clean
+	cd seq_file && make clean
 	rm -rf BitArray
 
 .PHONY: all clean
