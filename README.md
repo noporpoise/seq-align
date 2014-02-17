@@ -6,6 +6,8 @@ author: Isaac Turner <turner.isaac@gmail.com>
 license: Public Domain  
 updated: 27 Nov 2013
 
+[![Build Status](https://travis-ci.org/noporpoise/seq-align.png?branch=master)](https://travis-ci.org/noporpoise/seq-align)
+
 About
 =====
 
