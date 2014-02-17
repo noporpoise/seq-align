@@ -1,22 +1,29 @@
+CC ?= gcc
 LIBS_PATH=libs
 
-ifndef CC
-	CC = gcc
-endif
+PLATFORM := $(shell uname)
+COMPILER := $(shell ($(CC) -v 2>&1) | tr A-Z a-z )
 
 ifdef DEBUG
-	OPT = -O0 -DDEBUG=1 --debug -g
+	OPT = -O0 -DDEBUG=1 --debug -g -ggdb
 else
-	OPT = -O3
+	ifneq (,$(findstring clang,$(COMPILER)))
+		# clang Link Time Optimisation (lto) seems to have issues atm
+		OPT = -O3
+	else
+		OPT = -O4 -flto
+		TGTFLAGS = -fwhole-program
+	endif
 endif
 
 CFLAGS = -Wall -Wextra $(OPT)
+OBJFLAGS = -fPIC
+LINKFLAGS = -lalign -lstrbuf -lbitarr -lpthread -lz
 
 INCS=-I $(LIBS_PATH)/bit_array -I $(LIBS_PATH)/string_buffer \
      -I $(LIBS_PATH)/seq_file -I src
 
 LIBS=-L $(LIBS_PATH)/bit_array -L $(LIBS_PATH)/string_buffer -L src
-LINK=-lalign -lstrbuf -lbitarr -lpthread -lz
 
 REQ=$(LIBS_PATH)/bit_array/Makefile $(LIBS_PATH)/string_buffer/Makefile $(LIBS_PATH)/seq_file/Makefile
 
@@ -36,13 +43,13 @@ $(LIBS_PATH)/%/Makefile:
 $(OBJ_FILES): $(REQ)
 
 %.o: %.c
-	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
+	$(CC) $(CFLAGS) $(OBJFLAGS) $(INCS) -c $< -o $@
 
 bin/needleman_wunsch: bin src/nw_cmdline.c src/libalign.a
-	$(CC) -o bin/needleman_wunsch $(CFLAGS) $(INCS) $(LIBS) src/nw_cmdline.c $(LINK)
+	$(CC) -o bin/needleman_wunsch $(CFLAGS) $(TGTFLAGS) $(INCS) $(LIBS) src/nw_cmdline.c $(LINKFLAGS)
 
 bin/smith_waterman: bin src/sw_cmdline.c src/libalign.a
-	$(CC) -o bin/smith_waterman $(CFLAGS) $(INCS) $(LIBS) src/sw_cmdline.c $(LINK)
+	$(CC) -o bin/smith_waterman $(CFLAGS) $(TGTFLAGS) $(INCS) $(LIBS) src/sw_cmdline.c $(LINKFLAGS)
 
 bin:
 	mkdir -p bin
