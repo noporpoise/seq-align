@@ -29,7 +29,7 @@ REQ=$(LIBS_PATH)/bit_array/Makefile $(LIBS_PATH)/string_buffer/Makefile $(LIBS_P
 
 # Compile and bundle all non-main files into library
 CFILES=$(wildcard src/*.c)
-ALIGN_FILES=$(filter-out src/*_cmdline.c,$(CFILES))
+ALIGN_FILES=$(filter-out src/%_cmdline.c,$(CFILES))
 OBJ_FILES=$(ALIGN_FILES:.c=.o)
 
 all: bin/needleman_wunsch bin/smith_waterman src/libalign.a examples
