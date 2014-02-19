@@ -28,28 +28,27 @@ LIBS=-L $(LIBS_PATH)/bit_array -L $(LIBS_PATH)/string_buffer -L src
 REQ=$(LIBS_PATH)/bit_array/Makefile $(LIBS_PATH)/string_buffer/Makefile $(LIBS_PATH)/seq_file/Makefile
 
 # Compile and bundle all non-main files into library
-CFILES=$(wildcard src/*.c)
-ALIGN_FILES=$(filter-out src/%_cmdline.c,$(CFILES))
-OBJ_FILES=$(ALIGN_FILES:.c=.o)
+SRCS=$(wildcard src/*.c)
+OBJS=$(SRCS:.c=.o)
 
 all: bin/needleman_wunsch bin/smith_waterman src/libalign.a examples
 
-src/libalign.a: $(OBJ_FILES)
-	ar -csru src/libalign.a $(OBJ_FILES)
+src/libalign.a: $(OBJS)
+	ar -csru src/libalign.a $(OBJS)
 
 $(LIBS_PATH)/%/Makefile:
 	cd libs; make;
 
-$(OBJ_FILES): $(REQ)
+$(OBJS): $(REQ)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(OBJFLAGS) $(INCS) -c $< -o $@
 
-bin/needleman_wunsch: bin src/nw_cmdline.c src/libalign.a
-	$(CC) -o bin/needleman_wunsch $(CFLAGS) $(TGTFLAGS) $(INCS) $(LIBS) src/nw_cmdline.c $(LINKFLAGS)
+bin/needleman_wunsch: bin tools/nw_cmdline.c src/libalign.a
+	$(CC) -o bin/needleman_wunsch $(SRCS) $(TGTFLAGS) $(INCS) $(LIBS) tools/nw_cmdline.c $(LINKFLAGS)
 
-bin/smith_waterman: bin src/sw_cmdline.c src/libalign.a
-	$(CC) -o bin/smith_waterman $(CFLAGS) $(TGTFLAGS) $(INCS) $(LIBS) src/sw_cmdline.c $(LINKFLAGS)
+bin/smith_waterman: bin tools/sw_cmdline.c src/libalign.a
+	$(CC) -o bin/smith_waterman $(SRCS) $(TGTFLAGS) $(INCS) $(LIBS) tools/sw_cmdline.c $(LINKFLAGS)
 
 bin:
 	mkdir -p bin
