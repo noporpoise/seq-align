@@ -15,6 +15,7 @@
 #include <ctype.h> // tolower
 
 #include "alignment_scoring.h"
+#include "alignment_macros.h"
 
 #define _get_bit(arr,i) (((arr)[(i)/32] >> ((i)%32))&0x1)
 #define _set_bit(arr,i) ((arr)[(i)/32] |= (0x1<<((i)%32)))

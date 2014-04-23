@@ -15,6 +15,7 @@
 
 #include "bit_array.h"
 #include "smith_waterman.h"
+#include "alignment_macros.h"
 #include "sort_r.h"
 
 // For iterating through local alignments

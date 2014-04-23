@@ -15,6 +15,7 @@
 #include <ctype.h> // tolower
 
 #include "alignment.h"
+#include "alignment_macros.h"
 
 const char align_col_mismatch[] = "\033[92m"; // Mismatch (GREEN)
 const char align_col_indel[] = "\033[91m"; // Insertion / deletion (RED)

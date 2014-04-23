@@ -17,6 +17,7 @@
 // Alignment scoring and loading
 #include "alignment_scoring_load.h"
 #include "alignment_cmdline.h"
+#include "alignment_macros.h"
 
 #include "smith_waterman.h"
 
