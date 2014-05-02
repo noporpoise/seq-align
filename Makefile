@@ -11,8 +11,9 @@ else
 		# clang Link Time Optimisation (lto) seems to have issues atm
 		OPT = -O3
 	else
-		OPT = -O4 -flto
-		TGTFLAGS = -fwhole-program
+		OPT = -O4
+		#OPT = -O4 -flto
+		#TGTFLAGS = -fwhole-program
 	endif
 endif
 
