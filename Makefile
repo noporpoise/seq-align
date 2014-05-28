@@ -58,7 +58,7 @@ examples: src/libalign.a
 	cd examples; make LIBS_PATH=$(abspath $(LIBS_PATH))
 
 clean:
-	rm -rf bin/* src/*.o src/libalign.a
+	rm -rf bin src/*.o src/libalign.a
 	cd examples; make clean
 
 .PHONY: all clean examples
