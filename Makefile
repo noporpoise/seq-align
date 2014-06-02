@@ -17,7 +17,7 @@ else
 	endif
 endif
 
-CFLAGS = -Wall -Wextra $(OPT)
+CFLAGS = -Wall -Wextra -std=c99 $(OPT)
 OBJFLAGS = -fPIC
 LINKFLAGS = -lalign -lstrbuf -lbitarr -lpthread -lz
 
