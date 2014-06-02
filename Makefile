@@ -45,14 +45,13 @@ $(OBJS): $(REQ)
 %.o: %.c
 	$(CC) $(CFLAGS) $(OBJFLAGS) $(INCS) -c $< -o $@
 
-bin/needleman_wunsch: bin tools/nw_cmdline.c src/libalign.a
+bin/needleman_wunsch: tools/nw_cmdline.c src/libalign.a
+	mkdir -p bin
 	$(CC) -o bin/needleman_wunsch $(SRCS) $(TGTFLAGS) $(INCS) $(LIBS) tools/nw_cmdline.c $(LINKFLAGS)
 
-bin/smith_waterman: bin tools/sw_cmdline.c src/libalign.a
-	$(CC) -o bin/smith_waterman $(SRCS) $(TGTFLAGS) $(INCS) $(LIBS) tools/sw_cmdline.c $(LINKFLAGS)
-
-bin:
+bin/smith_waterman: tools/sw_cmdline.c src/libalign.a
 	mkdir -p bin
+	$(CC) -o bin/smith_waterman $(SRCS) $(TGTFLAGS) $(INCS) $(LIBS) tools/sw_cmdline.c $(LINKFLAGS)
 
 examples: src/libalign.a
 	cd examples; make LIBS_PATH=$(abspath $(LIBS_PATH))
