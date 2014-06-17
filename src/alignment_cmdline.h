@@ -8,6 +8,10 @@
 #ifndef ALIGNMENT_CMDLINE_HEADER_SEEN
 #define ALIGNMENT_CMDLINE_HEADER_SEEN
 
+// request decent POSIX version
+#define _XOPEN_SOURCE 700
+#define _BSD_SOURCE
+
 #include <stdarg.h> // required for va_list
 #include "seq_file.h"
 #include "alignment.h"
