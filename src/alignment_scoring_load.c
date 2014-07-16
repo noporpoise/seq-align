@@ -39,7 +39,7 @@ static void _loading_error(const char* err_msg, const char* file_path,
 void align_scoring_load_matrix(gzFile file, const char* file_path,
                                scoring_t* scoring, char case_sensitive)
 {
-  StrBuf* sbuf = strbuf_init(500);
+  StrBuf* sbuf = strbuf_new(500);
   size_t read_length;
   int line_num = 0;
 
@@ -48,12 +48,12 @@ void align_scoring_load_matrix(gzFile file, const char* file_path,
   {
     strbuf_chomp(sbuf);
 
-    if(sbuf->len > 0 && sbuf->buff[0] != '#' && // line is not empty, not comment
-       !string_is_all_whitespace(sbuf->buff)) // and not whitespace
+    if(sbuf->end > 0 && sbuf->b[0] != '#' && // line is not empty, not comment
+       !string_is_all_whitespace(sbuf->b)) // and not whitespace
     {
       // Read first line
 
-      if(sbuf->len < 2)
+      if(sbuf->end < 2)
       {
         _loading_error("Too few column headings", file_path, line_num, 1);
       }
@@ -64,14 +64,14 @@ void align_scoring_load_matrix(gzFile file, const char* file_path,
     line_num++;
   }
 
-  if(line_num == 0 && sbuf->len <= 0)
+  if(line_num == 0 && sbuf->end <= 0)
   {
     _loading_error("Empty file", file_path, -1, 0);
   }
 
   // If the separator character is whitespace,
   // the set of whitespace characters is used
-  char sep = sbuf->buff[0];
+  char sep = sbuf->b[0];
 
   if((sep >= (int)'0' && sep <= (int)'9') || sep == '-')
   {
@@ -79,12 +79,12 @@ void align_scoring_load_matrix(gzFile file, const char* file_path,
                    file_path, line_num, 0);
   }
 
-  char* characters = (char*)malloc(sbuf->len);
+  char* characters = (char*)malloc(sbuf->end);
   int num_of_chars = 0;
 
   if(isspace(sep))
   {
-    char* next = sbuf->buff;
+    char* next = sbuf->b;
 
     while((next = string_next_nonwhitespace(next+1)) != NULL)
     {
@@ -96,9 +96,9 @@ void align_scoring_load_matrix(gzFile file, const char* file_path,
     {
       strbuf_chomp(sbuf);
 
-      char* from_char_pos = string_next_nonwhitespace(sbuf->buff);
+      char* from_char_pos = string_next_nonwhitespace(sbuf->b);
 
-      if(from_char_pos == NULL || sbuf->buff[0] == '#')
+      if(from_char_pos == NULL || sbuf->b[0] == '#')
       {
         // skip this line
         continue;
@@ -107,7 +107,7 @@ void align_scoring_load_matrix(gzFile file, const char* file_path,
       char from_char = case_sensitive ? *from_char_pos : tolower(*from_char_pos);
       char to_char;
 
-      char* score_txt = sbuf->buff+1;
+      char* score_txt = sbuf->b+1;
       int score;
 
       int i;
@@ -149,14 +149,14 @@ void align_scoring_load_matrix(gzFile file, const char* file_path,
   {
     size_t i;
 
-    for(i = 0; i < sbuf->len; i += 2)
+    for(i = 0; i < sbuf->end; i += 2)
     {
-      if(sbuf->buff[i] != sep)
+      if(sbuf->b[i] != sep)
       {
         _loading_error("Separator missing from line", file_path, line_num, 1);
       }
 
-      char c = case_sensitive ? sbuf->buff[i+1] : tolower(sbuf->buff[i+1]);
+      char c = case_sensitive ? sbuf->b[i+1] : tolower(sbuf->b[i+1]);
       characters[num_of_chars++] = c;
     }
 
@@ -167,15 +167,15 @@ void align_scoring_load_matrix(gzFile file, const char* file_path,
     {
       strbuf_chomp(sbuf);
 
-      char from_char = case_sensitive ? sbuf->buff[0] : tolower(sbuf->buff[0]);
+      char from_char = case_sensitive ? sbuf->b[0] : tolower(sbuf->b[0]);
 
-      if(from_char == '#' || string_is_all_whitespace(sbuf->buff))
+      if(from_char == '#' || string_is_all_whitespace(sbuf->b))
       {
         // skip this line
         continue;
       }
 
-      char* str_pos = sbuf->buff;
+      char* str_pos = sbuf->b;
 
       int to_char_index = 0;
       char to_char;
@@ -223,7 +223,7 @@ void align_scoring_load_matrix(gzFile file, const char* file_path,
 void align_scoring_load_pairwise(gzFile file, const char* file_path,
                                  scoring_t* scoring, char case_sensitive)
 {
-  StrBuf* sbuf = strbuf_init(200);
+  StrBuf* sbuf = strbuf_new(200);
   size_t read_length;
   int line_num = 0;
 
@@ -236,48 +236,48 @@ void align_scoring_load_pairwise(gzFile file, const char* file_path,
   {
     strbuf_chomp(sbuf);
 
-    if(sbuf->len > 0 && sbuf->buff[0] != '#' && // line is not empty, not comment
-       !string_is_all_whitespace(sbuf->buff)) // and not whitespace
+    if(sbuf->end > 0 && sbuf->b[0] != '#' && // line is not empty, not comment
+       !string_is_all_whitespace(sbuf->b)) // and not whitespace
     {
       if(read_length < 5)
       {
         _loading_error("Too few column headings", file_path, line_num, 0);
       }
 
-      if(isspace(sbuf->buff[1]))
+      if(isspace(sbuf->b[1]))
       {
         // split by whitespace
-        a = sbuf->buff[0];
+        a = sbuf->b[0];
 
         size_t char2_pos;
 
         for(char2_pos = 1;
-            sbuf->buff[char2_pos] != '\0' && isspace(sbuf->buff[char2_pos]);
+            sbuf->b[char2_pos] != '\0' && isspace(sbuf->b[char2_pos]);
             char2_pos++);
 
-        if(char2_pos+2 >= sbuf->len || !isspace(sbuf->buff[char2_pos+1]))
+        if(char2_pos+2 >= sbuf->end || !isspace(sbuf->b[char2_pos+1]))
         {
           _loading_error("Line too short", file_path, line_num, 0);
         }
 
-        b = sbuf->buff[char2_pos];
+        b = sbuf->b[char2_pos];
 
-        if(!parse_entire_int(sbuf->buff+char2_pos+2, &score))
+        if(!parse_entire_int(sbuf->b+char2_pos+2, &score))
         {
           _loading_error("Invalid number", file_path, line_num, 0);
         }
       }
       else
       {
-        if(sbuf->buff[1] != sbuf->buff[3])
+        if(sbuf->b[1] != sbuf->b[3])
         {
           _loading_error("Inconsistent separators used", file_path, line_num, 0);
         }
 
-        a = sbuf->buff[0];
-        b = sbuf->buff[2];
+        a = sbuf->b[0];
+        b = sbuf->b[2];
 
-        if(!parse_entire_int(sbuf->buff + 4, &score))
+        if(!parse_entire_int(sbuf->b + 4, &score))
         {
           _loading_error("Invalid number", file_path, line_num, 0);
         }
