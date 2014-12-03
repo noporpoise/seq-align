@@ -390,3 +390,9 @@ void scoring_system_default(scoring_t* scoring)
                gap_open_default, gap_extend_default,
                0, 0, 0, 0, 0, 0);
 }
+
+//LCS
+void scoring_system_lcs(scoring_t* scoring)
+{
+  scoring_init(scoring, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0);
+}
