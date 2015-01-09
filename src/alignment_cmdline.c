@@ -257,6 +257,22 @@ cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw)
         if(is_sw) usage("--freeendgap only valid with Needleman-Wunsch");
         scoring->no_end_gap_penalty = 1;
       }
+      else if(strcasecmp(argv[argi], "--gapsonlyatendsin1") == 0)
+      {
+         if(is_sw) usage("--freeendgap only valid with Needleman-Wunsch");
+         scoring->gaps_ends_a = 1;
+      }
+      else if(strcasecmp(argv[argi], "--gapsonlyatendsin2") == 0)
+      {
+         if(is_sw) usage("--freeendgap only valid with Needleman-Wunsch");
+         scoring->gaps_ends_b = 1;
+      }
+      else if(strcasecmp(argv[argi], "--gapsonlyatends") == 0)
+      {
+         if(is_sw) usage("--freeendgap only valid with Needleman-Wunsch");
+         scoring->gaps_ends_a = 1;
+         scoring->gaps_ends_b = 1;
+      }
       else if(strcasecmp(argv[argi], "--nogaps") == 0)
       {
         scoring->no_gaps_in_a = 1;
