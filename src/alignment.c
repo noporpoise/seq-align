@@ -49,11 +49,11 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
   size_t seq_i, seq_j, len_i = score_width-1, len_j = score_height-1;
   size_t index, index_left, index_up, index_upleft;
 
-  if(scoring->no_gaps_in_a) {
+  if(scoring->no_gaps_in_a || scoring->gaps_ends_a) {
     for(i = 0; i < arr_size; i++) gap_a_scores[i] = min;
   }
 
-  if(scoring->no_gaps_in_b) {
+  if(scoring->no_gaps_in_b || scoring->gaps_ends_b) {
     for(i = 0; i < arr_size; i++) gap_b_scores[i] = min;
   }
 
@@ -130,7 +130,7 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
       // Long arithmetic since some INTs are set to min and penalty is -ve
       // (adding as ints would cause an integer overflow)
 
-      if(!scoring->no_gaps_in_a)
+      if(!scoring->no_gaps_in_a && !scoring->gaps_ends_a)
       {
         // Update gap_a_scores[i][j] from position [i][j-1]
 
@@ -150,7 +150,7 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
         }
       }
 
-      if(!scoring->no_gaps_in_b)
+      if(!scoring->no_gaps_in_b && !scoring->gaps_ends_b)
       {
         // Update gap_b_scores[i][j] from position [i-1][j]
 
@@ -182,7 +182,7 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
     index_upleft++;
   }
 
-  if(scoring->no_gaps_in_a)
+  if((scoring->no_gaps_in_a && len_i < len_j) || scoring->gaps_ends_a)
   {
     // Allow gaps only at the start/end of A
     // Fill right hand column of traceback matrix
@@ -201,7 +201,7 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
     }
   }
 
-  if(scoring->no_gaps_in_b)
+  if((scoring->no_gaps_in_b && len_j < len_i) || scoring->gaps_ends_b)
   {
     // Allow gaps only at the start/end of B
     // Fill bottom row of traceback matrix
