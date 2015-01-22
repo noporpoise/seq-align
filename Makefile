@@ -32,7 +32,7 @@ REQ=$(LIBS_PATH)/bit_array/Makefile $(LIBS_PATH)/string_buffer/Makefile $(LIBS_P
 SRCS=$(wildcard src/*.c)
 OBJS=$(SRCS:.c=.o)
 
-all: bin/needleman_wunsch bin/smith_waterman src/libalign.a examples
+all: bin/needleman_wunsch bin/smith_waterman src/libalign.a examples tests
 
 src/libalign.a: $(OBJS)
 	ar -csru src/libalign.a $(OBJS)
@@ -55,9 +55,13 @@ bin/smith_waterman: tools/sw_cmdline.c src/libalign.a
 
 examples: src/libalign.a
 	cd examples; make LIBS_PATH=$(abspath $(LIBS_PATH))
+	
+tests: src/libalign.a
+	cd tests; make LIBS_PATH=$(abspath $(LIBS_PATH))
 
 clean:
 	rm -rf bin src/*.o src/libalign.a
 	cd examples; make clean
+	cd tests; make clean
 
-.PHONY: all clean examples
+.PHONY: all clean examples tests
