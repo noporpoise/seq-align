@@ -69,7 +69,8 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
 
     // Think carefully about which way round these are
     gap_a_scores[i] = min;
-    gap_b_scores[i] = scoring->no_start_gap_penalty ? 0
+    if(len_j < len_i)
+   	 gap_b_scores[i] = scoring->no_start_gap_penalty ? 0
                       : scoring->gap_open + (long)i * scoring->gap_extend;
   }
 
@@ -79,8 +80,9 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
     match_scores[index] = min;
 
     // Think carefully about which way round these are
-    gap_a_scores[index]
-      = (score_t)(scoring->no_start_gap_penalty ? 0
+    if(len_i < len_j)
+    	gap_a_scores[index]
+      		= (score_t)(scoring->no_start_gap_penalty ? 0
                   : scoring->gap_open + (long)j * scoring->gap_extend);
     gap_b_scores[index] = min;
   }
