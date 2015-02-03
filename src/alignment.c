@@ -194,8 +194,8 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
     while(index < arr_size)
     {
       gap_a_scores[index]
-        = MAX3(match_scores[index_up] + gap_open_penalty,
-               gap_a_scores[index_up] + gap_extend_penalty,
+        = MAX3(match_scores[index_up] + ((scoring->no_end_gap_penalty) ? 0 : gap_open_penalty),
+               gap_a_scores[index_up] + ((scoring->no_end_gap_penalty) ? 0 : gap_extend_penalty),
                min);
 
       index_up = index;
@@ -213,8 +213,8 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
     while(index < arr_size)
     {
       gap_b_scores[index]
-        = MAX3(match_scores[index_left] + gap_open_penalty,
-               gap_b_scores[index_left] + gap_extend_penalty,
+        = MAX3(match_scores[index_left] + ((scoring->no_end_gap_penalty) ? 0 : gap_open_penalty),
+               gap_b_scores[index_left] + ((scoring->no_end_gap_penalty) ? 0 : gap_extend_penalty),
                min);
 
       index_left++;
