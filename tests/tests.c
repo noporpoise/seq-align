@@ -126,11 +126,89 @@ void test_no_gaps_smith_waterman(void)
   TEST_CHECK(strcmp(result->result_a, "ag") == 0 && strcmp(result->result_b, "ag") == 0);
 }
 
+/* First sequence is aligned to the end of the second one because of the reduced cost of
+ * mismatches and cost-free start gap */
+void test_free_start_gap(void)
+{
+  nw_aligner_t *nw = needleman_wunsch_new();
+  alignment_t *result = alignment_create(256);
+  
+  const char* seq_a = "acg";
+  const char* seq_b = "tttacgttt"; 
+
+  int match = 1;
+  int mismatch = -1;
+  int gap_open = -4;
+  int gap_extend = -1;
+  
+  char gaps_ends_b = 0, no_gaps_in_a = 0, no_gaps_in_b = 0, freestartgap = 1;
+  scoring_t scoring;
+  scoring_init(&scoring, match, mismatch, gap_open, gap_extend,
+               freestartgap, 0,
+               no_gaps_in_a, no_gaps_in_b, 0, gaps_ends_b, 0, 0);
+               
+  needleman_wunsch_align(seq_a, seq_b, &scoring, nw, result);
+  TEST_CHECK(strcmp(result->result_a, "------acg") == 0 && strcmp(result->result_b, "tttacgttt")== 0);
+}
+
+/* First sequence is aligned to the start of the second one because of the reduced cost of
+ * mismatches and cost-free end gap */
+void test_free_end_gap(void)
+{
+  nw_aligner_t *nw = needleman_wunsch_new();
+  alignment_t *result = alignment_create(256);
+  
+  const char* seq_a = "acg";
+  const char* seq_b = "tttacgttt"; 
+
+  int match = 1;
+  int mismatch = -1;
+  int gap_open = -4;
+  int gap_extend = -1;
+  
+  char gaps_ends_b = 0, no_gaps_in_a = 0, no_gaps_in_b = 0, freeendgap = 1;
+  scoring_t scoring;
+  scoring_init(&scoring, match, mismatch, gap_open, gap_extend,
+               0, freeendgap,
+               no_gaps_in_a, no_gaps_in_b, 0, gaps_ends_b, 0, 0);
+               
+  needleman_wunsch_align(seq_a, seq_b, &scoring, nw, result);
+  TEST_CHECK(strcmp(result->result_a, "acg---------") == 0 && strcmp(result->result_b, "---tttacgttt")== 0);
+}
+
+void test(void)
+{
+  nw_aligner_t *nw = needleman_wunsch_new();
+  alignment_t *result = alignment_create(256);
+  
+  const char* seq_a = "acg";
+  const char* seq_b = "tttacgttt"; 
+
+  int match = 1;
+  int mismatch = -1;
+  int gap_open = -4;
+  int gap_extend = -1;
+  
+  char gaps_ends_b = 0, no_gaps_in_a = 0, no_gaps_in_b = 1, freeendgap = 1;
+  scoring_t scoring;
+  scoring_init(&scoring, match, mismatch, gap_open, gap_extend,
+               1, freeendgap,
+               no_gaps_in_a, no_gaps_in_b, 0, gaps_ends_b, 0, 0);
+               
+  needleman_wunsch_align(seq_a, seq_b, &scoring, nw, result);
+  alignment_print_matrices(nw);
+  TEST_CHECK(strcmp(result->result_a, "---acg---") == 0 && strcmp(result->result_b, "tttacgttt")== 0);
+}
+
+
 TEST_LIST = {
   { "no_gaps_in_longer", test_no_gaps_in_longer },
   { "no_gaps_equal_length", test_no_gaps_equal},
   { "gaps_only_at_ends_in_shorter", test_gaps_only_at_ends_in_shorter},
   { "gaps_only_at_ends_in_longer", test_gaps_only_at_ends_in_longer},
   { "no_gaps_smith_waterman", test_no_gaps_smith_waterman},
+  { "free_start_gap", test_free_start_gap },
+  { "free_end_gap", test_free_end_gap },
+  { "test", test },
   { 0 }
 };
