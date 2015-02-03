@@ -19,6 +19,7 @@ nw_example: nw_example.c ../src/libalign.a
 	
 lcs_example: lcs_example.c ../src/libalign.a
 	$(CC) lcs_example.c -o lcs_example $(CFLAGS) $(INCS) $(LIBS) $(LINK)
+	
 
 clean:
 	rm -rf nw_example sw_example lcs_example *.greg *.dSYM

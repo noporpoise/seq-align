@@ -42,7 +42,7 @@ void align(char* seq_a, char* seq_b)
   scoring_t scoring;
   scoring_init(&scoring, match, mismatch, gap_open, gap_extend,
                no_start_gap_penalty, no_end_gap_penalty,
-               no_gaps_in_a, no_gaps_in_b, no_mismatches, case_sensitive);
+               no_gaps_in_a, no_gaps_in_b, 0, 0, no_mismatches, case_sensitive);
 
   // Add some special cases
   // x -> y means x in seq1 changing to y in seq2

@@ -29,7 +29,7 @@
 void scoring_init(scoring_t* scoring, int match, int mismatch,
                   int gap_open, int gap_extend,
                   char no_start_gap_penalty, char no_end_gap_penalty,
-                  char no_gaps_in_a, char no_gaps_in_b,
+                  char no_gaps_in_a, char no_gaps_in_b, char gaps_ends_a, char gaps_ends_b,
                   char no_mismatches, char case_sensitive)
 {
   // Gap of length 1 has penalty (gap_open+gap_extend)
@@ -43,6 +43,9 @@ void scoring_init(scoring_t* scoring, int match, int mismatch,
   scoring->no_gaps_in_a = no_gaps_in_a;
   scoring->no_gaps_in_b = no_gaps_in_b;
   scoring->no_mismatches = no_mismatches;
+  
+  scoring->gaps_ends_a = gaps_ends_a;
+  scoring->gaps_ends_b = gaps_ends_b;
 
   scoring->use_match_mismatch = 1;
   scoring->match = match;
@@ -311,7 +314,7 @@ void scoring_system_PAM30(scoring_t* scoring)
   // Gap open -9, gap extend -1
   // no_start_gap_penalty, no_end_gap_penalty = 0
   // case_sensitive = 0
-  scoring_init(scoring, 1, -17, -9, -1, 0, 0, 0, 0, 0, 0);
+  scoring_init(scoring, 1, -17, -9, -1, 0, 0, 0, 0, 0, 0, 0, 0);
 
   // use_match_mismatch=1
   scoring_add_mutations(scoring, amino_acids, pam30, 1);
@@ -325,7 +328,7 @@ void scoring_system_PAM70(scoring_t* scoring)
   // Gap open -10, gap extend -1
   // no_start_gap_penalty, no_end_gap_penalty = 0
   // case_sensitive = 0
-  scoring_init(scoring, 1, -11, -10, -1, 0, 0, 0, 0, 0, 0);
+  scoring_init(scoring, 1, -11, -10, -1, 0, 0, 0, 0, 0, 0, 0, 0);
 
   // use_match_mismatch=1
   scoring_add_mutations(scoring, amino_acids, pam70, 1);
@@ -339,7 +342,7 @@ void scoring_system_BLOSUM80(scoring_t* scoring)
   // Gap open -10, gap extend -1
   // no_start_gap_penalty, no_end_gap_penalty = 0
   // case_sensitive = 0
-  scoring_init(scoring, 1, -8, -10, -1, 0, 0, 0, 0, 0, 0);
+  scoring_init(scoring, 1, -8, -10, -1, 0, 0, 0, 0, 0, 0, 0, 0);
 
   // use_match_mismatch=1
   scoring_add_mutations(scoring, amino_acids, blosum80, 1);
@@ -353,7 +356,7 @@ void scoring_system_BLOSUM62(scoring_t* scoring)
   // Gap open -10, gap extend -1
   // no_start_gap_penalty, no_end_gap_penalty = 0
   // case_sensitive = 0
-  scoring_init(scoring, 1, -4, -10, -1, 0, 0, 0, 0, 0, 0);
+  scoring_init(scoring, 1, -4, -10, -1, 0, 0, 0, 0, 0, 0, 0, 0);
 
   // use_match_mismatch=1
   scoring_add_mutations(scoring, amino_acids, blosum62, 1);
@@ -370,7 +373,7 @@ void scoring_system_DNA_hybridization(scoring_t* scoring)
   // Gap open -10, gap extend -10
   // no_start_gap_penalty, no_end_gap_penalty = 0
   // case_sensitive = 0
-  scoring_init(scoring, 0, 0, -10, -10, 0, 0, 0, 0, 0, 0);
+  scoring_init(scoring, 0, 0, -10, -10, 0, 0, 0, 0, 0, 0, 0, 0);
 
   // use_match_mismatch=0
   scoring_add_mutations(scoring, dna_bases, sub_matrix, 0);
@@ -388,11 +391,11 @@ void scoring_system_default(scoring_t* scoring)
   // case_sensitive = 0
   scoring_init(scoring, match_default, mismatch_default,
                gap_open_default, gap_extend_default,
-               0, 0, 0, 0, 0, 0);
+               0, 0, 0, 0, 0, 0, 0, 0);
 }
 
 //LCS
 void scoring_system_lcs(scoring_t* scoring)
 {
-  scoring_init(scoring, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0);
+  scoring_init(scoring, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0);
 }
