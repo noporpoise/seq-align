@@ -7,6 +7,7 @@ various options for executions:
 * Executions of the whole test set ( > tests)
 * Execution of only some tests ( > tests [name_test1] [name_test2] ..)
 * Executions skipping some test ( > tests --skip [name_test1] [name_test2] ..)
+
 The suite contains the following tests:
 * no_gaps_in_longer
 * no_gaps_equal_length
