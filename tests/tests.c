@@ -190,8 +190,8 @@ void test_free_end_gap(void)
                no_gaps_in_a, no_gaps_in_b, 0, gaps_ends_b, 0, 0);
                
   needleman_wunsch_align(seq_a, seq_b, &scoring, nw, result);
-  TEST_CHECK(strcmp(result->result_a, "acg---------") == 0 &&
-             strcmp(result->result_b, "---tttacgttt")== 0);
+  TEST_CHECK(strcmp(result->result_a, "acg------") == 0 &&
+             strcmp(result->result_b, "tttacgttt")== 0);
 }
 
 /* First sequence is aligned to the corresponding (equal) substring of the second
@@ -282,6 +282,57 @@ void test_free_gaps_at_ends_compare_no_gaps_gaps_only_at_ends(void)
              strcmp(result->result_b, "tttacgttt-")== 0);
 }
 
+//Original implementation had bugs even with very simple instances
+void test_no_mismatches_simple(void)
+{
+  nw_aligner_t *nw = needleman_wunsch_new();
+  alignment_t *result = alignment_create(256);
+  
+  const char* seq_a = "atc";
+  const char* seq_b = "ac"; 
+
+  int match = 1;
+  int mismatch = -2;
+  int gap_open = -4;
+  int gap_extend = -1;
+  
+  char no_gaps_in_a = 0, no_gaps_in_b = 0;
+  scoring_t scoring;
+  scoring_init(&scoring, match, mismatch, gap_open, gap_extend,
+               0, 0,
+               no_gaps_in_a, no_gaps_in_b, 0, 0, 1, 0);
+  
+  needleman_wunsch_align(seq_a, seq_b, &scoring, nw, result);
+  TEST_CHECK(strcmp(result->result_a, "atc") == 0 &&
+             strcmp(result->result_b, "a-c")== 0);
+ }
+ 
+ //Another test with nomismatches, a little more complex
+void test_no_mismatches(void)
+{
+  nw_aligner_t *nw = needleman_wunsch_new();
+  alignment_t *result = alignment_create(256);
+  
+  const char* seq_a = "cgatcga";
+  const char* seq_b = "catcctcga"; 
+
+  int match = 1;
+  int mismatch = -2;
+  int gap_open = -4;
+  int gap_extend = -1;
+  
+  char no_gaps_in_a = 0, no_gaps_in_b = 0;
+  scoring_t scoring;
+  scoring_init(&scoring, match, mismatch, gap_open, gap_extend,
+               0, 0,
+               no_gaps_in_a, no_gaps_in_b, 0, 0, 1, 0);
+  
+  needleman_wunsch_align(seq_a, seq_b, &scoring, nw, result);
+  TEST_CHECK(strcmp(result->result_a, "cgatc---ga") == 0 &&
+             strcmp(result->result_b, "c-atcctcga")== 0);
+  
+ }
+
 TEST_LIST = {
   { "no_gaps_in_longer", test_no_gaps_in_longer },
   { "no_gaps_equal_length", test_no_gaps_equal},
@@ -294,5 +345,7 @@ TEST_LIST = {
   { "free_gaps_at_ends_no_gaps", test_free_gaps_at_ends_no_gaps },
   { "free_gaps_at_ends_compare_no_gaps_gaps_only_at_ends",
     test_free_gaps_at_ends_compare_no_gaps_gaps_only_at_ends},
+  { "no_mismatches_simple", test_no_mismatches_simple },
+  { "no_mismatches", test_no_mismatches },
   { 0 }
 };

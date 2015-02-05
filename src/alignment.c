@@ -69,9 +69,9 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
 
     // Think carefully about which way round these are
     gap_a_scores[i] = min;
-    if(len_j < len_i)
-   	 gap_b_scores[i] = scoring->no_start_gap_penalty ? 0
-                      : scoring->gap_open + (long)i * scoring->gap_extend;
+    if((len_j < len_i && scoring->no_gaps_in_a) || !scoring->no_gaps_in_a)
+   	 gap_b_scores[i] = (score_t)(scoring->no_start_gap_penalty ? 0
+                      : scoring->gap_open + (long)i * scoring->gap_extend);
   }
 
   // work down first column -> [0][j]
@@ -80,7 +80,7 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
     match_scores[index] = min;
 
     // Think carefully about which way round these are
-    if(len_i < len_j)
+    if((len_i < len_j && scoring->no_gaps_in_b) || !scoring->no_gaps_in_b)
     	gap_a_scores[index]
       		= (score_t)(scoring->no_start_gap_penalty ? 0
                   : scoring->gap_open + (long)j * scoring->gap_extend);
@@ -382,7 +382,7 @@ void alignment_reverse_move(enum Matrix *curr_matrix, score_t *curr_score,
     *curr_matrix = GAP_B;
     *curr_score = aligner->gap_b_scores[*arr_index];
   }
-  else if((!scoring->no_mismatches || is_match) &&
+  else if((!scoring->no_mismatches || is_match) || scoring->no_mismatches &&
           (long)aligner->match_scores[*arr_index] + prev_match_penalty == *curr_score)
   {
     *curr_matrix = MATCH;
