@@ -1,4 +1,3 @@
-CC ?= gcc
 LIBS_PATH=../libs
 CFLAGS=-Wall -Wextra -std=c99
 

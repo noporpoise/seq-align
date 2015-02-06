@@ -1,20 +1,9 @@
-CC ?= gcc
 LIBS_PATH=libs
-
-PLATFORM := $(shell uname)
-COMPILER := $(shell ($(CC) -v 2>&1) | tr A-Z a-z )
 
 ifdef DEBUG
 	OPT = -O0 -DDEBUG=1 --debug -g -ggdb
 else
-	ifneq (,$(findstring clang,$(COMPILER)))
-		# clang Link Time Optimisation (lto) seems to have issues atm
-		OPT = -O3
-	else
-		OPT = -O4
-		#OPT = -O4 -flto
-		#TGTFLAGS = -fwhole-program
-	endif
+	OPT = -O3
 endif
 
 CFLAGS = -Wall -Wextra -std=c99 $(OPT)
@@ -58,6 +47,10 @@ examples: src/libalign.a
 
 clean:
 	rm -rf bin src/*.o src/libalign.a
-	cd examples; make clean
+	cd examples && make clean
+	cd tests && make clean
 
-.PHONY: all clean examples
+test: src/libalign.a
+	cd tests && make test
+
+.PHONY: all clean examples test
