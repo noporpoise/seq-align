@@ -29,7 +29,7 @@
 void scoring_init(scoring_t* scoring, int match, int mismatch,
                   int gap_open, int gap_extend,
                   char no_start_gap_penalty, char no_end_gap_penalty,
-                  char no_gaps_in_a, char no_gaps_in_b, char gaps_ends_a, char gaps_ends_b,
+                  char no_gaps_in_a, char no_gaps_in_b, char gaps_only_at_ends_in_a, char gaps_only_at_ends_in_b,
                   char no_mismatches, char case_sensitive)
 {
   // Gap of length 1 has penalty (gap_open+gap_extend)
@@ -44,8 +44,8 @@ void scoring_init(scoring_t* scoring, int match, int mismatch,
   scoring->no_gaps_in_b = no_gaps_in_b;
   scoring->no_mismatches = no_mismatches;
   
-  scoring->gaps_ends_a = gaps_ends_a;
-  scoring->gaps_ends_b = gaps_ends_b;
+  scoring->gaps_only_at_ends_in_a = gaps_only_at_ends_in_a;
+  scoring->gaps_only_at_ends_in_b = gaps_only_at_ends_in_b;
 
   scoring->use_match_mismatch = 1;
   scoring->match = match;

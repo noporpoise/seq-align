@@ -260,18 +260,18 @@ cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw)
       else if(strcasecmp(argv[argi], "--gapsonlyatendsin1") == 0)
       {
          if(is_sw) usage("--gapsonlyatends only valid with Needleman-Wunsch");
-         scoring->gaps_ends_a = 1;
+         scoring->gaps_only_at_ends_in_a = 1;
       }
       else if(strcasecmp(argv[argi], "--gapsonlyatendsin2") == 0)
       {
          if(is_sw) usage("--gapsonlyatends only valid with Needleman-Wunsch");
-         scoring->gaps_ends_b = 1;
+         scoring->gaps_only_at_ends_in_b = 1;
       }
       else if(strcasecmp(argv[argi], "--gapsonlyatends") == 0)
       {
          if(is_sw) usage("--gapsonlyatends only valid with Needleman-Wunsch");
-         scoring->gaps_ends_a = 1;
-         scoring->gaps_ends_b = 1;
+         scoring->gaps_only_at_ends_in_a = 1;
+         scoring->gaps_only_at_ends_in_b = 1;
       }
       else if(strcasecmp(argv[argi], "--nogaps") == 0)
       {
@@ -500,13 +500,13 @@ cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw)
     usage("--nogaps.. --nomismatches cannot be used at together");
   }
   
-  if((scoring->gaps_ends_a || scoring->gaps_ends_b) && scoring->no_mismatches)
+  if((scoring->gaps_only_at_ends_in_a || scoring->gaps_only_at_ends_in_b) && scoring->no_mismatches)
   {
     usage("--gapsonlyatends.. --nomismatches cannot be used at together");
   }
   
-  if((scoring->gaps_ends_a && scoring->no_gaps_in_a) || 
-     (scoring->gaps_ends_b && scoring->no_gaps_in_b))
+  if((scoring->gaps_only_at_ends_in_a && scoring->no_gaps_in_a) || 
+     (scoring->gaps_only_at_ends_in_b && scoring->no_gaps_in_b))
   {
     usage("--gapsonlyatends.. --nogaps cannot be used at together");
   }

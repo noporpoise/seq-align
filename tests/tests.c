@@ -68,20 +68,20 @@ void test_gaps_only_at_ends_in_shorter(void)
   int gap_open = -4;
   int gap_extend = -1;
   
-  char gaps_ends_a = 1, no_gaps_in_a = 0, no_gaps_in_b = 0;
+  char gaps_only_at_ends_in_a = 1, no_gaps_in_a = 0, no_gaps_in_b = 0;
   scoring_t scoring;
   scoring_init(&scoring, match, mismatch, gap_open, gap_extend,
                0, 0,
-               no_gaps_in_a, no_gaps_in_b, gaps_ends_a, 0, 0, 0);
+               no_gaps_in_a, no_gaps_in_b, gaps_only_at_ends_in_a, 0, 0, 0);
                
   needleman_wunsch_align(seq_a, seq_b, &scoring, nw, result);
   TEST_CHECK(strcmp(result->result_a, "----acgt") == 0 && 
              strcmp(result->result_b, "aaaaacg-")== 0);
   
-  gaps_ends_a = 0; no_gaps_in_a = 1; no_gaps_in_b = 0;
+  gaps_only_at_ends_in_a = 0; no_gaps_in_a = 1; no_gaps_in_b = 0;
   scoring_init(&scoring, match, mismatch, gap_open, gap_extend,
                0, 0,
-               no_gaps_in_a, no_gaps_in_b, gaps_ends_a, 0, 0, 0);
+               no_gaps_in_a, no_gaps_in_b, gaps_only_at_ends_in_a, 0, 0, 0);
                
   needleman_wunsch_align(seq_a, seq_b, &scoring, nw, result);
   TEST_CHECK(strcmp(result->result_a, "----acgt") == 0 &&
@@ -104,11 +104,11 @@ void test_gaps_only_at_ends_in_longer(void)
   int gap_open = -4;
   int gap_extend = -1;
   
-  char gaps_ends_b = 1, no_gaps_in_a = 0, no_gaps_in_b = 0;
+  char gaps_only_at_ends_in_b = 1, no_gaps_in_a = 0, no_gaps_in_b = 0;
   scoring_t scoring;
   scoring_init(&scoring, match, mismatch, gap_open, gap_extend,
                0, 0,
-               no_gaps_in_a, no_gaps_in_b, 0, gaps_ends_b, 0, 0);
+               no_gaps_in_a, no_gaps_in_b, 0, gaps_only_at_ends_in_b, 0, 0);
                
   needleman_wunsch_align(seq_a, seq_b, &scoring, nw, result);
   TEST_CHECK(strcmp(result->result_a, "a----cgt") == 0 &&
@@ -157,11 +157,11 @@ void test_free_start_gap(void)
   int gap_open = -4;
   int gap_extend = -1;
   
-  char gaps_ends_b = 0, no_gaps_in_a = 0, no_gaps_in_b = 0, freestartgap = 1;
+  char gaps_only_at_ends_in_b = 0, no_gaps_in_a = 0, no_gaps_in_b = 0, freestartgap = 1;
   scoring_t scoring;
   scoring_init(&scoring, match, mismatch, gap_open, gap_extend,
                freestartgap, 0,
-               no_gaps_in_a, no_gaps_in_b, 0, gaps_ends_b, 0, 0);
+               no_gaps_in_a, no_gaps_in_b, 0, gaps_only_at_ends_in_b, 0, 0);
                
   needleman_wunsch_align(seq_a, seq_b, &scoring, nw, result);
   TEST_CHECK(strcmp(result->result_a, "------acg") == 0 &&
@@ -183,11 +183,11 @@ void test_free_end_gap(void)
   int gap_open = -4;
   int gap_extend = -1;
   
-  char gaps_ends_b = 0, no_gaps_in_a = 0, no_gaps_in_b = 0, freeendgap = 1;
+  char gaps_only_at_ends_in_b = 0, no_gaps_in_a = 0, no_gaps_in_b = 0, freeendgap = 1;
   scoring_t scoring;
   scoring_init(&scoring, match, mismatch, gap_open, gap_extend,
                0, freeendgap,
-               no_gaps_in_a, no_gaps_in_b, 0, gaps_ends_b, 0, 0);
+               no_gaps_in_a, no_gaps_in_b, 0, gaps_only_at_ends_in_b, 0, 0);
                
   needleman_wunsch_align(seq_a, seq_b, &scoring, nw, result);
   TEST_CHECK(strcmp(result->result_a, "acg------") == 0 &&
@@ -209,12 +209,12 @@ void test_free_gaps_at_ends(void)
   int gap_open = -4;
   int gap_extend = -1;
   
-  char gaps_ends_b = 0, no_gaps_in_a = 0, no_gaps_in_b = 0, freestartgap = 1,
+  char gaps_only_at_ends_in_b = 0, no_gaps_in_a = 0, no_gaps_in_b = 0, freestartgap = 1,
        freeendgap = 1;
   scoring_t scoring;
   scoring_init(&scoring, match, mismatch, gap_open, gap_extend,
                freestartgap, freeendgap,
-               no_gaps_in_a, no_gaps_in_b, 0, gaps_ends_b, 0, 0);
+               no_gaps_in_a, no_gaps_in_b, 0, gaps_only_at_ends_in_b, 0, 0);
                
   needleman_wunsch_align(seq_a, seq_b, &scoring, nw, result);
   TEST_CHECK(strcmp(result->result_a, "---acg---") == 0 &&
@@ -235,12 +235,12 @@ void test_free_gaps_at_ends_no_gaps(void)
   int gap_open = -4;
   int gap_extend = -1;
   
-  char gaps_ends_b = 0, no_gaps_in_a = 1, no_gaps_in_b = 1, freestartgap = 1,
+  char gaps_only_at_ends_in_b = 0, no_gaps_in_a = 1, no_gaps_in_b = 1, freestartgap = 1,
        freeendgap = 1;
   scoring_t scoring;
   scoring_init(&scoring, match, mismatch, gap_open, gap_extend,
                freestartgap, freeendgap,
-               no_gaps_in_a, no_gaps_in_b, 0, gaps_ends_b, 0, 0);
+               no_gaps_in_a, no_gaps_in_b, 0, gaps_only_at_ends_in_b, 0, 0);
                
   needleman_wunsch_align(seq_a, seq_b, &scoring, nw, result);
   TEST_CHECK(strcmp(result->result_a, "---acg---") == 0 &&
@@ -262,20 +262,20 @@ void test_free_gaps_at_ends_compare_no_gaps_gaps_only_at_ends(void)
   int gap_open = -4;
   int gap_extend = -1;
   
-  char gaps_ends_b = 0, no_gaps_in_a = 1, no_gaps_in_b = 1,
+  char gaps_only_at_ends_in_b = 0, no_gaps_in_a = 1, no_gaps_in_b = 1,
        freestartgap = 1, freeendgap = 1;
   scoring_t scoring;
   scoring_init(&scoring, match, mismatch, gap_open, gap_extend,
                freestartgap, freeendgap,
-               no_gaps_in_a, no_gaps_in_b, 0, gaps_ends_b, 0, 0);
+               no_gaps_in_a, no_gaps_in_b, 0, gaps_only_at_ends_in_b, 0, 0);
                
   needleman_wunsch_align(seq_a, seq_b, &scoring, nw, result);
   TEST_CHECK(strcmp(result->result_a, "--acgtttt") == 0 &&
              strcmp(result->result_b, "tttacgttt")== 0); 
-  char gaps_ends_a = 1; gaps_ends_b = 1; no_gaps_in_a = 0; no_gaps_in_b = 0;
+  char gaps_only_at_ends_in_a = 1; gaps_only_at_ends_in_b = 1; no_gaps_in_a = 0; no_gaps_in_b = 0;
   scoring_init(&scoring, match, mismatch, gap_open, gap_extend,
                freestartgap, freeendgap,
-               no_gaps_in_a, no_gaps_in_b, gaps_ends_a, gaps_ends_b, 0, 0);
+               no_gaps_in_a, no_gaps_in_b, gaps_only_at_ends_in_a, gaps_only_at_ends_in_b, 0, 0);
                
   needleman_wunsch_align(seq_a, seq_b, &scoring, nw, result);
   TEST_CHECK(strcmp(result->result_a, "---acgtttt") == 0 &&

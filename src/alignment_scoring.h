@@ -23,7 +23,7 @@ typedef struct
   // Turn at most one of these on at a time to prevent gaps/mismatches
   char no_gaps_in_a, no_gaps_in_b, no_mismatches;
   
-  char gaps_ends_a, gaps_ends_b;
+  char gaps_only_at_ends_in_a, gaps_only_at_ends_in_b;
 
   // If swap_score not set, should we use match/mismatch values?
   char use_match_mismatch;
@@ -39,7 +39,7 @@ typedef struct
 void scoring_init(scoring_t* scoring, int match, int mismatch,
                   int gap_open, int gap_extend,
                   char no_start_gap_penalty, char no_end_gap_penalty,
-                  char no_gaps_in_a, char no_gaps_in_b, char gaps_ends_a, char gaps_ends_b,
+                  char no_gaps_in_a, char no_gaps_in_b, char gaps_only_at_ends_in_a, char gaps_only_at_ends_in_b,
                   char no_mismatches, char case_sensitive);
 
 void scoring_add_wildcard(scoring_t* scoring, char c, int s);
