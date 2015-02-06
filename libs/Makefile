@@ -1,4 +1,3 @@
-
 all: bit_array string_buffer seq_file
 	cd bit_array &&  git pull && make
 	cd string_buffer && git pull && make
