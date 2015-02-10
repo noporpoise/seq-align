@@ -466,12 +466,14 @@ void test_nw()
   nw_test_no_gaps_equal();
   nw_test_free_gaps_at_ends();
 
+  /* These tests not working: */
   // nw_test_no_mismatches_simple();
   // nw_test_gaps_only_at_ends_in_shorter();
   // nw_test_gaps_only_at_ends_in_longer();
   // nw_test_free_gaps_at_ends_compare_no_gaps_gaps_only_at_ends();
   // nw_test_no_mismatches();
 
+  /* These test features not added: */
   // nw_test_free_start_gap();
   // nw_test_free_end_gap();
   // nw_test_free_gaps_at_ends_no_gaps();

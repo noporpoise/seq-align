@@ -13,6 +13,7 @@
 #define _BSD_SOURCE
 
 #include <stdarg.h> // required for va_list
+#include <stdbool.h>
 #include "seq_file.h"
 #include "alignment.h"
 
@@ -23,29 +24,29 @@ typedef struct
   char **file_paths1, **file_paths2;
 
   // All values initially 0
-  char case_sensitive;
+  bool case_sensitive;
   int match, mismatch, gap_open, gap_extend;
 
   // SW specific
   score_t min_score;
   unsigned int print_context, max_hits_per_alignment;
-  char min_score_set, max_hits_per_alignment_set;
-  char print_seq;
+  bool min_score_set, max_hits_per_alignment_set;
+  bool print_seq;
 
   // NW specific
-  char freestartgap_set, freeendgap_set;
-  char print_scores;
-  char zam_stle_output;
+  bool freestartgap_set, freeendgap_set;
+  bool print_matrices, print_scores;
+  bool zam_stle_output;
 
   // General output
-  char print_fasta, print_pretty, print_colour;
+  bool print_fasta, print_pretty, print_colour;
 
   // Experimental
-  char no_gaps_in1, no_gaps_in2;
-  char no_mismatches;
+  bool no_gaps_in1, no_gaps_in2;
+  bool no_mismatches;
 
   // Pair of sequences to align
-  char *seq1, *seq2;
+  const char *seq1, *seq2;
 } cmdline_t;
 
 char parse_entire_int(char *str, int *result);

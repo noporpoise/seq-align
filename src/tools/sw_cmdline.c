@@ -157,6 +157,11 @@ void align(const char *seq_a, const char *seq_b,
 
   printf("== Alignment %zu lengths (%lu, %lu):\n", alignment_index, len_a, len_b);
 
+  if(cmd->print_matrices)
+  {
+    alignment_print_matrices(aligner);
+  }
+
   // seqA
   if(cmd->print_fasta && seq_a_name != NULL)
   {

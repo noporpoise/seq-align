@@ -90,6 +90,11 @@ static void align(const char *seq_a, const char *seq_b,
 
   needleman_wunsch_align(seq_a, seq_b, &scoring, nw, result);
 
+  if(cmd->print_matrices)
+  {
+    alignment_print_matrices(nw);
+  }
+
   if(cmd->print_fasta && seq_a_name != NULL)
   {
     fputs(seq_a_name, stdout);

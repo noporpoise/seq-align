@@ -87,7 +87,7 @@ static void print_usage(char is_sw, score_t defaults[4], const char *cmdstr,
   fprintf(stderr,
 "  %s optimal %s alignment (maximises score).  \n"
 "  Takes a pair of sequences on the command line, or can read from a\n"
-"  file and from sequence piped in.  Can read gzip files and FASTA.\n\n",
+"  file and from sequence piped in.  Can read gzip files, FASTA and FASTQ.\n\n",
           is_sw ? "Smith-Waterman" : "Needleman-Wunsch",
           is_sw ? "local" : "global");
 
@@ -284,27 +284,31 @@ cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw)
         if(!is_sw) usage("--printseq only valid with Smith-Waterman");
         cmd->print_seq = 1;
       }
+      else if(strcasecmp(argv[argi], "--printmatrices") == 0)
+      {
+        cmd->print_matrices = true;
+      }
       else if(strcasecmp(argv[argi], "--printscores") == 0)
       {
         if(is_sw) usage("--printscores only valid with Needleman-Wunsch");
-        cmd->print_scores = 1;
+        cmd->print_scores = true;
       }
       else if(strcasecmp(argv[argi], "--printfasta") == 0)
       {
-        cmd->print_fasta = 1;
+        cmd->print_fasta = true;
       }
       else if(strcasecmp(argv[argi], "--pretty") == 0)
       {
-        cmd->print_pretty = 1;
+        cmd->print_pretty = true;
       }
       else if(strcasecmp(argv[argi], "--colour") == 0)
       {
-        cmd->print_colour = 1;
+        cmd->print_colour = true;
       }
       else if(strcasecmp(argv[argi], "--zam") == 0)
       {
         if(is_sw) usage("--zam only valid with Needleman-Wunsch");
-        cmd->zam_stle_output = 1;
+        cmd->zam_stle_output = true;
       }
       else if(strcasecmp(argv[argi], "--stdin") == 0)
       {
