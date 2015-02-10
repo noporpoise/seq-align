@@ -171,10 +171,6 @@ static char _follow_hit(sw_aligner_t* sw, size_t arr_index,
                            &score_x, &score_y, &arr_index, aligner);
   }
 
-  #ifdef DEBUG
-  printf("assembling results...\n");
-  #endif
-
   // We got a result!
   // Allocate memory for the result
   result->length = length;

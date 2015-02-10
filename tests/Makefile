@@ -10,7 +10,7 @@ LINK=-lalign -lstrbuf -lbitarr -lpthread -lz
 
 all: tests
 
-tests: tests.c
+tests: tests.c ../src/libalign.a
 	$(CC) -o $@ $< $(CFLAGS) $(INCS) $(LIBS) $(LINK)
 
 test: tests

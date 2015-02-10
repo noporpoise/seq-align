@@ -9,6 +9,7 @@
 #define ALIGNMENT_SCORING_HEADER_SEEN
 
 #include <inttypes.h>
+#include <stdbool.h>
 
 typedef int score_t;
 
@@ -18,16 +19,16 @@ typedef struct
 
   // Needleman Wunsch only
   // Turn these on to turn off penalties for gaps at the start/end of alignment
-  char no_start_gap_penalty, no_end_gap_penalty;
+  bool no_start_gap_penalty, no_end_gap_penalty;
 
   // Turn at most one of these on at a time to prevent gaps/mismatches
-  char no_gaps_in_a, no_gaps_in_b, no_mismatches;
+  bool no_gaps_in_a, no_gaps_in_b, no_mismatches;
 
   // If swap_score not set, should we use match/mismatch values?
-  char use_match_mismatch;
+  bool use_match_mismatch;
   int match, mismatch;
 
-  char case_sensitive;
+  bool case_sensitive;
 
   // Array of characters that match to everything with the same penalty (i.e. 'N's)
   uint32_t wildcards[256/32], swap_set[256][256/32];
@@ -36,9 +37,24 @@ typedef struct
 
 void scoring_init(scoring_t* scoring, int match, int mismatch,
                   int gap_open, int gap_extend,
-                  char no_start_gap_penalty, char no_end_gap_penalty,
-                  char no_gaps_in_a, char no_gaps_in_b,
-                  char no_mismatches, char case_sensitive);
+                  bool no_start_gap_penalty, bool no_end_gap_penalty,
+                  bool no_gaps_in_a, bool no_gaps_in_b,
+                  bool no_mismatches, bool case_sensitive);
+
+/*
+enum scoring_flags {
+  NO_LEFT_GAP_PENALTY_A = 1, NO_RGHT_GAP_PENALTY_A = 2,
+  NO_LEFT_GAP_A = 4, NO_GAPS_IN_A = 8, NO_RGHT_GAP_A = 16,
+  NO_LEFT_GAP_PENALTY_B = 32, NO_RGHT_GAP_PENALTY_B = 64,
+  NO_LEFT_GAP_B = 128, NO_GAPS_IN_B = 256, NO_RGHT_GAP_B = 512,
+  NO_MISMATCHES = 1024, CASE_INSENSITIVE = 2048
+};
+
+void scoring_init2(scoring_t* scoring,
+                   int match, int mismatch,
+                   int gap_open, int gap_extend,
+                   int flags);
+*/
 
 void scoring_add_wildcard(scoring_t* scoring, char c, int s);
 

@@ -44,7 +44,7 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
 
   size_t i, j, arr_size = score_width * score_height;
 
-  score_t min = is_sw ? 0 : INT_MIN;
+  const score_t min = is_sw ? 0 : INT_MIN;
 
   size_t seq_i, seq_j, len_i = score_width-1, len_j = score_height-1;
   size_t index, index_left, index_up, index_upleft;
@@ -234,20 +234,13 @@ void aligner_align(aligner_t *aligner,
 
   size_t new_capacity = aligner->score_width * aligner->score_height;
 
-  if(aligner->capacity == 0 || aligner->capacity < new_capacity)
+  if(aligner->capacity < new_capacity)
   {
     aligner->capacity = ROUNDUP2POW(new_capacity);
     size_t mem = sizeof(score_t) * aligner->capacity;
-
-    if(aligner->capacity == 0) {
-      aligner->match_scores = malloc(mem);
-      aligner->gap_a_scores = malloc(mem);
-      aligner->gap_b_scores = malloc(mem);
-    } else {
-      aligner->match_scores = realloc(aligner->match_scores, mem);
-      aligner->gap_a_scores = realloc(aligner->gap_a_scores, mem);
-      aligner->gap_b_scores = realloc(aligner->gap_b_scores, mem);
-    }
+    aligner->match_scores = realloc(aligner->match_scores, mem);
+    aligner->gap_a_scores = realloc(aligner->gap_a_scores, mem);
+    aligner->gap_b_scores = realloc(aligner->gap_b_scores, mem);
   }
 
   alignment_fill_matrices(aligner, is_sw);
@@ -388,6 +381,8 @@ void alignment_reverse_move(enum Matrix *curr_matrix, score_t *curr_score,
   }
   else
   {
+    alignment_print_matrices(aligner);
+
     fprintf(stderr, "[%s:%zu,%zu]: %i\n",
             MATRIX_NAME(*curr_matrix), *score_x, *score_y, *curr_score);
     fprintf(stderr, " match: %li gap_open: %li gap_extend: %li\n",
@@ -415,6 +410,8 @@ void alignment_print_matrices(const aligner_t *aligner)
   const score_t* gap_b_scores = aligner->gap_b_scores;
 
   size_t i, j;
+
+  printf("seq_a: %s\nseq_b: %s\n", aligner->seq_a, aligner->seq_b);
 
   printf("match_scores:\n");
   for(j = 0; j < aligner->score_height; j++)
@@ -446,6 +443,11 @@ void alignment_print_matrices(const aligner_t *aligner)
     }
     putc('\n', stdout);
   }
+
+  printf("match: %i mismatch: %i gapopen: %i gapexend: %i\n",
+         aligner->scoring->match, aligner->scoring->mismatch,
+         aligner->scoring->gap_open, aligner->scoring->gap_extend);
+  printf("\n");
 }
 
 void alignment_colour_print_against(const char *alignment_a,

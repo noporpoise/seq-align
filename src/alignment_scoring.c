@@ -26,11 +26,12 @@
 #define get_swap_bit(scoring,a,b) _get_bit((scoring)->swap_set[(size_t)a],b)
 #define set_swap_bit(scoring,a,b) _set_bit((scoring)->swap_set[(size_t)a],b)
 
-void scoring_init(scoring_t* scoring, int match, int mismatch,
+void scoring_init(scoring_t* scoring,
+                  int match, int mismatch,
                   int gap_open, int gap_extend,
-                  char no_start_gap_penalty, char no_end_gap_penalty,
-                  char no_gaps_in_a, char no_gaps_in_b,
-                  char no_mismatches, char case_sensitive)
+                  bool no_start_gap_penalty, bool no_end_gap_penalty,
+                  bool no_gaps_in_a, bool no_gaps_in_b,
+                  bool no_mismatches, bool case_sensitive)
 {
   // Gap of length 1 has penalty (gap_open+gap_extend)
   // of length N: (gap_open + gap_extend*N)
