@@ -138,13 +138,14 @@ static void print_usage(char is_sw, score_t defaults[4], const char *cmdstr,
   }
 
   fprintf(stderr,
+"    --printmatrices      Print dynamic programming matrices\n"
 "    --printfasta         Print fasta header lines\n"
 "    --pretty             Print with a descriptor line\n"
 "    --colour             Print with colour\n"
 "\n"
-"  EXPERIMENTAL (and buggy):\n"
-"    --nogapsin1          No gaps allowed in the first sequence\n"
-"    --nogapsin2          No gaps allowed in the second sequence\n"
+"  Experimental Options:\n"
+"    --nogapsin1          No gaps allowed within the first sequence\n"
+"    --nogapsin2          No gaps allowed within the second sequence\n"
 "    --nogaps             No gaps allowed in either sequence\n"
 "    --nomismatches       No mismatches allowed: cannot be used with --nogaps..\n"
 "\n"

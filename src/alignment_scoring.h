@@ -35,6 +35,16 @@ typedef struct
   score_t wildscores[256], swap_scores[256][256];
 } scoring_t;
 
+#define scoring_get_bit(arr,i) (((arr)[(i)/32] >> ((i)%32))&0x1)
+#define scoring_set_bit(arr,i) ((arr)[(i)/32] |= (0x1<<((i)%32)))
+
+#define get_wildcard_bit(scoring,c) scoring_get_bit((scoring)->wildcards,c)
+#define set_wildcard_bit(scoring,c) scoring_set_bit((scoring)->wildcards,c)
+
+#define get_swap_bit(scoring,a,b) scoring_get_bit((scoring)->swap_set[(size_t)a],b)
+#define set_swap_bit(scoring,a,b) scoring_set_bit((scoring)->swap_set[(size_t)a],b)
+
+
 void scoring_init(scoring_t* scoring, int match, int mismatch,
                   int gap_open, int gap_extend,
                   bool no_start_gap_penalty, bool no_end_gap_penalty,
@@ -56,6 +66,8 @@ void scoring_init2(scoring_t* scoring,
                    int flags);
 */
 
+#define scoring_is_wildcard(scoring,c) (get_wildcard_bit(scoring,c))
+
 void scoring_add_wildcard(scoring_t* scoring, char c, int s);
 
 void scoring_add_mutation(scoring_t* scoring, char a, char b, int score);
@@ -63,7 +75,7 @@ void scoring_add_mutation(scoring_t* scoring, char a, char b, int score);
 void scoring_print(const scoring_t* scoring);
 
 void scoring_lookup(const scoring_t* scoring, char a, char b,
-                    int* score, char* is_match);
+                    int *score, bool *is_match);
 
 // Some scoring systems
 void scoring_system_PAM30(scoring_t *scoring);

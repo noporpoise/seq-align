@@ -17,15 +17,6 @@
 #include "alignment_scoring.h"
 #include "alignment_macros.h"
 
-#define _get_bit(arr,i) (((arr)[(i)/32] >> ((i)%32))&0x1)
-#define _set_bit(arr,i) ((arr)[(i)/32] |= (0x1<<((i)%32)))
-
-#define get_wildcard_bit(scoring,c) _get_bit((scoring)->wildcards,c)
-#define set_wildcard_bit(scoring,c) _set_bit((scoring)->wildcards,c)
-
-#define get_swap_bit(scoring,a,b) _get_bit((scoring)->swap_set[(size_t)a],b)
-#define set_swap_bit(scoring,a,b) _set_bit((scoring)->swap_set[(size_t)a],b)
-
 void scoring_init(scoring_t* scoring,
                   int match, int mismatch,
                   int gap_open, int gap_extend,
@@ -132,7 +123,7 @@ void scoring_print(const scoring_t* scoring)
 // Considered match if lc(a)==lc(b) or if a or b are wildcards
 // Always sets score and is_match
 void scoring_lookup(const scoring_t* scoring, char a, char b,
-                    int* score, char* is_match)
+                    int *score, bool *is_match)
 {
   if(!scoring->case_sensitive)
   {
