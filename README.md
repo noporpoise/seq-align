@@ -57,7 +57,7 @@ Smith-Waterman
         usage: ./bin/smith_waterman [OPTIONS] [seq1 seq2]
           Smith-Waterman optimal local alignment (maximises score).  
           Takes a pair of sequences on the command line, or can read from a
-          file and from sequence piped in.  Can read gzip files and FASTA.
+          file and from sequence piped in.  Can read gzip files, FASTA and FASTQ.
 
           OPTIONS:
             --file <file>        Sequence file reading with gzip support - read two
@@ -85,13 +85,14 @@ Smith-Waterman
 
             --context <n>        Print <n> bases of context
             --printseq           Print sequences before local alignments
+            --printmatrices      Print dynamic programming matrices
             --printfasta         Print fasta header lines
             --pretty             Print with a descriptor line
             --colour             Print with colour
 
-          EXPERIMENTAL (and buggy):
-            --nogapsin1          No gaps allowed in the first sequence
-            --nogapsin2          No gaps allowed in the second sequence
+          Experimental Options:
+            --nogapsin1          No gaps allowed within the first sequence
+            --nogapsin2          No gaps allowed within the second sequence
             --nogaps             No gaps allowed in either sequence
             --nomismatches       No mismatches allowed: cannot be used with --nogaps..
 
@@ -102,7 +103,8 @@ Smith-Waterman
           * Scoring files should be matrices, with entries separated by a single
             character or whitespace. See files in the 'scores' directory for examples.
 
-          turner.isaac@gmail.com  (compiled: Oct 23 2013 19:08:54)
+          turner.isaac@gmail.com  (compiled: Feb 11 2015 20:20:34)
+
 
 Needleman-Wunsch
 ================
@@ -110,7 +112,7 @@ Needleman-Wunsch
         usage: ./bin/needleman_wunsch [OPTIONS] [seq1 seq2]
           Needleman-Wunsch optimal global alignment (maximises score).  
           Takes a pair of sequences on the command line, or can read from a
-          file and from sequence piped in.  Can read gzip files and FASTA.
+          file and from sequence piped in.  Can read gzip files, FASTA and FASTQ.
 
           OPTIONS:
             --file <file>        Sequence file reading with gzip support - read two
@@ -137,13 +139,14 @@ Needleman-Wunsch
 
             --printscores        Print optimal alignment scores
             --zam                A funky type of output
+            --printmatrices      Print dynamic programming matrices
             --printfasta         Print fasta header lines
             --pretty             Print with a descriptor line
             --colour             Print with colour
 
-          EXPERIMENTAL (and buggy):
-            --nogapsin1          No gaps allowed in the first sequence
-            --nogapsin2          No gaps allowed in the second sequence
+          Experimental Options:
+            --nogapsin1          No gaps allowed within the first sequence
+            --nogapsin2          No gaps allowed within the second sequence
             --nogaps             No gaps allowed in either sequence
             --nomismatches       No mismatches allowed: cannot be used with --nogaps..
 
@@ -154,7 +157,8 @@ Needleman-Wunsch
           * Scoring files should be matrices, with entries separated by a single
             character or whitespace. See files in the 'scores' directory for examples.
 
-          turner.isaac@gmail.com  (compiled: Oct 23 2013 19:08:54)
+          turner.isaac@gmail.com  (compiled: Feb 11 2015 20:20:34)
+
 
 
 Baiscs:
@@ -170,7 +174,7 @@ Print alignment scores:
     C--GATA
     score: -15
 
-Read from file (dna.fa):
+Read from file (dna.fa.gz):
 
     >seqA
     ACAATAGAC
@@ -295,22 +299,9 @@ DEVELOPMENT
 Feel free to contact me to request features.  Bug reports are appreciated.  
 (turner.isaac@gmail.com)
 
-1) Add tests  
-2) Finish adding the following options:
-
-* No unneeded gaps:  
---nogapsin1  
---nogapsin2  
---nogaps
-
-* Penalised gaps at ends:  
---gapsonlyatendsin1  
---gapsonlyatendsin2  
---gapsonlyatends
-
-* free gaps at ends:  
---freestartgap  
---freeendgap
+Possible features:
+1. May add option to have no gaps in alignment result for longest sequence
+   with `--nogapsinlongest`
 
 Algorithms to investigate:
 Gotoh
