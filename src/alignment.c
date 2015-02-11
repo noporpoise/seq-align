@@ -385,13 +385,6 @@ void alignment_reverse_move(enum Matrix *curr_matrix, score_t *curr_score,
   }
   else if((long)aligner->match_scores[*arr_index] + prev_match_penalty == *curr_score)
   {
-    // Check that if no matches is true, characters match
-    if(scoring->no_mismatches) {
-      char a = aligner->seq_a[(*score_x)-1], b = aligner->seq_b[(*score_y)-1];
-      assert(tolower(a) == tolower(b) ||
-             scoring_is_wildcard(scoring, a) || scoring_is_wildcard(scoring, b));
-    }
-
     *curr_matrix = MATCH;
     *curr_score = aligner->match_scores[*arr_index];
   }

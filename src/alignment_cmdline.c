@@ -146,8 +146,13 @@ static void print_usage(char is_sw, score_t defaults[4], const char *cmdstr,
 "  Experimental Options:\n"
 "    --nogapsin1          No gaps allowed within the first sequence\n"
 "    --nogapsin2          No gaps allowed within the second sequence\n"
-"    --nogaps             No gaps allowed in either sequence\n"
-"    --nomismatches       No mismatches allowed: cannot be used with --nogaps..\n"
+"    --nogaps             No gaps allowed in either sequence\n");
+
+  fprintf(stderr,
+"    --nomismatches       No mismatches allowed%s\n",
+          is_sw ? "" : " (cannot be used with --nogaps..)");
+
+  printf(
 "\n"
 " DETAILS:\n"
 "  * For help choosing scoring, see the README file. \n"
@@ -251,39 +256,39 @@ cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw)
       if(strcasecmp(argv[argi], "--freestartgap") == 0)
       {
         if(is_sw) usage("--freestartgap only valid with Needleman-Wunsch");
-        scoring->no_start_gap_penalty = 1;
+        scoring->no_start_gap_penalty = true;
       }
       else if(strcasecmp(argv[argi], "--freeendgap") == 0)
       {
         if(is_sw) usage("--freeendgap only valid with Needleman-Wunsch");
-        scoring->no_end_gap_penalty = 1;
+        scoring->no_end_gap_penalty = true;
       }
       else if(strcasecmp(argv[argi], "--nogaps") == 0)
       {
-        scoring->no_gaps_in_a = 1;
-        scoring->no_gaps_in_b = 1;
+        scoring->no_gaps_in_a = true;
+        scoring->no_gaps_in_b = true;
       }
       else if(strcasecmp(argv[argi], "--nogapsin1") == 0)
       {
-        scoring->no_gaps_in_a = 1;
+        scoring->no_gaps_in_a = true;
       }
       else if(strcasecmp(argv[argi], "--nogapsin2") == 0)
       {
-        scoring->no_gaps_in_b = 1;
+        scoring->no_gaps_in_b = true;
       }
       else if(strcasecmp(argv[argi], "--nomismatches") == 0)
       {
-        scoring->no_mismatches = 1;
+        scoring->no_mismatches = true;
       }
       else if(strcasecmp(argv[argi], "--case_sensitive") == 0)
       {
         // Already dealt with
-        //case_sensitive = 1;
+        //case_sensitive = true;
       }
       else if(strcasecmp(argv[argi], "--printseq") == 0)
       {
         if(!is_sw) usage("--printseq only valid with Smith-Waterman");
-        cmd->print_seq = 1;
+        cmd->print_seq = true;
       }
       else if(strcasecmp(argv[argi], "--printmatrices") == 0)
       {
@@ -335,7 +340,7 @@ cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw)
                                   scoring, cmd->case_sensitive);
 
         gzclose(sub_matrix_file);
-        substitutions_set = 1;
+        substitutions_set = true;
 
         argi++; // took an argument
       }
@@ -348,7 +353,7 @@ cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw)
                                     scoring, cmd->case_sensitive);
 
         gzclose(sub_pairs_file);
-        substitutions_set = 1;
+        substitutions_set = true;
 
         argi++; // took an argument
       }
@@ -359,7 +364,7 @@ cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw)
         if(!parse_entire_int(argv[argi+1], &cmd->min_score))
           usage("Invalid --minscore <score> argument (must be a +ve int)");
 
-        cmd->min_score_set = 1;
+        cmd->min_score_set = true;
 
         argi++;
       }
@@ -370,7 +375,7 @@ cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw)
         if(!parse_entire_uint(argv[argi+1], &cmd->max_hits_per_alignment))
           usage("Invalid --maxhits <hits> argument (must be a +ve int)");
 
-        cmd->max_hits_per_alignment_set = 1;
+        cmd->max_hits_per_alignment_set = true;
 
         argi++;
       }
@@ -390,7 +395,7 @@ cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw)
           usage("Invalid --match argument ('%s') must be an int", argv[argi+1]);
         }
 
-        match_set = 1;
+        match_set = true;
         argi++; // took an argument
       }
       else if(strcasecmp(argv[argi], "--mismatch") == 0)
@@ -400,7 +405,7 @@ cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw)
           usage("Invalid --mismatch argument ('%s') must be an int", argv[argi+1]);
         }
 
-        mismatch_set = 1;
+        mismatch_set = true;
         argi++; // took an argument
       }
       else if(strcasecmp(argv[argi], "--gapopen") == 0)
@@ -484,7 +489,10 @@ cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw)
     usage("Match value should not be less than mismatch penalty");
   }
 
-  if((scoring->no_gaps_in_a || scoring->no_gaps_in_b) && scoring->no_mismatches)
+  // Cannot guarantee that we can perform a global alignment if nomismatches
+  // and nogaps is true
+  if(!is_sw && scoring->no_mismatches &&
+     (scoring->no_gaps_in_a || scoring->no_gaps_in_b))
   {
     usage("--nogaps.. --nomismatches cannot be used at together");
   }
