@@ -1,3 +1,6 @@
 *.o
 *.a
 bin/
+libs/
+examples/nw_example
+examples/sw_example
