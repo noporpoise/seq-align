@@ -94,7 +94,7 @@ Smith-Waterman
             --nogapsin1          No gaps allowed within the first sequence
             --nogapsin2          No gaps allowed within the second sequence
             --nogaps             No gaps allowed in either sequence
-            --nomismatches       No mismatches allowed: cannot be used with --nogaps..
+            --nomismatches       No mismatches allowed
 
          DETAILS:
           * For help choosing scoring, see the README file. 
@@ -148,7 +148,7 @@ Needleman-Wunsch
             --nogapsin1          No gaps allowed within the first sequence
             --nogapsin2          No gaps allowed within the second sequence
             --nogaps             No gaps allowed in either sequence
-            --nomismatches       No mismatches allowed: cannot be used with --nogaps..
+            --nomismatches       No mismatches allowed (cannot be used with --nogaps..)
 
          DETAILS:
           * For help choosing scoring, see the README file. 
@@ -158,7 +158,6 @@ Needleman-Wunsch
             character or whitespace. See files in the 'scores' directory for examples.
 
           turner.isaac@gmail.com  (compiled: Feb 11 2015 20:20:34)
-
 
 
 Baiscs:
@@ -214,6 +213,14 @@ Set different scoring systems:
 
     $ ./needleman_wunsch --match 1 --mismatch 0 --gapopen -10 --gapextend 0 ACGTGCCCCACAGAT AGGTGGACGAGAT
 
+
+Longest Common Substring
+========================
+
+    ./bin/lcs [options] <sequence>
+      Print substrings in order of length
+
+Print maximal substrings from longest to shortest
 
 
 Scoring Penalties

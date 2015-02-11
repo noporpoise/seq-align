@@ -23,7 +23,7 @@ LINK=-lalign -lstrbuf -lbitarr -lpthread -lz
 SRCS=$(wildcard src/*.c)
 OBJS=$(SRCS:.c=.o)
 
-all: bin/needleman_wunsch bin/smith_waterman src/libalign.a examples
+all: bin/needleman_wunsch bin/smith_waterman bin/lcs src/libalign.a examples
 
 src/libalign.a: $(OBJS)
 	ar -csru src/libalign.a $(OBJS)
@@ -36,13 +36,14 @@ $(OBJS): $(REQ)
 %.o: %.c
 	$(CC) $(CFLAGS) $(OBJFLAGS) $(INCS) -c $< -o $@
 
-bin/needleman_wunsch: src/tools/nw_cmdline.c src/libalign.a
-	mkdir -p bin
+bin/needleman_wunsch: src/tools/nw_cmdline.c src/libalign.a | bin
 	$(CC) -o bin/needleman_wunsch $(SRCS) $(TGTFLAGS) $(INCS) $(LIBS) src/tools/nw_cmdline.c $(LINKFLAGS)
 
-bin/smith_waterman: src/tools/sw_cmdline.c src/libalign.a
-	mkdir -p bin
+bin/smith_waterman: src/tools/sw_cmdline.c src/libalign.a | bin
 	$(CC) -o bin/smith_waterman $(SRCS) $(TGTFLAGS) $(INCS) $(LIBS) src/tools/sw_cmdline.c $(LINKFLAGS)
+
+bin/lcs: src/tools/lcs_cmdline.c src/libalign.a | bin
+	$(CC) -o bin/lcs $(SRCS) $(TGTFLAGS) $(INCS) $(LIBS) src/tools/lcs_cmdline.c $(LINKFLAGS)
 
 bin/seq_align_tests: src/tools/tests.c src/libalign.a
 	mkdir -p bin
@@ -50,6 +51,9 @@ bin/seq_align_tests: src/tools/tests.c src/libalign.a
 
 examples: src/libalign.a
 	cd examples; make LIBS_PATH=$(abspath $(LIBS_PATH))
+
+bin:
+	mkdir -p bin
 
 clean:
 	rm -rf bin src/*.o src/libalign.a
