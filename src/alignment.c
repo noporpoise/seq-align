@@ -43,20 +43,12 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
   size_t score_width = aligner->score_width;
   size_t score_height = aligner->score_height;
 
-  size_t i, j, arr_size = score_width * score_height;
+  size_t i, j;
 
   const score_t min = is_sw ? 0 : INT_MIN;
 
   size_t seq_i, seq_j, len_i = score_width-1, len_j = score_height-1;
   size_t index, index_left, index_up, index_upleft;
-
-  if(scoring->no_gaps_in_a) {
-    for(i = 0; i < arr_size; i++) gap_a_scores[i] = min;
-  }
-
-  if(scoring->no_gaps_in_b) {
-    for(i = 0; i < arr_size; i++) gap_b_scores[i] = min;
-  }
 
   // [0][0]
   match_scores[0] = 0;
@@ -140,45 +132,41 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
       // Long arithmetic since some INTs are set to min and penalty is -ve
       // (adding as ints would cause an integer overflow)
 
-      if(!scoring->no_gaps_in_a)
+      // Update gap_a_scores[i][j] from position [i][j-1]
+      if(seq_i == len_i-1 && scoring->no_end_gap_penalty)
       {
-        // Update gap_a_scores[i][j] from position [i][j-1]
-
-        if(seq_i == len_i-1 && scoring->no_end_gap_penalty)
-        {
-          gap_a_scores[index] = MAX3(match_scores[index_up],
-                                     gap_a_scores[index_up],
-                                     gap_b_scores[index_up]);
-        }
-        else
-        {
-          gap_a_scores[index]
-            = max4(match_scores[index_up] + gap_open_penalty,
-                   gap_a_scores[index_up] + gap_extend_penalty,
-                   gap_b_scores[index_up] + gap_open_penalty,
-                   min);
-        }
+        gap_a_scores[index] = MAX3(match_scores[index_up],
+                                   gap_a_scores[index_up],
+                                   gap_b_scores[index_up]);
       }
-
-      if(!scoring->no_gaps_in_b)
+      else if(!scoring->no_gaps_in_a || seq_i == len_i-1)
       {
-        // Update gap_b_scores[i][j] from position [i-1][j]
-
-        if(seq_j == len_j-1 && scoring->no_end_gap_penalty)
-        {
-          gap_b_scores[index] = MAX3(match_scores[index_left],
-                                     gap_a_scores[index_left],
-                                     gap_b_scores[index_left]);
-        }
-        else
-        {
-          gap_b_scores[index]
-            = max4(match_scores[index_left] + gap_open_penalty,
-                   gap_a_scores[index_left] + gap_open_penalty,
-                   gap_b_scores[index_left] + gap_extend_penalty,
-                   min);
-        }
+        gap_a_scores[index]
+          = max4(match_scores[index_up] + gap_open_penalty,
+                 gap_a_scores[index_up] + gap_extend_penalty,
+                 gap_b_scores[index_up] + gap_open_penalty,
+                 min);
       }
+      else
+        gap_a_scores[index] = min;
+
+      // Update gap_b_scores[i][j] from position [i-1][j]
+      if(seq_j == len_j-1 && scoring->no_end_gap_penalty)
+      {
+        gap_b_scores[index] = MAX3(match_scores[index_left],
+                                   gap_a_scores[index_left],
+                                   gap_b_scores[index_left]);
+      }
+      else if(!scoring->no_gaps_in_b || seq_j == len_j-1)
+      {
+        gap_b_scores[index]
+          = max4(match_scores[index_left] + gap_open_penalty,
+                 gap_a_scores[index_left] + gap_open_penalty,
+                 gap_b_scores[index_left] + gap_extend_penalty,
+                 min);
+      }
+      else
+        gap_b_scores[index] = min;
 
       index++;
       index_left++;
@@ -190,44 +178,6 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
     index_left++;
     index_up++;
     index_upleft++;
-  }
-
-  if(scoring->no_gaps_in_a)
-  {
-    // Allow gaps only at the start/end of A
-    // Fill right hand column of traceback matrix
-    index_up = score_width-1;
-    index = index_up+score_width;
-
-    while(index < arr_size)
-    {
-      gap_a_scores[index]
-        = MAX3(match_scores[index_up] + gap_open_penalty,
-               gap_a_scores[index_up] + gap_extend_penalty,
-               min);
-
-      index_up = index;
-      index += score_width;
-    }
-  }
-
-  if(scoring->no_gaps_in_b)
-  {
-    // Allow gaps only at the start/end of B
-    // Fill bottom row of traceback matrix
-    index_left = (score_height-1)*score_width;
-    index = index_left+1;
-
-    while(index < arr_size)
-    {
-      gap_b_scores[index]
-        = MAX3(match_scores[index_left] + gap_open_penalty,
-               gap_b_scores[index_left] + gap_extend_penalty,
-               min);
-
-      index_left++;
-      index++;
-    }
   }
 }
 
