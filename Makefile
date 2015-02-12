@@ -11,7 +11,7 @@ OBJFLAGS = -fPIC
 LINKFLAGS = -lalign -lstrbuf -lbitarr -lpthread -lz
 
 INCS=-I $(LIBS_PATH)/bit_array -I $(LIBS_PATH)/string_buffer \
-     -I $(LIBS_PATH)/seq_file -I src
+     -I $(LIBS_PATH)/seq_file -I $(LIBS_PATH)/sort_r -I src
 
 LIBS=-L $(LIBS_PATH)/bit_array -L $(LIBS_PATH)/string_buffer -L src
 
@@ -58,7 +58,6 @@ bin:
 clean:
 	rm -rf bin src/*.o src/libalign.a
 	cd examples && make clean
-	cd tests && make clean
 
 test: bin/seq_align_tests
 	./bin/seq_align_tests
