@@ -78,7 +78,7 @@ sub new
 
   my ($in, $out, $err);
 
-  #print "running '$cmdline'\n";
+  print "running '$cmdline'\n";
 
   my $pid = open2($in, $out, $cmdline)
     or die("Cannot run cmd: '$cmdline'");

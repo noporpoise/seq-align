@@ -1,5 +1,5 @@
 /*
- sw_example.cc
+ examples/sw_example.cpp
  author: Isaac Turner <turner.isaac@gmail.com>
  url: https://github.com/noporpoise/seq-align
  Feb 2015; License: Public Domain

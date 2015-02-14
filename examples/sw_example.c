@@ -1,8 +1,8 @@
 /*
- sw_example.c
+ examples/sw_example.c
  author: Isaac Turner <turner.isaac@gmail.com>
  url: https://github.com/noporpoise/seq-align
- May 2013
+ May 2013; License: Public Domain
  */
 
 #include <stdlib.h>

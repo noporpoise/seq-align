@@ -64,13 +64,13 @@ char parse_entire_uint(char *str, unsigned int *result)
   }
 }
 
-static void print_usage(char is_sw, score_t defaults[4], const char *cmdstr,
-                        const char *errfmt, ...)
+static void print_usage(enum SeqAlignCmdType cmd_type, score_t defaults[4],
+                        const char *cmdstr, const char *errfmt, ...)
   __attribute__((format(printf, 4, 5)))
   __attribute__((noreturn));
 
-static void print_usage(char is_sw, score_t defaults[4], const char *cmdstr,
-                        const char *errfmt, ...)
+static void print_usage(enum SeqAlignCmdType cmd_type, score_t defaults[4],
+                        const char *cmdstr, const char *errfmt, ...)
 {
   if(errfmt != NULL) {
     fprintf(stderr, "Error: ");
@@ -88,8 +88,8 @@ static void print_usage(char is_sw, score_t defaults[4], const char *cmdstr,
 "  %s optimal %s alignment (maximises score).  \n"
 "  Takes a pair of sequences on the command line, or can read from a\n"
 "  file and from sequence piped in.  Can read gzip files, FASTA and FASTQ.\n\n",
-          is_sw ? "Smith-Waterman" : "Needleman-Wunsch",
-          is_sw ? "local" : "global");
+          cmd_type == SEQ_ALIGN_SW_CMD ? "Smith-Waterman" : "Needleman-Wunsch",
+          cmd_type == SEQ_ALIGN_SW_CMD ? "local" : "global");
 
   fprintf(stderr,
 "  OPTIONS:\n"
@@ -113,7 +113,7 @@ static void print_usage(char is_sw, score_t defaults[4], const char *cmdstr,
           defaults[0], defaults[1],
           defaults[2], defaults[3]);
 
-  if(is_sw)
+  if(cmd_type == SEQ_ALIGN_SW_CMD)
   {
     // SW specific
     fprintf(stderr,
@@ -150,7 +150,7 @@ static void print_usage(char is_sw, score_t defaults[4], const char *cmdstr,
 
   fprintf(stderr,
 "    --nomismatches       No mismatches allowed%s\n",
-          is_sw ? "" : " (cannot be used with --nogaps..)");
+          cmd_type == SEQ_ALIGN_SW_CMD ? "" : " (cannot be used with --nogaps..)");
 
   printf(
 "\n"
@@ -173,10 +173,10 @@ void cmdline_free(cmdline_t *cmd)
   free(cmd);
 }
 
-#define usage(fmt,...) \
-  print_usage(is_sw,defaults,argv[0],fmt, ##__VA_ARGS__)
+#define usage(fmt,...) print_usage(cmd_type,defaults,argv[0],fmt, ##__VA_ARGS__)
 
-cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw)
+cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring,
+                       enum SeqAlignCmdType cmd_type)
 {
   cmdline_t* cmd = calloc(1, sizeof(cmdline_t));
   cmd->file_list_length = 0;
@@ -255,12 +255,14 @@ cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw)
       // strcasecmp does case insensitive comparison
       if(strcasecmp(argv[argi], "--freestartgap") == 0)
       {
-        if(is_sw) usage("--freestartgap only valid with Needleman-Wunsch");
+        if(cmd_type != SEQ_ALIGN_NW_CMD)
+          usage("--freestartgap only valid with Needleman-Wunsch");
         scoring->no_start_gap_penalty = true;
       }
       else if(strcasecmp(argv[argi], "--freeendgap") == 0)
       {
-        if(is_sw) usage("--freeendgap only valid with Needleman-Wunsch");
+        if(cmd_type != SEQ_ALIGN_NW_CMD)
+          usage("--freeendgap only valid with Needleman-Wunsch");
         scoring->no_end_gap_penalty = true;
       }
       else if(strcasecmp(argv[argi], "--nogaps") == 0)
@@ -287,7 +289,8 @@ cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw)
       }
       else if(strcasecmp(argv[argi], "--printseq") == 0)
       {
-        if(!is_sw) usage("--printseq only valid with Smith-Waterman");
+        if(cmd_type != SEQ_ALIGN_SW_CMD)
+          usage("--printseq only valid with Smith-Waterman");
         cmd->print_seq = true;
       }
       else if(strcasecmp(argv[argi], "--printmatrices") == 0)
@@ -296,7 +299,8 @@ cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw)
       }
       else if(strcasecmp(argv[argi], "--printscores") == 0)
       {
-        if(is_sw) usage("--printscores only valid with Needleman-Wunsch");
+        if(cmd_type != SEQ_ALIGN_NW_CMD)
+          usage("--printscores only valid with Needleman-Wunsch");
         cmd->print_scores = true;
       }
       else if(strcasecmp(argv[argi], "--printfasta") == 0)
@@ -313,13 +317,15 @@ cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw)
       }
       else if(strcasecmp(argv[argi], "--zam") == 0)
       {
-        if(is_sw) usage("--zam only valid with Needleman-Wunsch");
+        if(cmd_type != SEQ_ALIGN_NW_CMD)
+          usage("--zam only valid with Needleman-Wunsch");
         cmd->zam_stle_output = true;
       }
       else if(strcasecmp(argv[argi], "--stdin") == 0)
       {
         // Similar to --file argument below
         cmdline_add_files(cmd, "", NULL);
+        cmd->interactive = true;
       }
       else if(argi == argc-1)
       {
@@ -359,7 +365,8 @@ cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw)
       }
       else if(strcasecmp(argv[argi], "--minscore") == 0)
       {
-        if(!is_sw) usage("--minscore only valid with Smith-Waterman");
+        if(cmd_type != SEQ_ALIGN_SW_CMD)
+          usage("--minscore only valid with Smith-Waterman");
 
         if(!parse_entire_int(argv[argi+1], &cmd->min_score))
           usage("Invalid --minscore <score> argument (must be a +ve int)");
@@ -370,7 +377,8 @@ cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw)
       }
       else if(strcasecmp(argv[argi], "--maxhits") == 0)
       {
-        if(!is_sw) usage("--maxhits only valid with Smith-Waterman");
+        if(cmd_type != SEQ_ALIGN_SW_CMD)
+          usage("--maxhits only valid with Smith-Waterman");
 
         if(!parse_entire_uint(argv[argi+1], &cmd->max_hits_per_alignment))
           usage("Invalid --maxhits <hits> argument (must be a +ve int)");
@@ -381,7 +389,8 @@ cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw)
       }
       else if(strcasecmp(argv[argi], "--context") == 0)
       {
-        if(!is_sw) usage("--context only valid with Smith-Waterman");
+        if(cmd_type != SEQ_ALIGN_SW_CMD)
+          usage("--context only valid with Smith-Waterman");
 
         if(!parse_entire_uint(argv[argi+1], &cmd->print_context))
           usage("Invalid --context <c> argument (must be >= 0)");
@@ -491,7 +500,7 @@ cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw)
 
   // Cannot guarantee that we can perform a global alignment if nomismatches
   // and nogaps is true
-  if(!is_sw && scoring->no_mismatches &&
+  if(cmd_type == SEQ_ALIGN_NW_CMD && scoring->no_mismatches &&
      (scoring->no_gaps_in_a || scoring->no_gaps_in_b))
   {
     usage("--nogaps.. --nomismatches cannot be used at together");
@@ -557,14 +566,21 @@ char* cmdline_get_file2(cmdline_t *cmd, size_t i)
   return cmd->file_paths2[i];
 }
 
+static seq_file_t* open_seq_file(const char *path, bool use_zlib)
+{
+  return (strcmp(path,"-") != 0 || use_zlib) ? seq_open(path)
+                                             : seq_open_fh(stdin, 0, 0, 0);
+}
+
 // If seq2 is NULL, read pair of entries from first file
 // Otherwise read an entry from each
 void align_from_file(const char *path1, const char *path2,
-                     void (align)(read_t *r1, read_t *r2))
+                     void (align)(read_t *r1, read_t *r2),
+                     bool use_zlib)
 {
   seq_file_t *sf1, *sf2;
 
-  if((sf1 = seq_open(path1)) == NULL)
+  if((sf1 = open_seq_file(path1, use_zlib)) == NULL)
   {
     fprintf(stderr, "Alignment Error: couldn't open file %s\n", path1);
     fflush(stderr);
@@ -575,12 +591,14 @@ void align_from_file(const char *path1, const char *path2,
   {
     sf2 = sf1;
   }
-  else if((sf2 = seq_open(path2)) == NULL)
+  else if((sf2 = open_seq_file(path2, use_zlib)) == NULL)
   {
     fprintf(stderr, "Alignment Error: couldn't open file %s\n", path1);
     fflush(stderr);
     return;
   }
+
+  // fprintf(stderr, "File buffer %zu zlib: %i\n", sf1->in.size, seq_use_gzip(sf1));
 
   read_t read1, read2;
   seq_read_alloc(&read1);

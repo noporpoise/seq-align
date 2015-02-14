@@ -2,7 +2,7 @@
  alignment_scoring.h
  author: Isaac Turner <turner.isaac@gmail.com>
  url: https://github.com/noporpoise/seq-align
- May 2013
+ May 2013; License: Public Domain
  */
 
 #ifndef ALIGNMENT_SCORING_HEADER_SEEN

@@ -27,7 +27,7 @@ my $sw = new SmithWaterman('minscore' => 2);
 my @aligns = (['asdfasdf','asdfasdf'],
               ['dogg', 'ggod'],
               ['asdfas', 'fadsas'],
-              ['', ''],
+              ['hello henry', 'wellohenry'],
               ['asdf', 'lkj']);
 
 for my $align (@aligns)

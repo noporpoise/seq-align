@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
   #endif
 
   nw_set_default_scoring();
-  cmd = cmdline_new(argc, argv, &scoring, 0); // 0 => NW, 1 => SW
+  cmd = cmdline_new(argc, argv, &scoring, SEQ_ALIGN_NW_CMD);
 
   // Align!
   nw = needleman_wunsch_new();
@@ -182,7 +182,7 @@ int main(int argc, char* argv[])
     if(file1 != NULL && *file1 == '\0' && file2 == NULL) {
       file1 = "-";
     }
-    align_from_file(file1, file2, &align_pair_from_file);
+    align_from_file(file1, file2, &align_pair_from_file, !cmd->interactive);
   }
 
   // Free memory for storing alignment results

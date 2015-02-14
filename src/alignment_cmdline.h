@@ -17,6 +17,8 @@
 #include "seq_file/seq_file.h"
 #include "alignment.h"
 
+enum SeqAlignCmdType {SEQ_ALIGN_SW_CMD, SEQ_ALIGN_NW_CMD, SEQ_ALIGN_LCS_CMD};
+
 typedef struct
 {
   // file inputs
@@ -38,6 +40,9 @@ typedef struct
   bool print_matrices, print_scores;
   bool zam_stle_output;
 
+  // Turns off zlib for stdin
+  bool interactive;
+
   // General output
   bool print_fasta, print_pretty, print_colour;
 
@@ -52,7 +57,8 @@ typedef struct
 char parse_entire_int(char *str, int *result);
 char parse_entire_uint(char *str, unsigned int *result);
 
-cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring, char is_sw);
+cmdline_t* cmdline_new(int argc, char **argv, scoring_t *scoring,
+                       enum SeqAlignCmdType cmd_type);
 void cmdline_free(cmdline_t* cmd);
 
 void cmdline_add_files(cmdline_t* cmd, char* p1, char* p2);
@@ -61,6 +67,7 @@ char* cmdline_get_file1(cmdline_t* cmd, size_t i);
 char* cmdline_get_file2(cmdline_t* cmd, size_t i);
 
 void align_from_file(const char *path1, const char *path2,
-                     void (align)(read_t *r1, read_t *r2));
+                     void (align)(read_t *r1, read_t *r2),
+                     bool use_zlib);
 
 #endif

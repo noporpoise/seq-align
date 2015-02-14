@@ -8,6 +8,7 @@
 #ifndef SMITH_WATERMAN_HEADER_SEEN
 #define SMITH_WATERMAN_HEADER_SEEN
 
+#include "seq_align.h"
 #include "alignment.h"
 
 typedef struct sw_aligner_t sw_aligner_t;

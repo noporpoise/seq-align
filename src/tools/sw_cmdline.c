@@ -32,7 +32,7 @@ sw_aligner_t *sw;
 alignment_t *result;
 
 size_t alignment_index = 0;
-char interactive = 0;
+bool wait_on_keystroke = 0;
 
 static void sw_set_default_scoring()
 {
@@ -83,7 +83,7 @@ void print_alignment_part(const char* seq1, const char* seq2,
 
 static char get_next_hit()
 {
-  if(!interactive)
+  if(!wait_on_keystroke)
     return 1;
 
   int r = 0;
@@ -125,7 +125,7 @@ static char get_next_hit()
 void align(const char *seq_a, const char *seq_b,
            const char *seq_a_name, const char *seq_b_name)
 {
-  if((seq_a_name != NULL || seq_b_name != NULL) && interactive)
+  if((seq_a_name != NULL || seq_b_name != NULL) && wait_on_keystroke)
   {
     fprintf(stderr, "Error: Interactive input takes seq only "
                     "(no FASTA/FASTQ) '%s:%s'\n", seq_a_name, seq_b_name);
@@ -193,8 +193,8 @@ void align(const char *seq_a, const char *seq_b,
   {
     // If min_score hasn't been set, set a limit based on the lengths of seqs
     // or zero if we're running interactively
-    cmd->min_score
-      = interactive ? 0 : scoring.match * MAX2(0.2 * MIN2(len_a, len_b), 2);
+    cmd->min_score = wait_on_keystroke ? 0
+                       : scoring.match * MAX2(0.2 * MIN2(len_a, len_b), 2);
 
     #ifdef DEBUG
     printf("min_score: %i\n", cmd->min_score);
@@ -327,7 +327,7 @@ int main(int argc, char* argv[])
   #endif
 
   sw_set_default_scoring();
-  cmd = cmdline_new(argc, argv, &scoring, 1); // 0 => NW, 1 => SW
+  cmd = cmdline_new(argc, argv, &scoring, SEQ_ALIGN_SW_CMD);
 
   // Align!
   sw = smith_waterman_new();
@@ -346,10 +346,10 @@ int main(int argc, char* argv[])
     const char *file1 = cmdline_get_file1(cmd, i);
     const char *file2 = cmdline_get_file2(cmd, i);
     if(file1 != NULL && *file1 == '\0' && file2 == NULL) {
-      interactive = 1;
+      wait_on_keystroke = 1;
       file1 = "-";
     }
-    align_from_file(file1, file2, &align_pair_from_file);
+    align_from_file(file1, file2, &align_pair_from_file, !cmd->interactive);
   }
 
   // Free memory for storing alignment results
