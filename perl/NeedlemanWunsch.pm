@@ -1,5 +1,11 @@
 package NeedlemanWunsch;
 
+# perl/NeedlemanWunsch.pm
+# url: https://github.com/noporpoise/seq-align
+# maintainer: Isaac Turner <turner.isaac@gmail.com>
+# license: Public Domain, no warranty
+# date: Oct 2012
+
 use strict;
 use warnings;
 

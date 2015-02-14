@@ -1,8 +1,9 @@
 /*
  alignment.c
- author: Isaac Turner <turner.isaac@gmail.com>
  url: https://github.com/noporpoise/seq-align
- Nov 2013; License: Public Domain
+ maintainer: Isaac Turner <turner.isaac@gmail.com>
+ license: Public Domain, no warranty
+ date: Feb 2015
  */
 
 // Turn on debugging output by defining DEBUG
@@ -11,7 +12,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <limits.h> // INT_MIN
 #include <ctype.h> // tolower
 #include <assert.h>
 
@@ -45,7 +45,7 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
 
   size_t i, j;
 
-  const score_t min = is_sw ? 0 : INT_MIN;
+  const score_t min = is_sw ? 0 : SCORE_MIN;
 
   size_t seq_i, seq_j, len_i = score_width-1, len_j = score_height-1;
   size_t index, index_left, index_up, index_upleft;

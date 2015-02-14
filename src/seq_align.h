@@ -1,8 +1,9 @@
 /*
  seq_align.h
- author: Isaac Turner <turner.isaac@gmail.com>
  url: https://github.com/noporpoise/seq-align
- Feb 2015
+ maintainer: Isaac Turner <turner.isaac@gmail.com>
+ license: Public Domain, no warranty
+ date: Feb 2015
  */
 
 #ifndef SEQ_ALIGN_HEADER_SEEN

@@ -1,8 +1,9 @@
 /*
  alignment_scoring.h
- author: Isaac Turner <turner.isaac@gmail.com>
  url: https://github.com/noporpoise/seq-align
- May 2013; License: Public Domain
+ maintainer: Isaac Turner <turner.isaac@gmail.com>
+ license: Public Domain, no warranty
+ date: Nov 2013
  */
 
 #ifndef ALIGNMENT_SCORING_HEADER_SEEN
@@ -10,10 +11,12 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
+#include <limits.h> // INT_MIN
 
 #include "bit_array/bit_macros.h"
 
 typedef int score_t;
+#define SCORE_MIN INT_MIN
 
 typedef struct
 {

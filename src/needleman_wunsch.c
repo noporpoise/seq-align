@@ -1,14 +1,14 @@
 /*
  needleman_wunsch.c
- author: Isaac Turner <turner.isaac@gmail.com>
  url: https://github.com/noporpoise/seq-align
- Nov 2013; License: Public Domain
+ maintainer: Isaac Turner <turner.isaac@gmail.com>
+ license: Public Domain, no warranty
+ date: Nov 2013
  */
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <limits.h>
 
 #include "needleman_wunsch.h"
 

@@ -1,8 +1,9 @@
 /*
  alignment_scoring.c
- author: Isaac Turner <turner.isaac@gmail.com>
  url: https://github.com/noporpoise/seq-align
- Nov 2013; License: Public Domain
+ maintainer: Isaac Turner <turner.isaac@gmail.com>
+ license: Public Domain, no warranty
+ date: Nov 2013
  */
 
 // Turn on debugging output by defining DEBUG

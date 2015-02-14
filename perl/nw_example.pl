@@ -1,4 +1,10 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
+
+# perl/nw_example.pl
+# url: https://github.com/noporpoise/seq-align
+# maintainer: Isaac Turner <turner.isaac@gmail.com>
+# license: Public Domain, no warranty
+# date: Oct 2012
 
 use strict;
 use warnings;

@@ -1,8 +1,9 @@
 /*
  examples/sw_example.cpp
- author: Isaac Turner <turner.isaac@gmail.com>
  url: https://github.com/noporpoise/seq-align
- Feb 2015; License: Public Domain
+ maintainer: Isaac Turner <turner.isaac@gmail.com>
+ license: Public Domain, no warranty
+ date: Feb 2015
  */
 
 
@@ -41,9 +42,9 @@ int main(int argc, char* argv[])
   // Loop over alignments
   while(smith_waterman_fetch(sw, aln))
   {
-    printf("seqA: %s [start:%zu]\n", aln->result_a, aln->pos_a);
-    printf("seqB: %s [start:%zu]\n", aln->result_b, aln->pos_b);
-    printf("alignment score: %i\n\n", aln->score);
+    cout << "seqA: " << aln->result_a << " [start:" << aln->pos_a << "]\n";
+    cout << "seqB: " << aln->result_b << " [start:" << aln->pos_b << "]\n";
+    cout << "alignment score: " << aln->score << "\n\n";
   }
 
   smith_waterman_free(sw);

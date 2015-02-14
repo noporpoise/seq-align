@@ -1,8 +1,9 @@
 /*
  examples/nw_example.cpp
- author: Isaac Turner <turner.isaac@gmail.com>
  url: https://github.com/noporpoise/seq-align
- Feb 2015; License: Public Domain
+ maintainer: Isaac Turner <turner.isaac@gmail.com>
+ license: Public Domain, no warranty
+ date: Feb 2015
  */
 
 
@@ -38,9 +39,9 @@ int main(int argc, char* argv[])
 
   needleman_wunsch_align(argv[1], argv[2], &scoring, nw, aln);
 
-  printf("seqA: %s\n", aln->result_a);
-  printf("seqB: %s\n", aln->result_b);
-  printf("alignment score: %i\n", aln->score);
+  cout << "seqA: " << aln->result_a << "\n";
+  cout << "seqB: " << aln->result_b << "\n";
+  cout << "alignment score: " << aln->score << "\n";
 
   needleman_wunsch_free(nw);
   alignment_free(aln);

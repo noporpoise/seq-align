@@ -1,8 +1,9 @@
 /*
  alignment_scoring_load.c
- author: Isaac Turner <turner.isaac@gmail.com>
  url: https://github.com/noporpoise/seq-align
- Nov 2013; License: Public Domain
+ maintainer: Isaac Turner <turner.isaac@gmail.com>
+ license: Public Domain, no warranty
+ date: Nov 2013
  */
 
 // request decent POSIX version
@@ -13,7 +14,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h> // tolower isspace
-#include <limits.h> // INT_MAX, INT_MIN
 
 #include "string_buffer/string_buffer.h"
 

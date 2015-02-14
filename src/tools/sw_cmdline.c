@@ -1,8 +1,9 @@
 /*
- sw_cmdline.c
- author: Isaac Turner <turner.isaac@gmail.com>
+ tools/sw_cmdline.c
  url: https://github.com/noporpoise/seq-align
- Nov 2013; License: Public Domain
+ maintainer: Isaac Turner <turner.isaac@gmail.com>
+ license: Public Domain, no warranty
+ date: Nov 2013
  */
 
 // request decent POSIX version
@@ -12,7 +13,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <limits.h>
 
 // my utility functions
 #include "seq_file/seq_file.h"

@@ -1,8 +1,9 @@
 /*
- lcs_cmdline.c
- author: Isaac Turner <turner.isaac@gmail.com>
+ tools/lcs_cmdline.c
  url: https://github.com/noporpoise/seq-align
- Feb 2015; License: Public Domain
+ maintainer: Isaac Turner <turner.isaac@gmail.com>
+ license: Public Domain, no warranty
+ date: Feb 2015
  */
 
 // request decent POSIX version
