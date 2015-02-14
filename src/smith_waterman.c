@@ -13,10 +13,11 @@
 #include <string.h>
 #include <limits.h>
 
-#include "bit_array.h"
+#include "bit_array/bit_array.h"
+#include "sort_r/sort_r.h"
+
 #include "smith_waterman.h"
 #include "alignment_macros.h"
-#include "sort_r.h"
 
 // For iterating through local alignments
 typedef struct

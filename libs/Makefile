@@ -41,4 +41,4 @@ clean:
 	[ -d seq_file ] && cd seq_file && make clean
 	[ -d sort_r ] && cd sort_r && make clean
 
-.PHONY: all clean
+.PHONY: all clean $(TGTS)

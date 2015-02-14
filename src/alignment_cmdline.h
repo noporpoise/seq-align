@@ -14,7 +14,7 @@
 
 #include <stdarg.h> // required for va_list
 #include <stdbool.h>
-#include "seq_file.h"
+#include "seq_file/seq_file.h"
 #include "alignment.h"
 
 typedef struct

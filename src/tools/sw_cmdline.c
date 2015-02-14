@@ -15,8 +15,7 @@
 #include <limits.h>
 
 // my utility functions
-#include "string_buffer.h"
-#include "seq_file.h"
+#include "seq_file/seq_file.h"
 
 // Alignment scoring and loading
 #include "alignment_scoring_load.h"

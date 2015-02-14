@@ -15,7 +15,7 @@
 #include <ctype.h> // tolower isspace
 #include <limits.h> // INT_MAX, INT_MIN
 
-#include "string_buffer.h"
+#include "string_buffer/string_buffer.h"
 
 #include "alignment_cmdline.h"
 #include "alignment_scoring_load.h"

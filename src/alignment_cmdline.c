@@ -17,11 +17,11 @@
 #include <limits.h>
 #include <stdarg.h> // for va_list
 
+#include "seq_file/seq_file.h"
+
 #include "alignment.h"
 #include "alignment_cmdline.h"
 #include "alignment_scoring_load.h"
-
-#include "seq_file.h"
 
 // File loading
 int file_list_length = 0;

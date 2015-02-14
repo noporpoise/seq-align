@@ -14,10 +14,6 @@
 #include <string.h>
 #include <ctype.h> // tolower
 
-// my utility functions
-#include "string_buffer.h"
-#include "seq_file.h"
-
 #include "smith_waterman.h"
 
 static void print_usage(char **argv)

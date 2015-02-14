@@ -12,6 +12,10 @@
 
 typedef struct sw_aligner_t sw_aligner_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 sw_aligner_t *smith_waterman_new();
 void smith_waterman_free(sw_aligner_t *sw_aligner);
 
@@ -31,5 +35,9 @@ void smith_waterman_align2(const char *seq_a, const char *seq_b,
 // An alignment to read from, and a pointer to memory to store the result
 // returns 1 if an alignment was read, 0 otherwise
 int smith_waterman_fetch(sw_aligner_t *sw, alignment_t *result);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

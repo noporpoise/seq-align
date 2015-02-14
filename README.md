@@ -35,21 +35,30 @@ Features:
 Build
 -----
 
-Fetch and build dependencies (requires `git`, `make` and `zlib`)
-
-    $ cd libs
-    $ make
-    $ cd ..
-
 Build seq-align:
 
     $ make
+
+To run tests:
+
+    $ make test
+
+When first built, make will download required libraries into `./libs/`
+(requires `git`, `make`, `zlib` and internet access). To manually update the
+libaries later:
+
+    $ cd libs && make && cd ..
+    $ make clean && make
 
 For those interested, the depedencies used are:
 
 * bit_array [https://github.com/noporpoise/BitArray]
 * string_buffer [https://github.com/noporpoise/string_buffer]
 * seq_file [https://github.com/noporpoise/seq_file]
+* sort_r [https://github.com/noporpoise/sort_r]
+
+To include seq-align in your own applications, look at the examples in `./examples/`. Perl wrapper modules are also available in `./perl/`.
+
 
 Smith-Waterman
 ==============

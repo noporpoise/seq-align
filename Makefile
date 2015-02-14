@@ -10,14 +10,13 @@ CFLAGS = -Wall -Wextra -std=c99 $(OPT)
 OBJFLAGS = -fPIC
 LINKFLAGS = -lalign -lstrbuf -lbitarr -lpthread -lz
 
-INCS=-I $(LIBS_PATH)/bit_array -I $(LIBS_PATH)/string_buffer \
-     -I $(LIBS_PATH)/seq_file -I $(LIBS_PATH)/sort_r -I src
-
+INCS=-I $(LIBS_PATH) -I src
 LIBS=-L $(LIBS_PATH)/bit_array -L $(LIBS_PATH)/string_buffer -L src
-
-REQ=$(LIBS_PATH)/bit_array/Makefile $(LIBS_PATH)/string_buffer/Makefile $(LIBS_PATH)/seq_file/Makefile
-
 LINK=-lalign -lstrbuf -lbitarr -lpthread -lz
+
+# If we are missing libraries, force (cd libs && make)
+REQ=$(LIBS_PATH)/bit_array/Makefile $(LIBS_PATH)/string_buffer/Makefile \
+    $(LIBS_PATH)/seq_file/Makefile $(LIBS_PATH)/sort_r/Makefile
 
 # Compile and bundle all non-main files into library
 SRCS=$(wildcard src/*.c)

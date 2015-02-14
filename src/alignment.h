@@ -39,6 +39,10 @@ enum Matrix { MATCH,GAP_A,GAP_B };
 
 #define MATRIX_NAME(x) ((x) == MATCH ? "MATCH" : ((x) == GAP_A ? "GAP_A" : "GAP_B"))
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Printing colour codes
 extern const char align_col_mismatch[], align_col_indel[], align_col_context[],
                   align_col_stop[];
@@ -68,5 +72,9 @@ void alignment_colour_print_against(const char *alignment_a,
 
 void alignment_print_spacer(const char* alignment_a, const char* alignment_b,
                             const scoring_t* scoring);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
