@@ -63,9 +63,8 @@ static char _scoring_check_wildcards(const scoring_t* scoring, char a, char b,
 {
   // Check if either characters are wildcards
   int tmp_score = INT_MAX;
-  size_t a2 = a;
-  if(get_wildcard_bit(scoring,a)) tmp_score = scoring->wildscores[a2];
-  if(get_wildcard_bit(scoring,b)) tmp_score = MIN2(scoring->wildscores[a2],tmp_score);
+  if(get_wildcard_bit(scoring,a)) tmp_score = scoring->wildscores[(size_t)a];
+  if(get_wildcard_bit(scoring,b)) tmp_score = MIN2(scoring->wildscores[(size_t)b],tmp_score);
   if(tmp_score != INT_MAX) {
     *score = tmp_score;
     return 1;
