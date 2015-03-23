@@ -570,7 +570,7 @@ char* cmdline_get_file2(cmdline_t *cmd, size_t i)
 static seq_file_t* open_seq_file(const char *path, bool use_zlib)
 {
   return (strcmp(path,"-") != 0 || use_zlib) ? seq_open(path)
-                                             : seq_open_fh(stdin, 0, 0, 0);
+                                             : seq_dopen(fileno(stdin), false, false, 0);
 }
 
 // If seq2 is NULL, read pair of entries from first file
