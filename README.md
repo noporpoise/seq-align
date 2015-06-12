@@ -1,5 +1,7 @@
 seq-align
 =========
+
+[![Join the chat at https://gitter.im/noporpoise/seq-align](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/noporpoise/seq-align?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 Smith-Waterman & Needleman-Wunsch Alignment in C  
 url: https://github.com/noporpoise/seq-align  
 author: Isaac Turner <turner.isaac@gmail.com>  
