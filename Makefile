@@ -14,10 +14,6 @@ INCS=-I $(LIBS_PATH) -I src
 LIBS=-L $(LIBS_PATH)/bit_array -L $(LIBS_PATH)/string_buffer -L src
 LINK=-lalign -lstrbuf -lbitarr -lpthread -lz
 
-# If we are missing libraries, force (cd libs && make)
-REQ=$(LIBS_PATH)/bit_array/Makefile $(LIBS_PATH)/string_buffer/Makefile \
-    $(LIBS_PATH)/seq_file/Makefile $(LIBS_PATH)/sort_r/Makefile
-
 # Compile and bundle all non-main files into library
 SRCS=$(wildcard src/*.c)
 OBJS=$(SRCS:.c=.o)
@@ -26,11 +22,6 @@ all: bin/needleman_wunsch bin/smith_waterman bin/lcs src/libalign.a examples
 
 src/libalign.a: $(OBJS)
 	ar -csru src/libalign.a $(OBJS)
-
-$(LIBS_PATH)/%/Makefile:
-	cd libs; make;
-
-$(OBJS): $(REQ)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(OBJFLAGS) $(INCS) -c $< -o $@
@@ -49,14 +40,14 @@ bin/seq_align_tests: src/tools/tests.c src/libalign.a
 	$(CC) -o $@ $< $(CFLAGS) $(INCS) $(LIBS) $(LINK)
 
 examples: src/libalign.a
-	cd examples; make LIBS_PATH=$(abspath $(LIBS_PATH))
+	cd examples; $(MAKE) LIBS_PATH=$(abspath $(LIBS_PATH))
 
 bin:
 	mkdir -p bin
 
 clean:
 	rm -rf bin src/*.o src/libalign.a
-	cd examples && make clean
+	cd examples && $(MAKE) clean
 
 test: bin/seq_align_tests
 	./bin/seq_align_tests

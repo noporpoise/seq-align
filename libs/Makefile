@@ -4,41 +4,25 @@ TGTS=bit_array string_buffer seq_file sort_r
 all: $(TGTS)
 
 #
-# Download (git clone)
+# Update (make)
 #
 
-bit_array/Makefile:
-	git clone https://github.com/noporpoise/BitArray.git bit_array
+bit_array:
+	cd bit_array && $(MAKE)
 
-string_buffer/Makefile:
-	git clone https://github.com/noporpoise/string_buffer.git
+string_buffer:
+	cd string_buffer && $(MAKE)
 
-seq_file/Makefile:
-	git clone https://github.com/noporpoise/seq_file.git
+seq_file:
+	cd seq_file && $(MAKE)
 
-sort_r/Makefile:
-	git clone https://github.com/noporpoise/sort_r.git
-
-#
-# Update (git pull + make)
-#
-
-bit_array: bit_array/Makefile
-	cd bit_array && git pull && make
-
-string_buffer: string_buffer/Makefile
-	cd string_buffer && git pull && make
-
-seq_file: seq_file/Makefile
-	cd seq_file && git pull && make
-
-sort_r: sort_r/Makefile
-	cd sort_r && git pull && make
+sort_r:
+	cd sort_r && $(MAKE)
 
 clean:
-	[ -d bit_array ] && cd bit_array && make clean
-	[ -d string_buffer ] && cd string_buffer && make clean
-	[ -d seq_file ] && cd seq_file && make clean
-	[ -d sort_r ] && cd sort_r && make clean
+	[ -d bit_array ] && cd bit_array && $(MAKE) clean
+	[ -d string_buffer ] && cd string_buffer && $(MAKE) clean
+	[ -d seq_file ] && cd seq_file && $(MAKE) clean
+	[ -d sort_r ] && cd sort_r && $(MAKE) clean
 
 .PHONY: all clean $(TGTS)

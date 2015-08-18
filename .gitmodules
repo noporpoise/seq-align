@@ -1,0 +1,12 @@
+[submodule "libs/bit_array"]
+	path = libs/bit_array
+	url = https://github.com/noporpoise/BitArray.git
+[submodule "libs/string_buffer"]
+	path = libs/string_buffer
+	url = https://github.com/noporpoise/string_buffer.git
+[submodule "libs/seq_file"]
+	path = libs/seq_file
+	url = https://github.com/noporpoise/seq_file.git
+[submodule "libs/sort_r"]
+	path = libs/sort_r
+	url = https://github.com/noporpoise/sort_r.git

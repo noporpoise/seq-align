@@ -4,7 +4,7 @@ Smith-Waterman & Needleman-Wunsch Alignment in C
 url: https://github.com/noporpoise/seq-align  
 author: Isaac Turner <turner.isaac@gmail.com>  
 license: Public Domain  
-updated: 27 Nov 2013
+updated: 18 Aug 2015
 
 [![Build Status](https://travis-ci.org/noporpoise/seq-align.png?branch=master)](https://travis-ci.org/noporpoise/seq-align)
 
@@ -35,22 +35,21 @@ Features:
 Build
 -----
 
-Build seq-align:
+Download and build seq-align:
 
+    $ git clone --recursive https://github.com/noporpoise/seq-align
     $ make
+
+To update:
+
+    $ git pull
+    $ git submodule update --init
 
 To run tests:
 
     $ make test
 
-When first built, make will download required libraries into `./libs/`
-(requires `git`, `make`, `zlib` and internet access). To manually update the
-libaries later:
-
-    $ cd libs && make && cd ..
-    $ make clean && make
-
-For those interested, the depedencies used are:
+For those interested, the bundled depedencies used are:
 
 * bit_array [https://github.com/noporpoise/BitArray]
 * string_buffer [https://github.com/noporpoise/string_buffer]
