@@ -21,6 +21,7 @@ OBJS=$(SRCS:.c=.o)
 all: bin/needleman_wunsch bin/smith_waterman bin/lcs src/libalign.a examples
 
 src/libalign.a: $(OBJS)
+	cd libs && $(MAKE)
 	ar -csru src/libalign.a $(OBJS)
 
 %.o: %.c
