@@ -42,7 +42,7 @@ static void sw_set_default_scoring()
   scoring.match = 2;
   scoring.mismatch = -2;
   scoring.gap_open = -2;
-  scoring.gap_open = -1;
+  scoring.gap_extend = -1;
 }
 
 // Print one line of an alignment
