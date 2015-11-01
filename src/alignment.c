@@ -250,6 +250,7 @@ void alignment_free(alignment_t* result)
 {
   free(result->result_a);
   free(result->result_b);
+  free(result);
 }
 
 
