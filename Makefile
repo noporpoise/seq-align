@@ -1,7 +1,7 @@
 LIBS_PATH=libs
 
 ifdef DEBUG
-	OPT = -O0 -DDEBUG=1 --debug -g -ggdb
+	OPT = -O0 --debug -g -ggdb
 else
 	OPT = -O3
 endif

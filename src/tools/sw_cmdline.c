@@ -196,7 +196,7 @@ void align(const char *seq_a, const char *seq_b,
     cmd->min_score = wait_on_keystroke ? 0
                        : scoring.match * MAX2(0.2 * MIN2(len_a, len_b), 2);
 
-    #ifdef DEBUG
+    #ifdef SEQ_ALIGN_VERBOSE
     printf("min_score: %i\n", cmd->min_score);
     #endif
   }
@@ -240,7 +240,7 @@ void align(const char *seq_a, const char *seq_b,
       right_spaces_b = (context_right > rem_b) ? context_right - rem_b : 0;
     }
 
-    #ifdef DEBUG
+    #ifdef SEQ_ALIGN_VERBOSE
     printf("context left = %lu; right = %lu spacing: [%lu,%lu] [%lu,%lu]\n",
            context_left, context_right,
            left_spaces_a, right_spaces_a,
@@ -322,8 +322,8 @@ void align_pair_from_file(read_t *read1, read_t *read2)
 
 int main(int argc, char* argv[])
 {
-  #ifdef DEBUG
-  printf("DEBUG: on\n");
+  #ifdef SEQ_ALIGN_VERBOSE
+  printf("VERBOSE: on\n");
   #endif
 
   sw_set_default_scoring();

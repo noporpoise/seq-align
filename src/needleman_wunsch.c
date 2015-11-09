@@ -65,7 +65,7 @@ void needleman_wunsch_align2(const char *a, const char *b,
     curr_score = nw->gap_a_scores[arr_size-1];
   }
 
-  #ifdef DEBUG
+  #ifdef SEQ_ALIGN_VERBOSE
     alignment_print_matrices(nw);
   #endif
 
@@ -78,7 +78,7 @@ void needleman_wunsch_align2(const char *a, const char *b,
 
   for(; score_x > 0 && score_y > 0; next_char--)
   {
-    #ifdef DEBUG
+    #ifdef SEQ_ALIGN_VERBOSE
     printf("matrix: %s (%lu,%lu) score: %i\n",
            MATRIX_NAME(curr_matrix), score_x-1, score_y-1, curr_score);
     #endif

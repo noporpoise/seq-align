@@ -157,8 +157,8 @@ static void align_pair_from_file(read_t *read1, read_t *read2)
 
 int main(int argc, char* argv[])
 {
-  #ifdef DEBUG
-  printf("DEBUG: on\n");
+  #ifdef SEQ_ALIGN_VERBOSE
+  printf("VERBOSE: on\n");
   #endif
 
   nw_set_default_scoring();

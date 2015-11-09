@@ -6,8 +6,8 @@
  date: Feb 2015
  */
 
-// Turn on debugging output by defining DEBUG
-//#define DEBUG
+// Turn on debugging output by defining SEQ_ALIGN_VERBOSE
+//#define SEQ_ALIGN_VERBOSE
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -372,7 +372,9 @@ void alignment_print_matrices(const aligner_t *aligner)
 
   size_t i, j;
 
-  printf("seq_a: %s\nseq_b: %s\n", aligner->seq_a, aligner->seq_b);
+  printf("seq_a: %.*s\nseq_b: %.*s\n",
+         (int)aligner->score_width-1, aligner->seq_a,
+         (int)aligner->score_height-1, aligner->seq_b);
 
   printf("match_scores:\n");
   for(j = 0; j < aligner->score_height; j++)
