@@ -19,6 +19,7 @@
 #define MIN2(x,y) ((x) <= (y) ? (x) : (y))
 #define MAX3(x,y,z) ((x) >= (y) && (x) >= (z) ? (x) : MAX2(y,z))
 #define MIN3(x,y,z) ((x) <= (y) && (x) <= (z) ? (x) : MIN2(y,z))
+#define MAX4(w,x,y,z) MAX2(MAX3(w, x, y), z)
 
 #define ABSDIFF(a,b) ((a) > (b) ? (a)-(b) : (b)-(a))
 

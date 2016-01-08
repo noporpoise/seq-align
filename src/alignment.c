@@ -24,15 +24,6 @@ const char align_col_indel[] = "\033[91m"; // Insertion / deletion (RED)
 const char align_col_context[] = "\033[95m";
 const char align_col_stop[] = "\033[0m";
 
-static long max4(long a, long b, long c, long d)
-{
-  long result = a;
-  if(b > result) result = b;
-  if(c > result) result = c;
-  if(d > result) result = d;
-  return result;
-}
-
 // Fill in traceback matrix
 static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
 {
@@ -123,7 +114,7 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
         // 2) close gap in seq_a
         // 3) close gap in seq_b
         match_scores[index]
-          = max4(match_scores[index_upleft] + substitution_penalty,
+          = MAX4(match_scores[index_upleft] + substitution_penalty,
                  gap_a_scores[index_upleft] + substitution_penalty,
                  gap_b_scores[index_upleft] + substitution_penalty,
                  min);
@@ -142,7 +133,7 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
       else if(!scoring->no_gaps_in_a || seq_i == len_i-1)
       {
         gap_a_scores[index]
-          = max4(match_scores[index_up] + gap_open_penalty,
+          = MAX4(match_scores[index_up] + gap_open_penalty,
                  gap_a_scores[index_up] + gap_extend_penalty,
                  gap_b_scores[index_up] + gap_open_penalty,
                  min);
@@ -160,7 +151,7 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
       else if(!scoring->no_gaps_in_b || seq_j == len_j-1)
       {
         gap_b_scores[index]
-          = max4(match_scores[index_left] + gap_open_penalty,
+          = MAX4(match_scores[index_left] + gap_open_penalty,
                  gap_a_scores[index_left] + gap_open_penalty,
                  gap_b_scores[index_left] + gap_extend_penalty,
                  min);
