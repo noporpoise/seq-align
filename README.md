@@ -171,15 +171,15 @@ Needleman-Wunsch
 Baiscs:
 
     $ ./needleman_wunsch CAGACGT CGATA
-    CAGACGT
-    C--GATA
+    C-AGACGT
+    CGATA---
 
 Print alignment scores:
 
     $ ./needleman_wunsch --printscores CAGACGT CGATA
-    CAGACGT
-    C--GATA
-    score: -15
+    C-AGACGT
+    CGATA---
+    score: -11
 
 Read from file (dna.fa.gz):
 
