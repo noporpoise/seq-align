@@ -7,9 +7,6 @@ all: $(TGTS)
 # Update (make)
 #
 
-bit_array:
-	cd bit_array && $(MAKE)
-
 string_buffer:
 	cd string_buffer && $(MAKE)
 

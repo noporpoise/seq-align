@@ -13,8 +13,6 @@
 #include <stdbool.h>
 #include <limits.h> // INT_MIN
 
-#include "bit_array/bit_macros.h"
-
 typedef int score_t;
 #define SCORE_MIN INT_MIN
 
@@ -40,11 +38,17 @@ typedef struct
   score_t wildscores[256], swap_scores[256][256];
 } scoring_t;
 
-#define get_wildcard_bit(scoring,c) bitset_get((scoring)->wildcards,c)
-#define set_wildcard_bit(scoring,c) bitset_set((scoring)->wildcards,c)
+#ifndef bitset32_get
+  #define bitset32_get(arr,idx)   (((arr)[(idx)>>5] >> ((idx)&31)) & 0x1)
+  #define bitset32_set(arr,idx)   ((arr)[(idx)>>5] |=   (1<<((idx)&31)))
+  #define bitset32_clear(arr,idx) ((arr)[(idx)>>5] &=  ~(1<<((idx)&31)))
+#endif
 
-#define get_swap_bit(scoring,a,b) bitset_get((scoring)->swap_set[(size_t)a],b)
-#define set_swap_bit(scoring,a,b) bitset_set((scoring)->swap_set[(size_t)a],b)
+#define get_wildcard_bit(scoring,c) bitset32_get((scoring)->wildcards,c)
+#define set_wildcard_bit(scoring,c) bitset32_set((scoring)->wildcards,c)
+
+#define get_swap_bit(scoring,a,b) bitset32_get((scoring)->swap_set[(size_t)a],b)
+#define set_swap_bit(scoring,a,b) bitset32_set((scoring)->swap_set[(size_t)a],b)
 
 #ifdef __cplusplus
 extern "C" {

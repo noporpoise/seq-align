@@ -8,11 +8,11 @@ endif
 
 CFLAGS = -Wall -Wextra -std=c99 $(OPT)
 OBJFLAGS = -fPIC
-LINKFLAGS = -lalign -lstrbuf -lbitarr -lpthread -lz
+LINKFLAGS = -lalign -lstrbuf -lpthread -lz
 
 INCS=-I $(LIBS_PATH) -I src
-LIBS=-L $(LIBS_PATH)/bit_array -L $(LIBS_PATH)/string_buffer -L src
-LINK=-lalign -lstrbuf -lbitarr -lpthread -lz
+LIBS=-L $(LIBS_PATH)/string_buffer -L src
+LINK=-lalign -lstrbuf -lpthread -lz
 
 # Compile and bundle all non-main files into library
 SRCS=$(wildcard src/*.c)
@@ -22,7 +22,7 @@ all: bin/needleman_wunsch bin/smith_waterman bin/lcs src/libalign.a examples
 
 # Build libraries only if they're downloaded
 src/libalign.a: $(OBJS)
-	[ -d libs/bit_array ] && cd libs && $(MAKE)
+	[ -d libs/string_buffer ] && cd libs && $(MAKE)
 	ar -csru src/libalign.a $(OBJS)
 
 %.o: %.c

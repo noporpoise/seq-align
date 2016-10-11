@@ -1,7 +1,3 @@
-[submodule "libs/bit_array"]
-	path = libs/bit_array
-	url = https://github.com/noporpoise/BitArray.git
-  branch = master
 [submodule "libs/string_buffer"]
 	path = libs/string_buffer
 	url = https://github.com/noporpoise/string_buffer.git

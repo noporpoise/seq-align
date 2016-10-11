@@ -3,8 +3,8 @@ CFLAGS=-Wall -Wextra -std=c99
 CXXFLAGS=-Wall -Wextra
 
 INCS=-I $(LIBS_PATH) -I ../src
-LIBS=-L $(LIBS_PATH)/bit_array -L $(LIBS_PATH)/string_buffer -L ../src
-LINK=-lalign -lstrbuf -lbitarr -lpthread -lz
+LIBS=-L $(LIBS_PATH)/string_buffer -L ../src
+LINK=-lalign -lstrbuf -lpthread -lz
 
 all: nw_example sw_example nw_cpp sw_cpp
 
