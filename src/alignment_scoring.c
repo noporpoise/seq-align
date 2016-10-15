@@ -45,33 +45,30 @@ void scoring_init(scoring_t* scoring,
 
   memset(scoring->wildcards, 0, sizeof(scoring->wildcards));
   memset(scoring->swap_set, 0, sizeof(scoring->swap_set));
-}
 
-void scoring_add_wildcard(scoring_t* scoring, char c, int s)
-{
-  if(!scoring->case_sensitive)
-    c = tolower(c);
-
-  size_t i = c;
-  set_wildcard_bit(scoring,i);
-  scoring->wildscores[i] = s;
-}
-
-// a, b must be lowercase if !scoring->case_sensitive
-static char _scoring_check_wildcards(const scoring_t* scoring, char a, char b,
-                                     int* score)
-{
-  // Check if either characters are wildcards
-  int tmp_score = INT_MAX;
-  if(get_wildcard_bit(scoring,a)) tmp_score = scoring->wildscores[(size_t)a];
-  if(get_wildcard_bit(scoring,b)) tmp_score = MIN2(scoring->wildscores[(size_t)b],tmp_score);
-  if(tmp_score != INT_MAX) {
-    *score = tmp_score;
-    return 1;
+  scoring->min_penalty = MIN2(match, mismatch);
+  scoring->max_penalty = MAX2(match, mismatch);
+  if(!no_gaps_in_a || !no_gaps_in_b) {
+    scoring->min_penalty = MIN3(scoring->min_penalty,gap_open+gap_extend,gap_extend);
+    scoring->max_penalty = MAX3(scoring->max_penalty,gap_open+gap_extend,gap_extend);
   }
+}
 
-  *score = 0;
-  return 0;
+void scoring_add_wildcard(scoring_t* scoring, char c, int score)
+{
+  if(!scoring->case_sensitive) c = tolower(c);
+  set_wildcard_bit(scoring,c);
+  scoring->wildscores[(size_t)c] = score;
+  scoring->min_penalty = MIN2(scoring->min_penalty, score);
+  scoring->max_penalty = MAX2(scoring->max_penalty, score);
+}
+
+void scoring_add_mutation(scoring_t* scoring, char a, char b, int score)
+{
+  scoring->swap_scores[(size_t)a][(size_t)b] = score;
+  set_swap_bit(scoring,a,b);
+  scoring->min_penalty = MIN2(scoring->min_penalty, score);
+  scoring->max_penalty = MAX2(scoring->max_penalty, score);
 }
 
 void scoring_add_mutations(scoring_t* scoring, const char *str, const int *scores,
@@ -97,12 +94,6 @@ void scoring_add_mutations(scoring_t* scoring, const char *str, const int *score
   scoring->use_match_mismatch = use_match_mismatch;
 }
 
-void scoring_add_mutation(scoring_t* scoring, char a, char b, int score)
-{
-  scoring->swap_scores[(size_t)a][(size_t)b] = score;
-  set_swap_bit(scoring,a,b);
-}
-
 void scoring_print(const scoring_t* scoring)
 {
   printf("scoring:\n");
@@ -119,6 +110,23 @@ void scoring_print(const scoring_t* scoring)
          scoring->no_start_gap_penalty, scoring->no_end_gap_penalty);
 }
 
+
+// a, b must be lowercase if !scoring->case_sensitive
+static char _scoring_check_wildcards(const scoring_t* scoring, char a, char b,
+                                     int* score)
+{
+  // Check if either characters are wildcards
+  int tmp_score = INT_MAX;
+  if(get_wildcard_bit(scoring,a)) tmp_score = scoring->wildscores[(size_t)a];
+  if(get_wildcard_bit(scoring,b)) tmp_score = MIN2(scoring->wildscores[(size_t)b],tmp_score);
+  if(tmp_score != INT_MAX) {
+    *score = tmp_score;
+    return 1;
+  }
+
+  *score = 0;
+  return 0;
+}
 
 // Considered match if lc(a)==lc(b) or if a or b are wildcards
 // Always sets score and is_match

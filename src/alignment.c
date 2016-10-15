@@ -33,10 +33,12 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
   const scoring_t *scoring = aligner->scoring;
   size_t score_width = aligner->score_width;
   size_t score_height = aligner->score_height;
-
   size_t i, j;
 
-  const score_t min = is_sw ? 0 : SCORE_MIN;
+  int gap_open_penalty = scoring->gap_extend + scoring->gap_open;
+  int gap_extend_penalty = scoring->gap_extend;
+
+  const score_t min = is_sw ? 0 : SCORE_MIN + abs(scoring->min_penalty);
 
   size_t seq_i, seq_j, len_i = score_width-1, len_j = score_height-1;
   size_t index, index_left, index_up, index_upleft;
@@ -63,7 +65,7 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
       // Think carefully about which way round these are
       gap_a_scores[i] = min;
       gap_b_scores[i] = scoring->no_start_gap_penalty ? 0
-                        : scoring->gap_open + (long)i * scoring->gap_extend;
+                        : scoring->gap_open + (int)i * scoring->gap_extend;
     }
 
     // work down first column -> [0][j]
@@ -73,15 +75,10 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
 
       // Think carefully about which way round these are
       gap_a_scores[index] = scoring->no_start_gap_penalty ? 0
-                            : scoring->gap_open + (long)j * scoring->gap_extend;
+                            : scoring->gap_open + (int)j * scoring->gap_extend;
       gap_b_scores[index] = min;
     }
   }
-
-  // These are longs to force addition to be done with higher accuracy
-  long gap_open_penalty = scoring->gap_extend + scoring->gap_open;
-  long gap_extend_penalty = scoring->gap_extend;
-  long substitution_penalty;
 
   // start at position [1][1]
   index_upleft = 0;
@@ -96,10 +93,10 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
       // Update match_scores[i][j] with position [i-1][j-1]
       // substitution penalty
       bool is_match;
-      int tmp_penalty;
+      int substitution_penalty;
 
       scoring_lookup(scoring, aligner->seq_a[seq_i], aligner->seq_b[seq_j],
-                     &tmp_penalty, &is_match);
+                     &substitution_penalty, &is_match);
 
       if(scoring->no_mismatches && !is_match)
       {
@@ -107,8 +104,6 @@ static void alignment_fill_matrices(aligner_t *aligner, char is_sw)
       }
       else
       {
-        substitution_penalty = tmp_penalty; // cast to long
-
         // substitution
         // 1) continue alignment
         // 2) close gap in seq_a
@@ -276,7 +271,7 @@ void alignment_reverse_move(enum Matrix *curr_matrix, score_t *curr_score,
     if(*score_y == 0) gap_b_open_penalty = gap_b_extend_penalty = 0;
   }
 
-  long prev_match_penalty, prev_gap_a_penalty, prev_gap_b_penalty;
+  int prev_match_penalty, prev_gap_a_penalty, prev_gap_b_penalty;
 
   switch(*curr_matrix)
   {
@@ -314,18 +309,18 @@ void alignment_reverse_move(enum Matrix *curr_matrix, score_t *curr_score,
   // *arr_index = ARR_2D_INDEX(aligner->score_width, *score_x, *score_y);
 
   if((!scoring->no_gaps_in_a || *score_x == 0 || *score_x == len_i) &&
-     (long)aligner->gap_a_scores[*arr_index] + prev_gap_a_penalty == *curr_score)
+     aligner->gap_a_scores[*arr_index] + prev_gap_a_penalty == *curr_score)
   {
     *curr_matrix = GAP_A;
     *curr_score = aligner->gap_a_scores[*arr_index];
   }
   else if((!scoring->no_gaps_in_b || *score_y == 0 || *score_y == len_j) &&
-          (long)aligner->gap_b_scores[*arr_index] + prev_gap_b_penalty == *curr_score)
+          aligner->gap_b_scores[*arr_index] + prev_gap_b_penalty == *curr_score)
   {
     *curr_matrix = GAP_B;
     *curr_score = aligner->gap_b_scores[*arr_index];
   }
-  else if((long)aligner->match_scores[*arr_index] + prev_match_penalty == *curr_score)
+  else if(aligner->match_scores[*arr_index] + prev_match_penalty == *curr_score)
   {
     *curr_matrix = MATCH;
     *curr_score = aligner->match_scores[*arr_index];
@@ -337,7 +332,7 @@ void alignment_reverse_move(enum Matrix *curr_matrix, score_t *curr_score,
     fprintf(stderr, "[%s:%zu,%zu]: %i [ismatch: %i] '%c' '%c'\n",
             MATRIX_NAME(*curr_matrix), *score_x, *score_y, *curr_score,
             is_match, aligner->seq_a[seq_x], aligner->seq_b[seq_y]);
-    fprintf(stderr, " Penalties match: %li gap_open: %li gap_extend: %li\n",
+    fprintf(stderr, " Penalties match: %i gap_open: %i gap_extend: %i\n",
             prev_match_penalty, prev_gap_a_penalty, prev_gap_b_penalty);
     fprintf(stderr, " Expected MATCH: %i GAP_A: %i GAP_B: %i\n",
             aligner->match_scores[*arr_index],

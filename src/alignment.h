@@ -12,7 +12,12 @@
 #include "alignment_scoring.h"
 
 #ifndef ROUNDUP2POW
-  #define ROUNDUP2POW(x) (0x1UL << (64 - __builtin_clzl(x)))
+  #define ROUNDUP2POW(x) _rndup2pow64(x)
+  static inline size_t _rndup2pow64(unsigned long long x) {
+    // long long >=64 bits guaranteed in C99
+    --x; x|=x>>1; x|=x>>2; x|=x>>4; x|=x>>8; x|=x>>16; x|=x>>32; ++x;
+    return x;
+  }
 #endif
 
 typedef struct
