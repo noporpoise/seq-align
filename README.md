@@ -51,12 +51,67 @@ To run tests:
 
 For those interested, the bundled depedencies used are:
 
-* bit_array [https://github.com/noporpoise/BitArray]
 * string_buffer [https://github.com/noporpoise/string_buffer]
 * seq_file [https://github.com/noporpoise/seq_file]
 * sort_r [https://github.com/noporpoise/sort_r]
 
 To include seq-align in your own applications, look at the examples in `./examples/`. Perl wrapper modules are also available in `./perl/`.
+
+Examples
+========
+
+Baiscs:
+
+    $ ./needleman_wunsch CAGACGT CGATA
+    C-AGACGT
+    CGATA---
+
+Print alignment scores:
+
+    $ ./needleman_wunsch --printscores CAGACGT CGATA
+    C-AGACGT
+    CGATA---
+    score: -11
+
+Read from file (dna.fa.gz):
+
+    >seqA
+    ACAATAGAC
+    >seqB
+    ACGAATAGAT
+    >seqC
+    ACGTGA
+    CAGAT
+    >seqD
+    GTGGACG
+    AGTA
+
+    $ ./needleman_wunsch --printscores --file dna.fa.gz
+    AC-AATAGAC
+    ACGAATAGAT
+    score: -3
+
+    ACGTGACAGAT
+    GTGGACGAGTA
+    score: -5
+
+
+Reading from STDIN:
+
+    $ gzip -d -c dna.fa.gz | ./needleman_wunsch --stdin
+    AC-AATAGAC
+    ACGAATAGAT
+
+    ACGTGACAGAT
+    GTGGACGAGTA
+
+is the same as:
+
+    $ gzip -d -c dna.fa.gz | ./needleman_wunsch --file -
+
+Set different scoring systems:
+
+    $ ./needleman_wunsch --match 1 --mismatch 0 --gapopen -10 --gapextend 0 ACGTGCCCCACAGAT AGGTGGACGAGAT
 
 
 Smith-Waterman
@@ -168,60 +223,6 @@ Needleman-Wunsch
           turner.isaac@gmail.com  (compiled: Feb 11 2015 20:20:34)
 
 
-Baiscs:
-
-    $ ./needleman_wunsch CAGACGT CGATA
-    C-AGACGT
-    CGATA---
-
-Print alignment scores:
-
-    $ ./needleman_wunsch --printscores CAGACGT CGATA
-    C-AGACGT
-    CGATA---
-    score: -11
-
-Read from file (dna.fa.gz):
-
-    >seqA
-    ACAATAGAC
-    >seqB
-    ACGAATAGAT
-    >seqC
-    ACGTGA
-    CAGAT
-    >seqD
-    GTGGACG
-    AGTA
-
-    $ ./needleman_wunsch --printscores --file dna.fa.gz
-    AC-AATAGAC
-    ACGAATAGAT
-    score: -3
-
-    ACGTGACAGAT
-    GTGGACGAGTA
-    score: -5
-
-
-Reading from STDIN:
-
-    $ gzip -d -c dna.fa.gz | ./needleman_wunsch --stdin
-    AC-AATAGAC
-    ACGAATAGAT
-
-    ACGTGACAGAT
-    GTGGACGAGTA
-
-is the same as:
-
-    $ gzip -d -c dna.fa.gz | ./needleman_wunsch --file -
-
-Set different scoring systems:
-
-    $ ./needleman_wunsch --match 1 --mismatch 0 --gapopen -10 --gapextend 0 ACGTGCCCCACAGAT AGGTGGACGAGAT
-
-
 Longest Common Substring
 ========================
 
@@ -276,7 +277,7 @@ match/mismatch: (1,-2)
  http://www.ebi.ac.uk/help/matrix.html
 
 License
--------
+=======
 
  NCBI protein align matices from:
  ftp://ftp.ncbi.nih.gov/blast/matrices/
