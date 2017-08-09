@@ -37,8 +37,8 @@ static inline void bitset_dealloc(BitSet *bs) {
 static inline BitSet* bitset_set_length(BitSet *bs, size_t l) {
   size_t ss = (l+31)/32;
   if(ss > bs->s) {
-    bs->b = realloc(bs->b, ss);
-    memset(bs->b+bs->s, 0, (bs->s-ss)*sizeof(bs->b[0])); // zero new memory
+    bs->b = realloc(bs->b, ss*sizeof(bs->b[0]));
+    memset(bs->b+bs->s, 0, (ss-bs->s)*sizeof(bs->b[0])); // zero new memory
     bs->s = ss;
   }
   bs->l = l;
