@@ -145,8 +145,11 @@ void smith_waterman_align2(const char *a, const char *b,
   size_t arr_size = aligner->score_width * aligner->score_height;
   _ensure_history_capacity(hist, arr_size);
 
+   // Clean &match_scores_mask.b
+  memset(hist->match_scores_mask.b, 0, (hist->match_scores_mask.s *
+          sizeof(hist->match_scores_mask.b[0])));
+ 
   // Set number of hits
-  memset(hist->match_scores_mask.b, 0, (hist->match_scores_mask.l+31)/32);
   hist->num_of_hits = hist->next_hit = 0;
 
   size_t pos;
